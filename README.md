@@ -68,4 +68,8 @@ change the original visitor function to extract context and rule information
 		PCSGLearner.updateRuleCount(rule);
 		return visitChildren(ctx);
 	}
+	
+4. first run PCSGLearner class to learn from samples
+
+5. run Generator class to generate samples
  
