@@ -1,0 +1,417 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - engine/encoding.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">engine</a> - encoding.cpp<span style="font-size: 80%;"> (source / <a href="encoding.cpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">60</td>
+            <td class="headerCovTableEntry">113</td>
+            <td class="headerCovTableEntryLo">53.1 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-10-24</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">10</td>
+            <td class="headerCovTableEntry">13</td>
+            <td class="headerCovTableEntryMed">76.9 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* </a>
+<span class="lineNum">       2 </span>            :  * The contents of this file are subject to the Mozilla Public
+<span class="lineNum">       3 </span>            :  * License Version 1.1 (the &quot;License&quot;); you may not use this file
+<span class="lineNum">       4 </span>            :  * except in compliance with the License. You may obtain a copy of
+<span class="lineNum">       5 </span>            :  * the License at http://www.mozilla.org/MPL/
+<span class="lineNum">       6 </span>            :  * 
+<span class="lineNum">       7 </span>            :  * Software distributed under the License is distributed on an &quot;AS
+<span class="lineNum">       8 </span>            :  * IS&quot; basis, WITHOUT WARRANTY OF ANY KIND, either express or
+<span class="lineNum">       9 </span>            :  * implied. See the License for the specific language governing
+<span class="lineNum">      10 </span>            :  * rights and limitations under the License.
+<span class="lineNum">      11 </span>            :  * 
+<span class="lineNum">      12 </span>            :  * The Original Code is the Sablotron XSLT Processor.
+<span class="lineNum">      13 </span>            :  * 
+<span class="lineNum">      14 </span>            :  * The Initial Developer of the Original Code is Ginger Alliance Ltd.
+<span class="lineNum">      15 </span>            :  * Portions created by Ginger Alliance are Copyright (C) 2000-2002
+<span class="lineNum">      16 </span>            :  * Ginger Alliance Ltd. All Rights Reserved.
+<span class="lineNum">      17 </span>            :  * 
+<span class="lineNum">      18 </span>            :  * Contributor(s):
+<span class="lineNum">      19 </span>            :  * 
+<span class="lineNum">      20 </span>            :  * Alternatively, the contents of this file may be used under the
+<span class="lineNum">      21 </span>            :  * terms of the GNU General Public License Version 2 or later (the
+<span class="lineNum">      22 </span>            :  * &quot;GPL&quot;), in which case the provisions of the GPL are applicable 
+<span class="lineNum">      23 </span>            :  * instead of those above.  If you wish to allow use of your 
+<span class="lineNum">      24 </span>            :  * version of this file only under the terms of the GPL and not to
+<span class="lineNum">      25 </span>            :  * allow others to use your version of this file under the MPL,
+<span class="lineNum">      26 </span>            :  * indicate your decision by deleting the provisions above and
+<span class="lineNum">      27 </span>            :  * replace them with the notice and other provisions required by
+<span class="lineNum">      28 </span>            :  * the GPL.  If you do not delete the provisions above, a recipient
+<span class="lineNum">      29 </span>            :  * may use your version of this file under either the MPL or the
+<span class="lineNum">      30 </span>            :  * GPL.
+<span class="lineNum">      31 </span>            :  */
+<span class="lineNum">      32 </span>            : #include &lt;errno.h&gt;
+<span class="lineNum">      33 </span>            : 
+<span class="lineNum">      34 </span>            : #include &quot;encoding.h&quot;
+<span class="lineNum">      35 </span>            : #include &quot;proc.h&quot;
+<span class="lineNum">      36 </span>            : #include &quot;guard.h&quot;
+<span class="lineNum">      37 </span>            : #include &quot;utf8.h&quot;
+<span class="lineNum">      38 </span>            : // #include &quot;shandler.h&quot;
+<span class="lineNum">      39 </span>            : 
+<span class="lineNum">      40 </span>            : /*
+<span class="lineNum">      41 </span>            :  ******************************
+<span class="lineNum">      42 </span>            :  * internal recoding functions
+<span class="lineNum">      43 </span>            :  * (shall be replaced with a call to the sabconv library function)
+<span class="lineNum">      44 </span>            :  ******************************
+<span class="lineNum">      45 </span>            :  */
+<span class="lineNum">      46 </span>            : 
+<span class="lineNum">      47 </span>            : // encoding tables for the functions
+<span class="lineNum">      48 </span>            : 
+<span class="lineNum">      49 </span>            : short EncTable1250[] =
+<span class="lineNum">      50 </span>            : {
+<span class="lineNum">      51 </span>            :     0x20ac,     -1, 0x201a,     -1, 0x201e, 0x2026, 0x2020, 0x2021, 
+<span class="lineNum">      52 </span>            :         -1, 0x2030, 0x0160, 0x2039, 0x015a, 0x0164, 0x017d, 0x0179, 
+<span class="lineNum">      53 </span>            :         -1, 0x2018, 0x2019, 0x201c, 0x201d, 0x2022, 0x2013, 0x2014, 
+<span class="lineNum">      54 </span>            :         -1, 0x2122, 0x0161, 0x203a, 0x015b, 0x0165, 0x017e, 0x017a, 
+<span class="lineNum">      55 </span>            :     0x00a0, 0x02c7, 0x02d8, 0x0141, 0x00a4, 0x0104, 0x00a6, 0x00a7, 
+<span class="lineNum">      56 </span>            :     0x00a8, 0x00a9, 0x015e, 0x00ab,     -1, 0x00ad, 0x00ae, 0x017b, 
+<span class="lineNum">      57 </span>            :     0x00b0, 0x00b1, 0x02db, 0x0142, 0x00b4, 0x00b5, 0x00b6, 0x00b7, 
+<span class="lineNum">      58 </span>            :     0x00b8, 0x0105, 0x015f, 0x00bb, 0x013d, 0x02dd, 0x013e, 0x017c, 
+<span class="lineNum">      59 </span>            :     0x0154, 0x00c1, 0x00c2, 0x0102, 0x00c4, 0x0139, 0x0106, 0x00c7, 
+<span class="lineNum">      60 </span>            :     0x010c, 0x00c9, 0x0118, 0x00cb, 0x011a, 0x00cd, 0x00ce, 0x010e, 
+<span class="lineNum">      61 </span>            :     0x0110, 0x0143, 0x0147, 0x00d3, 0x00d4, 0x0150, 0x00d6, 0x00d7, 
+<span class="lineNum">      62 </span>            :     0x0158, 0x016e, 0x00da, 0x0170, 0x00dc, 0x00dd, 0x0162, 0x00df, 
+<span class="lineNum">      63 </span>            :     0x0155, 0x00e1, 0x00e2, 0x0103, 0x00e4, 0x013a, 0x0107, 0x00e7, 
+<span class="lineNum">      64 </span>            :     0x010d, 0x00e9, 0x0119, 0x00eb, 0x011b, 0x00ed, 0x00ee, 0x010f, 
+<span class="lineNum">      65 </span>            :     0x0111, 0x0144, 0x0148, 0x00f3, 0x00f4, 0x0151, 0x00f6, 0x00f7, 
+<span class="lineNum">      66 </span>            :     0x0159, 0x016f, 0x00fa, 0x0171, 0x00fc, 0x00fd, 0x0163, 0x02d9
+<span class="lineNum">      67 </span>            : };
+<span class="lineNum">      68 </span>            : 
+<span class="lineNum">      69 </span>            : short EncTableLatin2[] =
+<span class="lineNum">      70 </span>            : {
+<span class="lineNum">      71 </span>            :         -1,     -1,     -1,     -1,     -1,     -1,     -1,     -1, 
+<span class="lineNum">      72 </span>            :         -1,     -1,     -1,     -1,     -1,     -1,     -1,     -1, 
+<span class="lineNum">      73 </span>            :         -1,     -1,     -1,     -1,     -1,     -1,     -1,     -1, 
+<span class="lineNum">      74 </span>            :         -1,     -1,     -1,     -1,     -1,     -1,     -1,     -1, 
+<span class="lineNum">      75 </span>            :     0x00a0, 0x0104, 0x02d8, 0x0141, 0x00a4, 0x013d, 0x015a, 0x00a7, 
+<span class="lineNum">      76 </span>            :     0x00a8, 0x0160, 0x015e, 0x0164, 0x0179, 0x00ad, 0x017d, 0x017b, 
+<span class="lineNum">      77 </span>            :     0x00b0, 0x0105, 0x02db, 0x0142, 0x00b4, 0x013e, 0x015b, 0x02c7, 
+<span class="lineNum">      78 </span>            :     0x00b8, 0x0161, 0x015f, 0x0165, 0x017a, 0x02dd, 0x017e, 0x017c, 
+<span class="lineNum">      79 </span>            :     0x0154, 0x00c1, 0x00c2, 0x0102, 0x00c4, 0x0139, 0x0106, 0x00c7, 
+<span class="lineNum">      80 </span>            :     0x010c, 0x00c9, 0x0118, 0x00cb, 0x011a, 0x00cd, 0x00ce, 0x010e, 
+<span class="lineNum">      81 </span>            :     0x0110, 0x0143, 0x0147, 0x00d3, 0x00d4, 0x0150, 0x00d6, 0x00d7, 
+<span class="lineNum">      82 </span>            :     0x0158, 0x016e, 0x00da, 0x0170, 0x00dc, 0x00dd, 0x0162, 0x00df, 
+<span class="lineNum">      83 </span>            :     0x0155, 0x00e1, 0x00e2, 0x0103, 0x00e4, 0x013a, 0x0107, 0x00e7, 
+<span class="lineNum">      84 </span>            :     0x010d, 0x00e9, 0x0119, 0x00eb, 0x011b, 0x00ed, 0x00ee, 0x010f, 
+<span class="lineNum">      85 </span>            :     0x0111, 0x0144, 0x0148, 0x00f3, 0x00f4, 0x0151, 0x00f6, 0x00f7, 
+<span class="lineNum">      86 </span>            :     0x0159, 0x016f, 0x00fa, 0x0171, 0x00fc, 0x00fd, 0x0163, 0x02d9, 
+<a name="87"><span class="lineNum">      87 </span>            : };</a>
+<span class="lineNum">      88 </span>            : 
+<span class="lineNum">      89 </span><span class="lineCov">         20 : void* encInternalOpen(const Str&amp; enc, Bool toUTF8)</span>
+<span class="lineNum">      90 </span>            : {
+<span class="lineNum">      91 </span><span class="lineCov">         20 :     if (!toUTF8)</span>
+<span class="lineNum">      92 </span>            :         return (void*)-1;
+<span class="lineNum">      93 </span><span class="lineCov">         10 :     if (enc.eqNoCase(&quot;ISO-8859-2&quot;))</span>
+<span class="lineNum">      94 </span>            :         return EncTableLatin2;
+<span class="lineNum">      95 </span><span class="lineCov">         10 :     else if (enc.eqNoCase(&quot;windows-1250&quot;))</span>
+<span class="lineNum">      96 </span>            :         return EncTable1250;
+<span class="lineNum">      97 </span>            :     // more builtin conversions can come here
+<span class="lineNum">      98 </span><span class="lineCov">         10 :     else return (void*)-1;</span>
+<a name="99"><span class="lineNum">      99 </span>            : }</a>
+<span class="lineNum">     100 </span>            : 
+<span class="lineNum">     101 </span><span class="lineNoCov">          0 : int encInternalClose(void* intCD)</span>
+<span class="lineNum">     102 </span>            : {
+<span class="lineNum">     103 </span><span class="lineNoCov">          0 :     return 0; // iconv's value for OK</span>
+<span class="lineNum">     104 </span>            : }
+<span class="lineNum">     105 </span>            : 
+<a name="106"><span class="lineNum">     106 </span>            : // the following only does 1-byte encodings for which an EncTable is defined</a>
+<span class="lineNum">     107 </span>            : 
+<span class="lineNum">     108 </span><span class="lineNoCov">          0 : EncResult encInternalConv(void *intCD, const char** inbuf, </span>
+<span class="lineNum">     109 </span>            :                                   size_t *inbytesleft,
+<span class="lineNum">     110 </span>            :                                   char **outbuf, size_t *outbytesleft)
+<span class="lineNum">     111 </span>            : {
+<span class="lineNum">     112 </span><span class="lineNoCov">          0 :     sabassert(intCD &amp;&amp; intCD != (void*)-1);</span>
+<span class="lineNum">     113 </span>            :     char charbuf[6];
+<span class="lineNum">     114 </span>            :     int val;
+<span class="lineNum">     115 </span>            :     size_t len;
+<span class="lineNum">     116 </span>            :     unsigned char thischar;
+<span class="lineNum">     117 </span><span class="lineNoCov">          0 :     for (; *inbytesleft &gt; 0; )</span>
+<span class="lineNum">     118 </span>            :     {
+<span class="lineNum">     119 </span><span class="lineNoCov">          0 :         thischar = **inbuf;</span>
+<span class="lineNum">     120 </span><span class="lineNoCov">          0 :         if (thischar &lt; 0x80)</span>
+<span class="lineNum">     121 </span>            :         {
+<span class="lineNum">     122 </span><span class="lineNoCov">          0 :             **outbuf = thischar;</span>
+<span class="lineNum">     123 </span><span class="lineNoCov">          0 :             len = 1;</span>
+<span class="lineNum">     124 </span>            :         }
+<span class="lineNum">     125 </span>            :         else
+<span class="lineNum">     126 </span>            :         {
+<span class="lineNum">     127 </span><span class="lineNoCov">          0 :             val = ((short*)intCD)[thischar - 0x80];</span>
+<span class="lineNum">     128 </span><span class="lineNoCov">          0 :             if (val == -1)</span>
+<span class="lineNum">     129 </span>            :                 return ENC_EILSEQ;
+<span class="lineNum">     130 </span><span class="lineNoCov">          0 :             len = utf8FromCharCode(charbuf, val);</span>
+<span class="lineNum">     131 </span><span class="lineNoCov">          0 :             if (len &lt;= *outbytesleft)</span>
+<span class="lineNum">     132 </span><span class="lineNoCov">          0 :                 memcpy(*outbuf, charbuf, len);</span>
+<span class="lineNum">     133 </span>            :             else
+<span class="lineNum">     134 </span>            :                 return ENC_E2BIG;
+<span class="lineNum">     135 </span>            :         };
+<span class="lineNum">     136 </span><span class="lineNoCov">          0 :         *outbuf += len;</span>
+<span class="lineNum">     137 </span><span class="lineNoCov">          0 :         *outbytesleft -= len;</span>
+<span class="lineNum">     138 </span><span class="lineNoCov">          0 :         (*inbuf)++;</span>
+<span class="lineNum">     139 </span><span class="lineNoCov">          0 :         (*inbytesleft)--;                </span>
+<span class="lineNum">     140 </span>            :     }
+<span class="lineNum">     141 </span>            :     return ENC_OK;
+<span class="lineNum">     142 </span>            : }
+<span class="lineNum">     143 </span>            : 
+<span class="lineNum">     144 </span>            : /*
+<span class="lineNum">     145 </span>            :  *
+<span class="lineNum">     146 </span>            :  *      Recoder class
+<span class="lineNum">     147 </span>            :  *
+<span class="lineNum">     148 </span>            :  */
+<span class="lineNum">     149 </span>            : 
+<span class="lineNum">     150 </span>            : 
+<span class="lineNum">     151 </span><span class="lineCov">      54371 : Recoder::Recoder()</span>
+<span class="lineNum">     152 </span>            : {
+<a name="153"><span class="lineNum">     153 </span><span class="lineCov">      54371 : }</span></a>
+<span class="lineNum">     154 </span>            : 
+<span class="lineNum">     155 </span><span class="lineCov">      85590 : Bool Recoder::handledByExpat(const Str&amp; enc) const</span>
+<span class="lineNum">     156 </span>            : {
+<span class="lineNum">     157 </span><span class="lineCov">      93501 :     return (enc.eqNoCase(&quot;UTF-8&quot;) ||</span>
+<span class="lineNum">     158 </span><span class="lineCov">      15814 :         enc.eqNoCase(&quot;UTF-16&quot;) ||</span>
+<span class="lineNum">     159 </span><span class="lineCov">      96191 :         enc.eqNoCase(&quot;ISO-8859-1&quot;) ||</span>
+<span class="lineNum">     160 </span><span class="lineCov">      88288 :         enc.eqNoCase(&quot;US-ASCII&quot;));</span>
+<a name="161"><span class="lineNum">     161 </span>            : }</a>
+<span class="lineNum">     162 </span>            : 
+<span class="lineNum">     163 </span><span class="lineCov">      54371 : void Recoder::clear(Sit S)</span>
+<span class="lineNum">     164 </span>            : {
+<span class="lineNum">     165 </span><span class="lineCov">     116164 :     for (int i = 0; i &lt; items.number(); i++)</span>
+<span class="lineNum">     166 </span>            :     {
+<span class="lineNum">     167 </span><span class="lineCov">      61793 :         if (items[i] &amp;&amp; items[i] -&gt; physCD)</span>
+<span class="lineNum">     168 </span><span class="lineCov">       3711 :             close(S, items[i]);</span>
+<span class="lineNum">     169 </span>            :     };
+<span class="lineNum">     170 </span><span class="lineCov">      54371 :     items.freeall(FALSE);</span>
+<span class="lineNum">     171 </span><span class="lineCov">      54371 : }</span>
+<span class="lineNum">     172 </span>            : 
+<span class="lineNum">     173 </span><span class="lineCov">      54371 : Recoder::~Recoder()</span>
+<span class="lineNum">     174 </span>            : {
+<span class="lineNum">     175 </span>            :     // can't clear here (have no situation)
+<a name="176"><span class="lineNum">     176 </span><span class="lineCov">      54371 : }</span></a>
+<span class="lineNum">     177 </span>            : 
+<span class="lineNum">     178 </span><span class="lineCov">       3751 : eFlag Recoder::open(Sit S, const Str&amp; enc, Bool toUTF8, CDesc&amp; cd)</span>
+<span class="lineNum">     179 </span>            : {
+<span class="lineNum">     180 </span><span class="lineCov">       3731 :     GP(ConvInfo) newitem = new ConvInfo;</span>
+<span class="lineNum">     181 </span><span class="lineCov">       7462 :     (*newitem).method = ENC_NONE;</span>
+<span class="lineNum">     182 </span><span class="lineCov">       7462 :     (*newitem).physCD = NULL;</span>
+<span class="lineNum">     183 </span>            : #ifdef HAVE_ICONV_H
+<span class="lineNum">     184 </span><span class="lineCov">       3731 :     iconv_t icd = toUTF8 ? iconv_open(&quot;UTF-8&quot;, enc) : iconv_open(enc, &quot;UTF-8&quot;);</span>
+<span class="lineNum">     185 </span>            :     // switch off transliteration in iconv:
+<span class="lineNum">     186 </span>            :     // sadly non-standard, only works in windows port
+<span class="lineNum">     187 </span>            :     // int val = 0;
+<span class="lineNum">     188 </span>            :     // iconvctl(icd, ICONV_SET_TRANSLITERATE, &amp;val);
+<span class="lineNum">     189 </span><span class="lineCov">       3731 :     if (icd != (iconv_t) -1)</span>
+<span class="lineNum">     190 </span>            :     {
+<span class="lineNum">     191 </span><span class="lineCov">       7422 :         (*newitem).method = ENC_ICONV;</span>
+<span class="lineNum">     192 </span><span class="lineCov">       7422 :         (*newitem).physCD = (void *) icd;</span>
+<span class="lineNum">     193 </span>            :     }
+<span class="lineNum">     194 </span>            :     else
+<span class="lineNum">     195 </span>            : #endif
+<span class="lineNum">     196 </span>            :     {
+<span class="lineNum">     197 </span>            :         // try to open internal recode
+<span class="lineNum">     198 </span>            :         void *physcd;
+<span class="lineNum">     199 </span><span class="lineCov">         20 :         physcd = encInternalOpen(enc, toUTF8);</span>
+<span class="lineNum">     200 </span><span class="lineCov">         20 :         if (physcd != (void*)-1)</span>
+<span class="lineNum">     201 </span>            :         {
+<span class="lineNum">     202 </span><span class="lineNoCov">          0 :             (*newitem).method = ENC_INTERNAL;</span>
+<span class="lineNum">     203 </span><span class="lineNoCov">          0 :             (*newitem).physCD = physcd;</span>
+<span class="lineNum">     204 </span>            :         }
+<span class="lineNum">     205 </span>            :         else
+<span class="lineNum">     206 </span>            :         {
+<span class="lineNum">     207 </span>            :             // try the encoding handler as a last resort
+<span class="lineNum">     208 </span><span class="lineCov">         20 :             void* enchlrUD = NULL;</span>
+<span class="lineNum">     209 </span><span class="lineCov">         20 :             EncHandler *enchlr = NULL;</span>
+<span class="lineNum">     210 </span><span class="lineCov">         20 :                 if (S.getProcessor())</span>
+<span class="lineNum">     211 </span><span class="lineCov">         20 :                         enchlr = S.getProcessor() -&gt; getEncHandler(&amp;enchlrUD);</span>
+<span class="lineNum">     212 </span><span class="lineCov">         20 :             if (enchlr)</span>
+<span class="lineNum">     213 </span>            :             {
+<span class="lineNum">     214 </span><span class="lineNoCov">          0 :                 void *physcd = enchlr -&gt; open(enchlrUD, S.getProcessor(), toUTF8 ? EH_TO_UTF8 : EH_FROM_UTF8, enc);</span>
+<span class="lineNum">     215 </span><span class="lineNoCov">          0 :                 if (physcd != (void*) -1)</span>
+<span class="lineNum">     216 </span>            :                 {
+<span class="lineNum">     217 </span><span class="lineNoCov">          0 :                     (*newitem).method = ENC_HANDLER;</span>
+<span class="lineNum">     218 </span><span class="lineNoCov">          0 :                     (*newitem).physCD = physcd;</span>
+<span class="lineNum">     219 </span>            :                 }
+<span class="lineNum">     220 </span>            :             }
+<span class="lineNum">     221 </span>            :         }
+<span class="lineNum">     222 </span>            :     };
+<span class="lineNum">     223 </span><span class="lineCov">       7462 :     if ((*newitem).method != ENC_NONE)</span>
+<span class="lineNum">     224 </span><span class="lineCov">       3711 :         items.append(cd = newitem.keep());</span>
+<span class="lineNum">     225 </span>            :     else
+<span class="lineNum">     226 </span><span class="lineCov">         40 :         Err1(S, E1_UNKNOWN_ENC, enc);</span>
+<span class="lineNum">     227 </span><span class="lineCov">       3731 :     return OK;</span>
+<a name="228"><span class="lineNum">     228 </span>            : }</a>
+<span class="lineNum">     229 </span>            : 
+<span class="lineNum">     230 </span><span class="lineCov">       1145 : eFlag Recoder::openFromUTF8(Sit S, const Str&amp; enc, CDesc&amp; cd)</span>
+<span class="lineNum">     231 </span>            : {
+<span class="lineNum">     232 </span><span class="lineCov">       1145 :     return open(S, enc, FALSE, cd);</span>
+<a name="233"><span class="lineNum">     233 </span>            : };</a>
+<span class="lineNum">     234 </span>            : 
+<span class="lineNum">     235 </span><span class="lineCov">       2586 : eFlag Recoder::openToUTF8(Sit S, const Str&amp; enc, CDesc&amp; cd)</span>
+<span class="lineNum">     236 </span>            : {
+<span class="lineNum">     237 </span><span class="lineCov">       2586 :     return open(S, enc, TRUE, cd);</span>
+<a name="238"><span class="lineNum">     238 </span>            : };</a>
+<span class="lineNum">     239 </span>            : 
+<span class="lineNum">     240 </span><span class="lineCov">       3711 : eFlag Recoder::close(Sit S, CDesc cd)</span>
+<span class="lineNum">     241 </span>            : {
+<span class="lineNum">     242 </span><span class="lineCov">       3711 :     sabassert(cd);</span>
+<span class="lineNum">     243 </span><span class="lineCov">       3711 :     switch(cd -&gt; method)</span>
+<span class="lineNum">     244 </span>            :     {
+<span class="lineNum">     245 </span>            :     case ENC_ICONV:
+<span class="lineNum">     246 </span>            : #ifdef HAVE_ICONV_H
+<span class="lineNum">     247 </span><span class="lineCov">       3711 :         iconv_close((iconv_t)(cd -&gt; physCD));</span>
+<span class="lineNum">     248 </span>            : #endif
+<span class="lineNum">     249 </span><span class="lineCov">       3711 :         break;</span>
+<span class="lineNum">     250 </span>            :     case ENC_INTERNAL:
+<span class="lineNum">     251 </span>            :         encInternalClose(cd -&gt; physCD);
+<span class="lineNum">     252 </span>            :         break;
+<span class="lineNum">     253 </span>            :     case ENC_HANDLER:
+<span class="lineNum">     254 </span>            :         {
+<span class="lineNum">     255 </span><span class="lineNoCov">          0 :             void *enchlrUD = NULL;</span>
+<span class="lineNum">     256 </span><span class="lineNoCov">          0 :                 EncHandler *enchlr = NULL;</span>
+<span class="lineNum">     257 </span><span class="lineNoCov">          0 :                 if (S.getProcessor())</span>
+<span class="lineNum">     258 </span><span class="lineNoCov">          0 :                         enchlr = S.getProcessor() -&gt; getEncHandler(&amp;enchlrUD);</span>
+<span class="lineNum">     259 </span><span class="lineNoCov">          0 :             if (enchlr)</span>
+<span class="lineNum">     260 </span><span class="lineNoCov">          0 :                 enchlr -&gt; close(enchlrUD, S.getProcessor(), cd -&gt; physCD);</span>
+<span class="lineNum">     261 </span>            :         }
+<span class="lineNum">     262 </span><span class="lineNoCov">          0 :         break;</span>
+<span class="lineNum">     263 </span>            :     default: 
+<span class="lineNum">     264 </span><span class="lineNoCov">          0 :         sabassert(0);</span>
+<span class="lineNum">     265 </span>            :     };
+<span class="lineNum">     266 </span><span class="lineCov">       3711 :     return OK;</span>
+<a name="267"><span class="lineNum">     267 </span>            : }</a>
+<span class="lineNum">     268 </span>            : 
+<span class="lineNum">     269 </span><span class="lineCov">    2834646 : eFlag Recoder::conv(Sit S, CDesc cd, const char *&amp; inbuf, size_t &amp;inbytesleft, </span>
+<span class="lineNum">     270 </span>            :         char *&amp; outbuf, size_t &amp;outbytesleft, EncResult&amp; result)
+<span class="lineNum">     271 </span>            : {
+<span class="lineNum">     272 </span><span class="lineCov">    2834646 :     sabassert(cd);</span>
+<span class="lineNum">     273 </span><span class="lineCov">    2834646 :     switch(cd -&gt; method)</span>
+<span class="lineNum">     274 </span>            :     {
+<span class="lineNum">     275 </span>            :     case ENC_ICONV:
+<span class="lineNum">     276 </span>            : #ifdef HAVE_ICONV_H
+<span class="lineNum">     277 </span>            :         {
+<span class="lineNum">     278 </span><span class="lineCov">    2834646 :             errno = 0;</span>
+<span class="lineNum">     279 </span>            :             iconv((iconv_t)(cd -&gt; physCD), 
+<span class="lineNum">     280 </span>            : #               ifdef SABLOT_ICONV_CAST_OK
+<span class="lineNum">     281 </span>            :                     (char**)(&amp;inbuf),
+<span class="lineNum">     282 </span>            : #               else
+<span class="lineNum">     283 </span>            :                     &amp;inbuf,
+<span class="lineNum">     284 </span>            : #               endif
+<span class="lineNum">     285 </span><span class="lineCov">    2834646 :                     &amp;inbytesleft, &amp;outbuf, &amp;outbytesleft);</span>
+<span class="lineNum">     286 </span><span class="lineCov">    2834646 :             switch(errno)</span>
+<span class="lineNum">     287 </span>            :             {
+<span class="lineNum">     288 </span>            :             case EINVAL:
+<span class="lineNum">     289 </span><span class="lineCov">         50 :                 result = ENC_EINVAL; break;</span>
+<span class="lineNum">     290 </span>            :             case E2BIG:
+<span class="lineNum">     291 </span><span class="lineNoCov">          0 :                 result = ENC_E2BIG; break;</span>
+<span class="lineNum">     292 </span>            :             case EILSEQ:
+<span class="lineNum">     293 </span><span class="lineCov">     165682 :                 result = ENC_EILSEQ; break;</span>
+<span class="lineNum">     294 </span>            :             default:
+<span class="lineNum">     295 </span><span class="lineCov">    2668914 :                 result = ENC_OK;</span>
+<span class="lineNum">     296 </span>            :             };
+<span class="lineNum">     297 </span>            :         };
+<span class="lineNum">     298 </span>            : #else
+<span class="lineNum">     299 </span>            :         sabassert(0);
+<span class="lineNum">     300 </span>            : #endif
+<span class="lineNum">     301 </span>            :         break;
+<span class="lineNum">     302 </span>            :     case ENC_INTERNAL:
+<span class="lineNum">     303 </span>            :         {
+<span class="lineNum">     304 </span>            :             result = 
+<span class="lineNum">     305 </span>            :                 encInternalConv(cd -&gt; physCD, &amp;inbuf, &amp;inbytesleft, 
+<span class="lineNum">     306 </span><span class="lineNoCov">          0 :                 &amp;outbuf, &amp;outbytesleft);</span>
+<span class="lineNum">     307 </span>            :         };
+<span class="lineNum">     308 </span><span class="lineNoCov">          0 :         break;</span>
+<span class="lineNum">     309 </span>            :     case ENC_HANDLER:
+<span class="lineNum">     310 </span>            :         {
+<span class="lineNum">     311 </span><span class="lineNoCov">          0 :             void *enchlrUD = NULL;</span>
+<span class="lineNum">     312 </span><span class="lineNoCov">          0 :             EncHandler *enchlr = NULL;</span>
+<span class="lineNum">     313 </span><span class="lineNoCov">          0 :                 if (S.getProcessor())</span>
+<span class="lineNum">     314 </span><span class="lineNoCov">          0 :                         enchlr = S.getProcessor() -&gt; getEncHandler(&amp;enchlrUD);</span>
+<span class="lineNum">     315 </span><span class="lineNoCov">          0 :                         if (enchlr)</span>
+<span class="lineNum">     316 </span>            :                         {
+<span class="lineNum">     317 </span><span class="lineNoCov">          0 :                 switch(enchlr -&gt; conv(enchlrUD, S.getProcessor(), cd -&gt; physCD, </span>
+<span class="lineNum">     318 </span><span class="lineNoCov">          0 :                     &amp;inbuf, &amp;inbytesleft, &amp;outbuf, &amp;outbytesleft))</span>
+<span class="lineNum">     319 </span>            :                 {
+<span class="lineNum">     320 </span><span class="lineNoCov">          0 :                 case EH_EINVAL: result = ENC_EINVAL;</span>
+<span class="lineNum">     321 </span><span class="lineNoCov">          0 :                     break;</span>
+<span class="lineNum">     322 </span><span class="lineNoCov">          0 :                 case EH_E2BIG: result = ENC_E2BIG;</span>
+<span class="lineNum">     323 </span><span class="lineNoCov">          0 :                     break;</span>
+<span class="lineNum">     324 </span><span class="lineNoCov">          0 :                 case EH_EILSEQ: result = ENC_EILSEQ;</span>
+<span class="lineNum">     325 </span><span class="lineNoCov">          0 :                     break;</span>
+<span class="lineNum">     326 </span><span class="lineNoCov">          0 :                 default: result = ENC_OK;</span>
+<span class="lineNum">     327 </span>            :                 };
+<span class="lineNum">     328 </span>            :                     };
+<span class="lineNum">     329 </span>            :         };
+<span class="lineNum">     330 </span><span class="lineNoCov">          0 :         break;</span>
+<span class="lineNum">     331 </span>            :     default:
+<span class="lineNum">     332 </span><span class="lineNoCov">          0 :         sabassert(0);</span>
+<span class="lineNum">     333 </span>            :     };
+<span class="lineNum">     334 </span><span class="lineCov">    2834646 :     return OK;</span>
+<a name="335"><span class="lineNum">     335 </span>            : }</a>
+<span class="lineNum">     336 </span>            : 
+<span class="lineNum">     337 </span><span class="lineNoCov">          0 : void Recoder::report(Sit S, MsgType type, MsgCode code, const Str &amp;arg1, const Str &amp; arg2)</span>
+<span class="lineNum">     338 </span>            : {
+<span class="lineNum">     339 </span><span class="lineCov">         20 :     S.message(type, code, arg1, arg2);</span>
+<span class="lineNum">     340 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">     341 </span>            : 
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - gcov/doc/examples/tree2.c</title>
+  <link rel="stylesheet" type="text/css" href="../../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../../index.html">top level</a> - <a href="index.html">gcov/doc/examples</a> - tree2.c<span style="font-size: 80%;"> (source / <a href="tree2.c.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">28</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-11-01</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* </a>
+<span class="lineNum">       2 </span>            :  * section:  Tree
+<span class="lineNum">       3 </span>            :  * synopsis: Creates a tree
+<span class="lineNum">       4 </span>            :  * purpose:  Shows how to create document, nodes and dump it to stdout or file.
+<span class="lineNum">       5 </span>            :  * usage:    tree2 &lt;filename&gt;  -Default output: stdout
+<span class="lineNum">       6 </span>            :  * test:     tree2 &gt; tree2.tmp &amp;&amp; diff tree2.tmp $(srcdir)/tree2.res
+<span class="lineNum">       7 </span>            :  * author:   Lucas Brasilino &lt;brasilino@recife.pe.gov.br&gt;
+<span class="lineNum">       8 </span>            :  * copy:     see Copyright for the status of this software
+<span class="lineNum">       9 </span>            :  */
+<span class="lineNum">      10 </span>            : 
+<span class="lineNum">      11 </span>            : #include &lt;stdio.h&gt;
+<span class="lineNum">      12 </span>            : #include &lt;libxml/parser.h&gt;
+<span class="lineNum">      13 </span>            : #include &lt;libxml/tree.h&gt;
+<span class="lineNum">      14 </span>            : 
+<span class="lineNum">      15 </span>            : #if defined(LIBXML_TREE_ENABLED) &amp;&amp; defined(LIBXML_OUTPUT_ENABLED)
+<span class="lineNum">      16 </span>            : 
+<span class="lineNum">      17 </span>            : /*
+<span class="lineNum">      18 </span>            :  *To compile this file using gcc you can type
+<span class="lineNum">      19 </span>            :  *gcc `xml2-config --cflags --libs` -o tree2 tree2.c
+<span class="lineNum">      20 </span>            :  */
+<span class="lineNum">      21 </span>            : 
+<span class="lineNum">      22 </span>            : /* A simple example how to create DOM. Libxml2 automagically 
+<span class="lineNum">      23 </span>            :  * allocates the necessary amount of memory to it.
+<a name="24"><span class="lineNum">      24 </span>            : */</a>
+<span class="lineNum">      25 </span>            : int
+<span class="lineNum">      26 </span><span class="lineNoCov">          0 : main(int argc, char **argv)</span>
+<span class="lineNum">      27 </span>            : {
+<span class="lineNum">      28 </span><span class="lineNoCov">          0 :     xmlDocPtr doc = NULL;       /* document pointer */</span>
+<span class="lineNum">      29 </span><span class="lineNoCov">          0 :     xmlNodePtr root_node = NULL, node = NULL, node1 = NULL;/* node pointers */</span>
+<span class="lineNum">      30 </span><span class="lineNoCov">          0 :     xmlDtdPtr dtd = NULL;       /* DTD pointer */</span>
+<span class="lineNum">      31 </span>            :     char buff[256];
+<span class="lineNum">      32 </span>            :     int i, j;
+<span class="lineNum">      33 </span>            : 
+<span class="lineNum">      34 </span><span class="lineNoCov">          0 :     LIBXML_TEST_VERSION;</span>
+<span class="lineNum">      35 </span>            : 
+<span class="lineNum">      36 </span>            :     /* 
+<span class="lineNum">      37 </span>            :      * Creates a new document, a node and set it as a root node
+<span class="lineNum">      38 </span>            :      */
+<span class="lineNum">      39 </span><span class="lineNoCov">          0 :     doc = xmlNewDoc(BAD_CAST &quot;1.0&quot;);</span>
+<span class="lineNum">      40 </span><span class="lineNoCov">          0 :     root_node = xmlNewNode(NULL, BAD_CAST &quot;root&quot;);</span>
+<span class="lineNum">      41 </span><span class="lineNoCov">          0 :     xmlDocSetRootElement(doc, root_node);</span>
+<span class="lineNum">      42 </span>            : 
+<span class="lineNum">      43 </span>            :     /*
+<span class="lineNum">      44 </span>            :      * Creates a DTD declaration. Isn't mandatory. 
+<span class="lineNum">      45 </span>            :      */
+<span class="lineNum">      46 </span><span class="lineNoCov">          0 :     dtd = xmlCreateIntSubset(doc, BAD_CAST &quot;root&quot;, NULL, BAD_CAST &quot;tree2.dtd&quot;);</span>
+<span class="lineNum">      47 </span>            : 
+<span class="lineNum">      48 </span>            :     /* 
+<span class="lineNum">      49 </span>            :      * xmlNewChild() creates a new node, which is &quot;attached&quot; as child node
+<span class="lineNum">      50 </span>            :      * of root_node node. 
+<span class="lineNum">      51 </span>            :      */
+<span class="lineNum">      52 </span><span class="lineNoCov">          0 :     xmlNewChild(root_node, NULL, BAD_CAST &quot;node1&quot;,</span>
+<span class="lineNum">      53 </span>            :                 BAD_CAST &quot;content of node 1&quot;);
+<span class="lineNum">      54 </span>            :     /* 
+<span class="lineNum">      55 </span>            :      * The same as above, but the new child node doesn't have a content 
+<span class="lineNum">      56 </span>            :      */
+<span class="lineNum">      57 </span><span class="lineNoCov">          0 :     xmlNewChild(root_node, NULL, BAD_CAST &quot;node2&quot;, NULL);</span>
+<span class="lineNum">      58 </span>            : 
+<span class="lineNum">      59 </span>            :     /* 
+<span class="lineNum">      60 </span>            :      * xmlNewProp() creates attributes, which is &quot;attached&quot; to an node.
+<span class="lineNum">      61 </span>            :      * It returns xmlAttrPtr, which isn't used here.
+<span class="lineNum">      62 </span>            :      */
+<span class="lineNum">      63 </span><span class="lineNoCov">          0 :     node =</span>
+<span class="lineNum">      64 </span>            :         xmlNewChild(root_node, NULL, BAD_CAST &quot;node3&quot;,
+<span class="lineNum">      65 </span>            :                     BAD_CAST &quot;this node has attributes&quot;);
+<span class="lineNum">      66 </span><span class="lineNoCov">          0 :     xmlNewProp(node, BAD_CAST &quot;attribute&quot;, BAD_CAST &quot;yes&quot;);</span>
+<span class="lineNum">      67 </span><span class="lineNoCov">          0 :     xmlNewProp(node, BAD_CAST &quot;foo&quot;, BAD_CAST &quot;bar&quot;);</span>
+<span class="lineNum">      68 </span>            : 
+<span class="lineNum">      69 </span>            :     /*
+<span class="lineNum">      70 </span>            :      * Here goes another way to create nodes. xmlNewNode() and xmlNewText
+<span class="lineNum">      71 </span>            :      * creates a node and a text node separately. They are &quot;attached&quot;
+<span class="lineNum">      72 </span>            :      * by xmlAddChild() 
+<span class="lineNum">      73 </span>            :      */
+<span class="lineNum">      74 </span><span class="lineNoCov">          0 :     node = xmlNewNode(NULL, BAD_CAST &quot;node4&quot;);</span>
+<span class="lineNum">      75 </span><span class="lineNoCov">          0 :     node1 = xmlNewText(BAD_CAST</span>
+<span class="lineNum">      76 </span>            :                    &quot;other way to create content (which is also a node)&quot;);
+<span class="lineNum">      77 </span><span class="lineNoCov">          0 :     xmlAddChild(node, node1);</span>
+<span class="lineNum">      78 </span><span class="lineNoCov">          0 :     xmlAddChild(root_node, node);</span>
+<span class="lineNum">      79 </span>            : 
+<span class="lineNum">      80 </span>            :     /* 
+<span class="lineNum">      81 </span>            :      * A simple loop that &quot;automates&quot; nodes creation 
+<span class="lineNum">      82 </span>            :      */
+<span class="lineNum">      83 </span><span class="lineNoCov">          0 :     for (i = 5; i &lt; 7; i++) {</span>
+<span class="lineNum">      84 </span>            :         sprintf(buff, &quot;node%d&quot;, i);
+<span class="lineNum">      85 </span><span class="lineNoCov">          0 :         node = xmlNewChild(root_node, NULL, BAD_CAST buff, NULL);</span>
+<span class="lineNum">      86 </span><span class="lineNoCov">          0 :         for (j = 1; j &lt; 4; j++) {</span>
+<span class="lineNum">      87 </span>            :             sprintf(buff, &quot;node%d%d&quot;, i, j);
+<span class="lineNum">      88 </span><span class="lineNoCov">          0 :             node1 = xmlNewChild(node, NULL, BAD_CAST buff, NULL);</span>
+<span class="lineNum">      89 </span><span class="lineNoCov">          0 :             xmlNewProp(node1, BAD_CAST &quot;odd&quot;, BAD_CAST((j % 2) ? &quot;no&quot; : &quot;yes&quot;));</span>
+<span class="lineNum">      90 </span>            :         }
+<span class="lineNum">      91 </span>            :     }
+<span class="lineNum">      92 </span>            : 
+<span class="lineNum">      93 </span>            :     /* 
+<span class="lineNum">      94 </span>            :      * Dumping document to stdio or file
+<span class="lineNum">      95 </span>            :      */
+<span class="lineNum">      96 </span><span class="lineNoCov">          0 :     xmlSaveFormatFileEnc(argc &gt; 1 ? argv[1] : &quot;-&quot;, doc, &quot;UTF-8&quot;, 1);</span>
+<span class="lineNum">      97 </span>            : 
+<span class="lineNum">      98 </span>            :     /*free the document */
+<span class="lineNum">      99 </span><span class="lineNoCov">          0 :     xmlFreeDoc(doc);</span>
+<span class="lineNum">     100 </span>            : 
+<span class="lineNum">     101 </span>            :     /*
+<span class="lineNum">     102 </span>            :      *Free the global variables that may
+<span class="lineNum">     103 </span>            :      *have been allocated by the parser.
+<span class="lineNum">     104 </span>            :      */
+<span class="lineNum">     105 </span><span class="lineNoCov">          0 :     xmlCleanupParser();</span>
+<span class="lineNum">     106 </span>            : 
+<span class="lineNum">     107 </span>            :     /*
+<span class="lineNum">     108 </span>            :      * this is to debug memory for regression tests
+<span class="lineNum">     109 </span>            :      */
+<span class="lineNum">     110 </span><span class="lineNoCov">          0 :     xmlMemoryDump();</span>
+<span class="lineNum">     111 </span><span class="lineNoCov">          0 :     return(0);</span>
+<span class="lineNum">     112 </span>            : }
+<span class="lineNum">     113 </span>            : #else
+<span class="lineNum">     114 </span>            : int main(void) {
+<span class="lineNum">     115 </span>            :     fprintf(stderr, &quot;tree support not compiled in\n&quot;);
+<span class="lineNum">     116 </span>            :     exit(1);
+<span class="lineNum">     117 </span>            : }
+<span class="lineNum">     118 </span>            : #endif
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

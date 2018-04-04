@@ -1,0 +1,594 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - gcov/timsort.h</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">gcov</a> - timsort.h<span style="font-size: 80%;"> (source / <a href="timsort.h.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">157</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-11-01</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">10</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /*</a>
+<span class="lineNum">       2 </span>            :  * taken from https://github.com/swenson/sort
+<span class="lineNum">       3 </span>            :  * Kept as is for the moment to be able to apply upstream patches for that
+<span class="lineNum">       4 </span>            :  * code, currently used only to speed up XPath node sorting, see xpath.c
+<span class="lineNum">       5 </span>            :  */
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span>            : /*
+<span class="lineNum">       8 </span>            :  * All code in this header, unless otherwise specified, is hereby licensed under the MIT Public License:
+<span class="lineNum">       9 </span>            : 
+<span class="lineNum">      10 </span>            : Copyright (c) 2010 Christopher Swenson
+<span class="lineNum">      11 </span>            : 
+<span class="lineNum">      12 </span>            : Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+<span class="lineNum">      13 </span>            : 
+<span class="lineNum">      14 </span>            : The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+<span class="lineNum">      15 </span>            : 
+<span class="lineNum">      16 </span>            : THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+<span class="lineNum">      17 </span>            : */
+<span class="lineNum">      18 </span>            : 
+<span class="lineNum">      19 </span>            : #include &lt;stdlib.h&gt;
+<span class="lineNum">      20 </span>            : #include &lt;stdio.h&gt;
+<span class="lineNum">      21 </span>            : #include &lt;string.h&gt;
+<span class="lineNum">      22 </span>            : #ifdef HAVE_STDINT_H
+<span class="lineNum">      23 </span>            : #include &lt;stdint.h&gt;
+<span class="lineNum">      24 </span>            : #else
+<span class="lineNum">      25 </span>            : #ifdef HAVE_INTTYPES_H
+<span class="lineNum">      26 </span>            : #include &lt;inttypes.h&gt;
+<span class="lineNum">      27 </span>            : #elif defined(WIN32)
+<span class="lineNum">      28 </span>            : typedef __int64 int64_t;
+<span class="lineNum">      29 </span>            : typedef unsigned __int64 uint64_t;
+<span class="lineNum">      30 </span>            : #endif
+<span class="lineNum">      31 </span>            : #endif
+<span class="lineNum">      32 </span>            : 
+<span class="lineNum">      33 </span>            : #ifndef MK_UINT64
+<span class="lineNum">      34 </span>            : #if defined(WIN32) &amp;&amp; defined(_MSC_VER) &amp;&amp; _MSC_VER &lt; 1300
+<span class="lineNum">      35 </span>            : #define MK_UINT64(x) ((uint64_t)(x))
+<span class="lineNum">      36 </span>            : #else
+<span class="lineNum">      37 </span>            : #define MK_UINT64(x) x##ULL
+<span class="lineNum">      38 </span>            : #endif
+<span class="lineNum">      39 </span>            : #endif
+<span class="lineNum">      40 </span>            : 
+<span class="lineNum">      41 </span>            : #ifndef MAX
+<span class="lineNum">      42 </span>            : #define MAX(x,y) (((x) &gt; (y) ? (x) : (y)))
+<span class="lineNum">      43 </span>            : #endif
+<span class="lineNum">      44 </span>            : #ifndef MIN
+<span class="lineNum">      45 </span>            : #define MIN(x,y) (((x) &lt; (y) ? (x) : (y)))
+<span class="lineNum">      46 </span>            : #endif
+<span class="lineNum">      47 </span>            : 
+<span class="lineNum">      48 </span>            : int compute_minrun(uint64_t);
+<span class="lineNum">      49 </span>            : 
+<span class="lineNum">      50 </span>            : #ifndef CLZ
+<span class="lineNum">      51 </span>            : #if defined(__GNUC__) &amp;&amp; ((__GNUC__ == 3 &amp;&amp; __GNUC_MINOR__ &gt;= 4) || (__GNUC__ &gt; 3))
+<span class="lineNum">      52 </span>            : #define CLZ __builtin_clzll
+<span class="lineNum">      53 </span>            : #else
+<span class="lineNum">      54 </span>            : 
+<span class="lineNum">      55 </span>            : int clzll(uint64_t);
+<span class="lineNum">      56 </span>            : 
+<span class="lineNum">      57 </span>            : /* adapted from Hacker's Delight */
+<span class="lineNum">      58 </span>            : int clzll(uint64_t x) /* {{{ */
+<span class="lineNum">      59 </span>            : {
+<span class="lineNum">      60 </span>            :   int n;
+<span class="lineNum">      61 </span>            : 
+<span class="lineNum">      62 </span>            :   if (x == 0) return(64);
+<span class="lineNum">      63 </span>            :   n = 0;
+<span class="lineNum">      64 </span>            :   if (x &lt;= MK_UINT64(0x00000000FFFFFFFF)) {n = n + 32; x = x &lt;&lt; 32;}
+<span class="lineNum">      65 </span>            :   if (x &lt;= MK_UINT64(0x0000FFFFFFFFFFFF)) {n = n + 16; x = x &lt;&lt; 16;}
+<span class="lineNum">      66 </span>            :   if (x &lt;= MK_UINT64(0x00FFFFFFFFFFFFFF)) {n = n + 8; x = x &lt;&lt; 8;}
+<span class="lineNum">      67 </span>            :   if (x &lt;= MK_UINT64(0x0FFFFFFFFFFFFFFF)) {n = n + 4; x = x &lt;&lt; 4;}
+<span class="lineNum">      68 </span>            :   if (x &lt;= MK_UINT64(0x3FFFFFFFFFFFFFFF)) {n = n + 2; x = x &lt;&lt; 2;}
+<span class="lineNum">      69 </span>            :   if (x &lt;= MK_UINT64(0x7FFFFFFFFFFFFFFF)) {n = n + 1;}
+<span class="lineNum">      70 </span>            :   return n;
+<span class="lineNum">      71 </span>            : }
+<span class="lineNum">      72 </span>            : /* }}} */
+<span class="lineNum">      73 </span>            : 
+<span class="lineNum">      74 </span>            : #define CLZ clzll
+<span class="lineNum">      75 </span>            : #endif
+<a name="76"><span class="lineNum">      76 </span>            : #endif</a>
+<span class="lineNum">      77 </span>            : 
+<a name="78"><span class="lineNum">      78 </span><span class="lineNoCov">          0 : int compute_minrun(uint64_t size) /* {{{ */</span></a>
+<span class="lineNum">      79 </span>            : {
+<span class="lineNum">      80 </span><span class="lineNoCov">          0 :   const int top_bit = 64 - CLZ(size);</span>
+<span class="lineNum">      81 </span><span class="lineNoCov">          0 :   const int shift = MAX(top_bit, 6) - 6;</span>
+<span class="lineNum">      82 </span><span class="lineNoCov">          0 :   const int minrun = size &gt;&gt; shift;</span>
+<span class="lineNum">      83 </span><span class="lineNoCov">          0 :   const uint64_t mask = (MK_UINT64(1) &lt;&lt; shift) - 1;</span>
+<span class="lineNum">      84 </span><span class="lineNoCov">          0 :   if (mask &amp; size) return minrun + 1;</span>
+<span class="lineNum">      85 </span>            :   return minrun;
+<span class="lineNum">      86 </span>            : }
+<span class="lineNum">      87 </span>            : /* }}} */
+<span class="lineNum">      88 </span>            : 
+<span class="lineNum">      89 </span>            : #ifndef SORT_NAME
+<span class="lineNum">      90 </span>            : #error &quot;Must declare SORT_NAME&quot;
+<span class="lineNum">      91 </span>            : #endif
+<span class="lineNum">      92 </span>            : 
+<span class="lineNum">      93 </span>            : #ifndef SORT_TYPE
+<span class="lineNum">      94 </span>            : #error &quot;Must declare SORT_TYPE&quot;
+<span class="lineNum">      95 </span>            : #endif
+<span class="lineNum">      96 </span>            : 
+<span class="lineNum">      97 </span>            : #ifndef SORT_CMP
+<span class="lineNum">      98 </span>            : #define SORT_CMP(x, y)  ((x) &lt; (y) ? -1 : ((x) == (y) ? 0 : 1))
+<span class="lineNum">      99 </span>            : #endif
+<span class="lineNum">     100 </span>            : 
+<span class="lineNum">     101 </span>            : 
+<span class="lineNum">     102 </span>            : #define SORT_SWAP(x,y) {SORT_TYPE __SORT_SWAP_t = (x); (x) = (y); (y) = __SORT_SWAP_t;}
+<span class="lineNum">     103 </span>            : 
+<span class="lineNum">     104 </span>            : #define SORT_CONCAT(x, y) x ## _ ## y
+<span class="lineNum">     105 </span>            : #define SORT_MAKE_STR1(x, y) SORT_CONCAT(x,y)
+<span class="lineNum">     106 </span>            : #define SORT_MAKE_STR(x) SORT_MAKE_STR1(SORT_NAME,x)
+<span class="lineNum">     107 </span>            : 
+<span class="lineNum">     108 </span>            : #define BINARY_INSERTION_FIND  SORT_MAKE_STR(binary_insertion_find)
+<span class="lineNum">     109 </span>            : #define BINARY_INSERTION_SORT_START SORT_MAKE_STR(binary_insertion_sort_start)
+<span class="lineNum">     110 </span>            : #define BINARY_INSERTION_SORT  SORT_MAKE_STR(binary_insertion_sort)
+<span class="lineNum">     111 </span>            : #define REVERSE_ELEMENTS       SORT_MAKE_STR(reverse_elements)
+<span class="lineNum">     112 </span>            : #define COUNT_RUN              SORT_MAKE_STR(count_run)
+<span class="lineNum">     113 </span>            : #define CHECK_INVARIANT        SORT_MAKE_STR(check_invariant)
+<span class="lineNum">     114 </span>            : #define TIM_SORT               SORT_MAKE_STR(tim_sort)
+<span class="lineNum">     115 </span>            : #define TIM_SORT_RESIZE        SORT_MAKE_STR(tim_sort_resize)
+<span class="lineNum">     116 </span>            : #define TIM_SORT_MERGE         SORT_MAKE_STR(tim_sort_merge)
+<span class="lineNum">     117 </span>            : #define TIM_SORT_COLLAPSE      SORT_MAKE_STR(tim_sort_collapse)
+<span class="lineNum">     118 </span>            : 
+<span class="lineNum">     119 </span>            : #define TIM_SORT_RUN_T         SORT_MAKE_STR(tim_sort_run_t)
+<span class="lineNum">     120 </span>            : #define TEMP_STORAGE_T         SORT_MAKE_STR(temp_storage_t)
+<span class="lineNum">     121 </span>            : 
+<span class="lineNum">     122 </span>            : typedef struct {
+<span class="lineNum">     123 </span>            :   int64_t start;
+<span class="lineNum">     124 </span>            :   int64_t length;
+<span class="lineNum">     125 </span>            : } TIM_SORT_RUN_T;
+<span class="lineNum">     126 </span>            : 
+<span class="lineNum">     127 </span>            : void BINARY_INSERTION_SORT(SORT_TYPE *dst, const size_t size);
+<span class="lineNum">     128 </span>            : void TIM_SORT(SORT_TYPE *dst, const size_t size);
+<span class="lineNum">     129 </span>            : 
+<span class="lineNum">     130 </span>            : /* Function used to do a binary search for binary insertion sort */
+<span class="lineNum">     131 </span><span class="lineNoCov">          0 : static int64_t BINARY_INSERTION_FIND(SORT_TYPE *dst, const SORT_TYPE x, const size_t size)</span>
+<span class="lineNum">     132 </span>            : {
+<span class="lineNum">     133 </span>            :   int64_t l, c, r;
+<span class="lineNum">     134 </span>            :   SORT_TYPE lx;
+<span class="lineNum">     135 </span>            :   SORT_TYPE cx;
+<span class="lineNum">     136 </span><span class="lineNoCov">          0 :   l = 0;</span>
+<span class="lineNum">     137 </span><span class="lineNoCov">          0 :   r = size - 1;</span>
+<span class="lineNum">     138 </span><span class="lineNoCov">          0 :   c = r &gt;&gt; 1;</span>
+<span class="lineNum">     139 </span><span class="lineNoCov">          0 :   lx = dst[l];</span>
+<span class="lineNum">     140 </span>            : 
+<span class="lineNum">     141 </span>            :   /* check for beginning conditions */
+<span class="lineNum">     142 </span><span class="lineNoCov">          0 :   if (SORT_CMP(x, lx) &lt; 0)</span>
+<span class="lineNum">     143 </span>            :     return 0;
+<span class="lineNum">     144 </span><span class="lineNoCov">          0 :   else if (SORT_CMP(x, lx) == 0)</span>
+<span class="lineNum">     145 </span>            :   {
+<span class="lineNum">     146 </span>            :     int64_t i = 1;
+<span class="lineNum">     147 </span><span class="lineNoCov">          0 :     while (SORT_CMP(x, dst[i]) == 0) i++;</span>
+<span class="lineNum">     148 </span>            :     return i;
+<span class="lineNum">     149 </span>            :   }
+<span class="lineNum">     150 </span>            : 
+<span class="lineNum">     151 </span><span class="lineNoCov">          0 :   cx = dst[c];</span>
+<span class="lineNum">     152 </span>            :   while (1)
+<span class="lineNum">     153 </span>            :   {
+<span class="lineNum">     154 </span><span class="lineNoCov">          0 :     const int val = SORT_CMP(x, cx);</span>
+<span class="lineNum">     155 </span><span class="lineNoCov">          0 :     if (val &lt; 0)</span>
+<span class="lineNum">     156 </span>            :     {
+<span class="lineNum">     157 </span><span class="lineNoCov">          0 :       if (c - l &lt;= 1) return c;</span>
+<span class="lineNum">     158 </span>            :       r = c;
+<span class="lineNum">     159 </span>            :     }
+<span class="lineNum">     160 </span><span class="lineNoCov">          0 :     else if (val &gt; 0)</span>
+<span class="lineNum">     161 </span>            :     {
+<span class="lineNum">     162 </span><span class="lineNoCov">          0 :       if (r - c &lt;= 1) return c + 1;</span>
+<span class="lineNum">     163 </span>            :       l = c;
+<span class="lineNum">     164 </span>            :       lx = cx;
+<span class="lineNum">     165 </span>            :     }
+<span class="lineNum">     166 </span>            :     else
+<span class="lineNum">     167 </span>            :     {
+<span class="lineNum">     168 </span>            :       do
+<span class="lineNum">     169 </span>            :       {
+<span class="lineNum">     170 </span><span class="lineNoCov">          0 :         cx = dst[++c];</span>
+<span class="lineNum">     171 </span><span class="lineNoCov">          0 :       } while (SORT_CMP(x, cx) == 0);</span>
+<span class="lineNum">     172 </span>            :       return c;
+<span class="lineNum">     173 </span>            :     }
+<span class="lineNum">     174 </span><span class="lineNoCov">          0 :     c = l + ((r - l) &gt;&gt; 1);</span>
+<span class="lineNum">     175 </span><span class="lineNoCov">          0 :     cx = dst[c];</span>
+<span class="lineNum">     176 </span><span class="lineNoCov">          0 :   }</span>
+<span class="lineNum">     177 </span>            : }
+<span class="lineNum">     178 </span>            : 
+<span class="lineNum">     179 </span>            : /* Binary insertion sort, but knowing that the first &quot;start&quot; entries are sorted.  Used in timsort. */
+<span class="lineNum">     180 </span><span class="lineNoCov">          0 : static void BINARY_INSERTION_SORT_START(SORT_TYPE *dst, const size_t start, const size_t size)</span>
+<span class="lineNum">     181 </span>            : {
+<span class="lineNum">     182 </span>            :   int64_t i;
+<span class="lineNum">     183 </span><span class="lineNoCov">          0 :   for (i = start; i &lt; (int64_t) size; i++)</span>
+<span class="lineNum">     184 </span>            :   {
+<span class="lineNum">     185 </span>            :     int64_t j;
+<span class="lineNum">     186 </span>            :     SORT_TYPE x;
+<span class="lineNum">     187 </span>            :     int64_t location;
+<span class="lineNum">     188 </span>            :     /* If this entry is already correct, just move along */
+<span class="lineNum">     189 </span><span class="lineNoCov">          0 :     if (SORT_CMP(dst[i - 1], dst[i]) &lt;= 0) continue;</span>
+<span class="lineNum">     190 </span>            : 
+<span class="lineNum">     191 </span>            :     /* Else we need to find the right place, shift everything over, and squeeze in */
+<span class="lineNum">     192 </span><span class="lineNoCov">          0 :     x = dst[i];</span>
+<span class="lineNum">     193 </span><span class="lineNoCov">          0 :     location = BINARY_INSERTION_FIND(dst, x, i);</span>
+<span class="lineNum">     194 </span><span class="lineNoCov">          0 :     for (j = i - 1; j &gt;= location; j--)</span>
+<span class="lineNum">     195 </span>            :     {
+<span class="lineNum">     196 </span><span class="lineNoCov">          0 :       dst[j + 1] = dst[j];</span>
+<span class="lineNum">     197 </span>            :     }
+<span class="lineNum">     198 </span><span class="lineNoCov">          0 :     dst[location] = x;</span>
+<span class="lineNum">     199 </span>            :   }
+<span class="lineNum">     200 </span><span class="lineNoCov">          0 : }</span>
+<a name="201"><span class="lineNum">     201 </span>            : </a>
+<span class="lineNum">     202 </span>            : /* Binary insertion sort */
+<span class="lineNum">     203 </span><span class="lineNoCov">          0 : void BINARY_INSERTION_SORT(SORT_TYPE *dst, const size_t size)</span>
+<span class="lineNum">     204 </span>            : {
+<span class="lineNum">     205 </span><span class="lineNoCov">          0 :   BINARY_INSERTION_SORT_START(dst, 1, size);</span>
+<span class="lineNum">     206 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">     207 </span>            : 
+<span class="lineNum">     208 </span>            : /* timsort implementation, based on timsort.txt */
+<span class="lineNum">     209 </span>            : 
+<span class="lineNum">     210 </span>            : static void REVERSE_ELEMENTS(SORT_TYPE *dst, int64_t start, int64_t end)
+<span class="lineNum">     211 </span>            : {
+<span class="lineNum">     212 </span>            :   while (1)
+<span class="lineNum">     213 </span>            :   {
+<span class="lineNum">     214 </span><span class="lineNoCov">          0 :     if (start &gt;= end) return;</span>
+<span class="lineNum">     215 </span><span class="lineNoCov">          0 :     SORT_SWAP(dst[start], dst[end]);</span>
+<span class="lineNum">     216 </span><span class="lineNoCov">          0 :     start++;</span>
+<span class="lineNum">     217 </span><span class="lineNoCov">          0 :     end--;</span>
+<span class="lineNum">     218 </span>            :   }
+<span class="lineNum">     219 </span>            : }
+<span class="lineNum">     220 </span>            : 
+<span class="lineNum">     221 </span><span class="lineNoCov">          0 : static int64_t COUNT_RUN(SORT_TYPE *dst, const int64_t start, const size_t size)</span>
+<span class="lineNum">     222 </span>            : {
+<span class="lineNum">     223 </span>            :   int64_t curr;
+<span class="lineNum">     224 </span><span class="lineNoCov">          0 :   if (size - start == 1) return 1;</span>
+<span class="lineNum">     225 </span><span class="lineNoCov">          0 :   if (start &gt;= (int64_t) size - 2)</span>
+<span class="lineNum">     226 </span>            :   {
+<span class="lineNum">     227 </span><span class="lineNoCov">          0 :     if (SORT_CMP(dst[size - 2], dst[size - 1]) &gt; 0)</span>
+<span class="lineNum">     228 </span><span class="lineNoCov">          0 :       SORT_SWAP(dst[size - 2], dst[size - 1]);</span>
+<span class="lineNum">     229 </span>            :     return 2;
+<span class="lineNum">     230 </span>            :   }
+<span class="lineNum">     231 </span>            : 
+<span class="lineNum">     232 </span><span class="lineNoCov">          0 :   curr = start + 2;</span>
+<span class="lineNum">     233 </span>            : 
+<span class="lineNum">     234 </span><span class="lineNoCov">          0 :   if (SORT_CMP(dst[start], dst[start + 1]) &lt;= 0)</span>
+<span class="lineNum">     235 </span>            :   {
+<span class="lineNum">     236 </span>            :     /* increasing run */
+<span class="lineNum">     237 </span>            :     while (1)
+<span class="lineNum">     238 </span>            :     {
+<span class="lineNum">     239 </span><span class="lineNoCov">          0 :       if (curr == (int64_t) size - 1) break;</span>
+<span class="lineNum">     240 </span><span class="lineNoCov">          0 :       if (SORT_CMP(dst[curr - 1], dst[curr]) &gt; 0) break;</span>
+<span class="lineNum">     241 </span><span class="lineNoCov">          0 :       curr++;</span>
+<span class="lineNum">     242 </span><span class="lineNoCov">          0 :     }</span>
+<span class="lineNum">     243 </span><span class="lineNoCov">          0 :     return curr - start;</span>
+<span class="lineNum">     244 </span>            :   }
+<span class="lineNum">     245 </span>            :   else
+<span class="lineNum">     246 </span>            :   {
+<span class="lineNum">     247 </span>            :     /* decreasing run */
+<span class="lineNum">     248 </span>            :     while (1)
+<span class="lineNum">     249 </span>            :     {
+<span class="lineNum">     250 </span><span class="lineNoCov">          0 :       if (curr == (int64_t) size - 1) break;</span>
+<span class="lineNum">     251 </span><span class="lineNoCov">          0 :       if (SORT_CMP(dst[curr - 1], dst[curr]) &lt;= 0) break;</span>
+<span class="lineNum">     252 </span><span class="lineNoCov">          0 :       curr++;</span>
+<span class="lineNum">     253 </span><span class="lineNoCov">          0 :     }</span>
+<span class="lineNum">     254 </span>            :     /* reverse in-place */
+<span class="lineNum">     255 </span><span class="lineNoCov">          0 :     REVERSE_ELEMENTS(dst, start, curr - 1);</span>
+<span class="lineNum">     256 </span><span class="lineNoCov">          0 :     return curr - start;</span>
+<span class="lineNum">     257 </span>            :   }
+<span class="lineNum">     258 </span>            : }
+<span class="lineNum">     259 </span>            : 
+<span class="lineNum">     260 </span>            : #define PUSH_NEXT() do {\
+<span class="lineNum">     261 </span>            : len = COUNT_RUN(dst, curr, size);\
+<span class="lineNum">     262 </span>            : run = minrun;\
+<span class="lineNum">     263 </span>            : if (run &lt; minrun) run = minrun;\
+<span class="lineNum">     264 </span>            : if (run &gt; (int64_t) size - curr) run = size - curr;\
+<span class="lineNum">     265 </span>            : if (run &gt; len)\
+<span class="lineNum">     266 </span>            : {\
+<span class="lineNum">     267 </span>            :   BINARY_INSERTION_SORT_START(&amp;dst[curr], len, run);\
+<span class="lineNum">     268 </span>            :   len = run;\
+<span class="lineNum">     269 </span>            : }\
+<span class="lineNum">     270 </span>            : {\
+<span class="lineNum">     271 </span>            : run_stack[stack_curr].start = curr;\
+<span class="lineNum">     272 </span>            : run_stack[stack_curr].length = len;\
+<span class="lineNum">     273 </span>            : stack_curr++;\
+<span class="lineNum">     274 </span>            : }\
+<span class="lineNum">     275 </span>            : curr += len;\
+<span class="lineNum">     276 </span>            : if (curr == (int64_t) size)\
+<span class="lineNum">     277 </span>            : {\
+<span class="lineNum">     278 </span>            :   /* finish up */ \
+<span class="lineNum">     279 </span>            :   while (stack_curr &gt; 1) \
+<span class="lineNum">     280 </span>            :   { \
+<span class="lineNum">     281 </span>            :     TIM_SORT_MERGE(dst, run_stack, stack_curr, store); \
+<span class="lineNum">     282 </span>            :     run_stack[stack_curr - 2].length += run_stack[stack_curr - 1].length; \
+<span class="lineNum">     283 </span>            :     stack_curr--; \
+<span class="lineNum">     284 </span>            :   } \
+<span class="lineNum">     285 </span>            :   if (store-&gt;storage != NULL)\
+<span class="lineNum">     286 </span>            :   {\
+<span class="lineNum">     287 </span>            :     free(store-&gt;storage);\
+<span class="lineNum">     288 </span>            :     store-&gt;storage = NULL;\
+<span class="lineNum">     289 </span>            :   }\
+<span class="lineNum">     290 </span>            :   return;\
+<span class="lineNum">     291 </span>            : }\
+<span class="lineNum">     292 </span>            : }\
+<a name="293"><span class="lineNum">     293 </span>            : while (0)</a>
+<span class="lineNum">     294 </span>            : 
+<span class="lineNum">     295 </span><span class="lineNoCov">          0 : static int CHECK_INVARIANT(TIM_SORT_RUN_T *stack, const int stack_curr)</span>
+<span class="lineNum">     296 </span>            : {
+<span class="lineNum">     297 </span>            :   int64_t A, B, C;
+<span class="lineNum">     298 </span><span class="lineNoCov">          0 :   if (stack_curr &lt; 2) return 1;</span>
+<span class="lineNum">     299 </span><span class="lineNoCov">          0 :   if (stack_curr == 2)</span>
+<span class="lineNum">     300 </span>            :   {
+<span class="lineNum">     301 </span><span class="lineNoCov">          0 :     const int64_t A1 = stack[stack_curr - 2].length;</span>
+<span class="lineNum">     302 </span><span class="lineNoCov">          0 :     const int64_t B1 = stack[stack_curr - 1].length;</span>
+<span class="lineNum">     303 </span><span class="lineNoCov">          0 :     if (A1 &lt;= B1) return 0;</span>
+<span class="lineNum">     304 </span><span class="lineNoCov">          0 :     return 1;</span>
+<span class="lineNum">     305 </span>            :   }
+<span class="lineNum">     306 </span><span class="lineNoCov">          0 :   A = stack[stack_curr - 3].length;</span>
+<span class="lineNum">     307 </span><span class="lineNoCov">          0 :   B = stack[stack_curr - 2].length;</span>
+<span class="lineNum">     308 </span><span class="lineNoCov">          0 :   C = stack[stack_curr - 1].length;</span>
+<span class="lineNum">     309 </span><span class="lineNoCov">          0 :   if ((A &lt;= B + C) || (B &lt;= C)) return 0;</span>
+<span class="lineNum">     310 </span><span class="lineNoCov">          0 :   return 1;</span>
+<span class="lineNum">     311 </span>            : }
+<span class="lineNum">     312 </span>            : 
+<span class="lineNum">     313 </span>            : typedef struct {
+<span class="lineNum">     314 </span>            :   size_t alloc;
+<span class="lineNum">     315 </span>            :   SORT_TYPE *storage;
+<span class="lineNum">     316 </span>            : } TEMP_STORAGE_T;
+<a name="317"><span class="lineNum">     317 </span>            : </a>
+<span class="lineNum">     318 </span>            : 
+<span class="lineNum">     319 </span><span class="lineNoCov">          0 : static void TIM_SORT_RESIZE(TEMP_STORAGE_T *store, const size_t new_size)</span>
+<span class="lineNum">     320 </span>            : {
+<span class="lineNum">     321 </span><span class="lineNoCov">          0 :   if (store-&gt;alloc &lt; new_size)</span>
+<span class="lineNum">     322 </span>            :   {
+<span class="lineNum">     323 </span><span class="lineNoCov">          0 :     SORT_TYPE *tempstore = (SORT_TYPE *)realloc(store-&gt;storage, new_size * sizeof(SORT_TYPE));</span>
+<span class="lineNum">     324 </span><span class="lineNoCov">          0 :     if (tempstore == NULL)</span>
+<span class="lineNum">     325 </span>            :     {
+<span class="lineNum">     326 </span><span class="lineNoCov">          0 :       fprintf(stderr, &quot;Error allocating temporary storage for tim sort: need %lu bytes&quot;, sizeof(SORT_TYPE) * new_size);</span>
+<span class="lineNum">     327 </span><span class="lineNoCov">          0 :       exit(1);</span>
+<span class="lineNum">     328 </span>            :     }
+<span class="lineNum">     329 </span><span class="lineNoCov">          0 :     store-&gt;storage = tempstore;</span>
+<span class="lineNum">     330 </span><span class="lineNoCov">          0 :     store-&gt;alloc = new_size;</span>
+<span class="lineNum">     331 </span>            :   }
+<span class="lineNum">     332 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">     333 </span>            : 
+<span class="lineNum">     334 </span><span class="lineNoCov">          0 : static void TIM_SORT_MERGE(SORT_TYPE *dst, const TIM_SORT_RUN_T *stack, const int stack_curr, TEMP_STORAGE_T *store)</span>
+<span class="lineNum">     335 </span>            : {
+<span class="lineNum">     336 </span><span class="lineNoCov">          0 :   const int64_t A = stack[stack_curr - 2].length;</span>
+<span class="lineNum">     337 </span><span class="lineNoCov">          0 :   const int64_t B = stack[stack_curr - 1].length;</span>
+<span class="lineNum">     338 </span><span class="lineNoCov">          0 :   const int64_t curr = stack[stack_curr - 2].start;</span>
+<span class="lineNum">     339 </span>            :   SORT_TYPE *storage;
+<span class="lineNum">     340 </span>            :   int64_t i, j, k;
+<span class="lineNum">     341 </span>            : 
+<span class="lineNum">     342 </span><span class="lineNoCov">          0 :   TIM_SORT_RESIZE(store, MIN(A, B));</span>
+<span class="lineNum">     343 </span><span class="lineNoCov">          0 :   storage = store-&gt;storage;</span>
+<span class="lineNum">     344 </span>            : 
+<span class="lineNum">     345 </span>            :   /* left merge */
+<span class="lineNum">     346 </span><span class="lineNoCov">          0 :   if (A &lt; B)</span>
+<span class="lineNum">     347 </span>            :   {
+<span class="lineNum">     348 </span><span class="lineNoCov">          0 :     memcpy(storage, &amp;dst[curr], A * sizeof(SORT_TYPE));</span>
+<span class="lineNum">     349 </span><span class="lineNoCov">          0 :     i = 0;</span>
+<span class="lineNum">     350 </span><span class="lineNoCov">          0 :     j = curr + A;</span>
+<span class="lineNum">     351 </span>            : 
+<span class="lineNum">     352 </span><span class="lineNoCov">          0 :     for (k = curr; k &lt; curr + A + B; k++)</span>
+<span class="lineNum">     353 </span>            :     {
+<span class="lineNum">     354 </span><span class="lineNoCov">          0 :       if ((i &lt; A) &amp;&amp; (j &lt; curr + A + B))</span>
+<span class="lineNum">     355 </span>            :       {
+<span class="lineNum">     356 </span><span class="lineNoCov">          0 :         if (SORT_CMP(storage[i], dst[j]) &lt;= 0)</span>
+<span class="lineNum">     357 </span><span class="lineNoCov">          0 :           dst[k] = storage[i++];</span>
+<span class="lineNum">     358 </span>            :         else
+<span class="lineNum">     359 </span><span class="lineNoCov">          0 :           dst[k] = dst[j++];</span>
+<span class="lineNum">     360 </span>            :       }
+<span class="lineNum">     361 </span><span class="lineNoCov">          0 :       else if (i &lt; A)</span>
+<span class="lineNum">     362 </span>            :       {
+<span class="lineNum">     363 </span><span class="lineNoCov">          0 :         dst[k] = storage[i++];</span>
+<span class="lineNum">     364 </span>            :       }
+<span class="lineNum">     365 </span>            :       else
+<span class="lineNum">     366 </span><span class="lineNoCov">          0 :         dst[k] = dst[j++];</span>
+<span class="lineNum">     367 </span>            :     }
+<span class="lineNum">     368 </span>            :   }
+<span class="lineNum">     369 </span>            :   /* right merge */
+<span class="lineNum">     370 </span>            :   else
+<span class="lineNum">     371 </span>            :   {
+<span class="lineNum">     372 </span><span class="lineNoCov">          0 :     memcpy(storage, &amp;dst[curr + A], B * sizeof(SORT_TYPE));</span>
+<span class="lineNum">     373 </span><span class="lineNoCov">          0 :     i = B - 1;</span>
+<span class="lineNum">     374 </span><span class="lineNoCov">          0 :     j = curr + A - 1;</span>
+<span class="lineNum">     375 </span>            : 
+<span class="lineNum">     376 </span><span class="lineNoCov">          0 :     for (k = curr + A + B - 1; k &gt;= curr; k--)</span>
+<span class="lineNum">     377 </span>            :     {
+<span class="lineNum">     378 </span><span class="lineNoCov">          0 :       if ((i &gt;= 0) &amp;&amp; (j &gt;= curr))</span>
+<span class="lineNum">     379 </span>            :       {
+<span class="lineNum">     380 </span><span class="lineNoCov">          0 :           if (SORT_CMP(dst[j], storage[i]) &gt; 0)</span>
+<span class="lineNum">     381 </span><span class="lineNoCov">          0 :             dst[k] = dst[j--];</span>
+<span class="lineNum">     382 </span>            :           else
+<span class="lineNum">     383 </span><span class="lineNoCov">          0 :             dst[k] = storage[i--];</span>
+<span class="lineNum">     384 </span>            :       }
+<span class="lineNum">     385 </span><span class="lineNoCov">          0 :       else if (i &gt;= 0)</span>
+<span class="lineNum">     386 </span><span class="lineNoCov">          0 :         dst[k] = storage[i--];</span>
+<span class="lineNum">     387 </span>            :       else
+<span class="lineNum">     388 </span><span class="lineNoCov">          0 :         dst[k] = dst[j--];</span>
+<span class="lineNum">     389 </span>            :     }
+<span class="lineNum">     390 </span>            :   }
+<a name="391"><span class="lineNum">     391 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     392 </span>            : 
+<span class="lineNum">     393 </span><span class="lineNoCov">          0 : static int TIM_SORT_COLLAPSE(SORT_TYPE *dst, TIM_SORT_RUN_T *stack, int stack_curr, TEMP_STORAGE_T *store, const size_t size)</span>
+<span class="lineNum">     394 </span>            : {
+<span class="lineNum">     395 </span>            :   while (1) {
+<span class="lineNum">     396 </span>            :     int64_t A, B, C, D;
+<span class="lineNum">     397 </span>            :     int ABC, BCD, BD, CD;
+<span class="lineNum">     398 </span>            : 
+<span class="lineNum">     399 </span>            :     /* if the stack only has one thing on it, we are done with the collapse */
+<span class="lineNum">     400 </span><span class="lineNoCov">          0 :     if (stack_curr &lt;= 1) {</span>
+<span class="lineNum">     401 </span>            :       break;
+<span class="lineNum">     402 </span>            :     }
+<span class="lineNum">     403 </span>            : 
+<span class="lineNum">     404 </span>            :     /* if this is the last merge, just do it */
+<span class="lineNum">     405 </span><span class="lineNoCov">          0 :     if ((stack_curr == 2) &amp;&amp; (stack[0].length + stack[1].length == size)) {</span>
+<span class="lineNum">     406 </span><span class="lineNoCov">          0 :       TIM_SORT_MERGE(dst, stack, stack_curr, store);</span>
+<span class="lineNum">     407 </span><span class="lineNoCov">          0 :       stack[0].length += stack[1].length;</span>
+<span class="lineNum">     408 </span><span class="lineNoCov">          0 :       stack_curr--;</span>
+<span class="lineNum">     409 </span><span class="lineNoCov">          0 :       break;</span>
+<span class="lineNum">     410 </span>            :     }
+<span class="lineNum">     411 </span>            :     /* check if the invariant is off for a stack of 2 elements */
+<span class="lineNum">     412 </span><span class="lineNoCov">          0 :     else if ((stack_curr == 2) &amp;&amp; (stack[0].length &lt;= stack[1].length)) {</span>
+<span class="lineNum">     413 </span><span class="lineNoCov">          0 :       TIM_SORT_MERGE(dst, stack, stack_curr, store);</span>
+<span class="lineNum">     414 </span><span class="lineNoCov">          0 :       stack[0].length += stack[1].length;</span>
+<span class="lineNum">     415 </span><span class="lineNoCov">          0 :       stack_curr--;</span>
+<span class="lineNum">     416 </span><span class="lineNoCov">          0 :       break;</span>
+<span class="lineNum">     417 </span><span class="lineNoCov">          0 :     } else if (stack_curr == 2) {</span>
+<span class="lineNum">     418 </span>            :       break;
+<span class="lineNum">     419 </span>            :     }
+<span class="lineNum">     420 </span>            : 
+<span class="lineNum">     421 </span><span class="lineNoCov">          0 :     B = stack[stack_curr - 3].length;</span>
+<span class="lineNum">     422 </span><span class="lineNoCov">          0 :     C = stack[stack_curr - 2].length;</span>
+<span class="lineNum">     423 </span><span class="lineNoCov">          0 :     D = stack[stack_curr - 1].length;</span>
+<span class="lineNum">     424 </span>            : 
+<span class="lineNum">     425 </span><span class="lineNoCov">          0 :     if (stack_curr &gt;= 4) {</span>
+<span class="lineNum">     426 </span><span class="lineNoCov">          0 :       A = stack[stack_curr - 4].length;</span>
+<span class="lineNum">     427 </span><span class="lineNoCov">          0 :       ABC = (A &lt;= B + C);</span>
+<span class="lineNum">     428 </span>            :     } else {
+<span class="lineNum">     429 </span>            :       ABC = 0;
+<span class="lineNum">     430 </span>            :     }
+<span class="lineNum">     431 </span>            : 
+<span class="lineNum">     432 </span><span class="lineNoCov">          0 :     BCD = (B &lt;= C + D) || ABC;</span>
+<span class="lineNum">     433 </span><span class="lineNoCov">          0 :     CD = (C &lt;= D);</span>
+<span class="lineNum">     434 </span><span class="lineNoCov">          0 :     BD = (B &lt; D);</span>
+<span class="lineNum">     435 </span>            : 
+<span class="lineNum">     436 </span>            :     /* Both invariants are good */
+<span class="lineNum">     437 </span><span class="lineNoCov">          0 :     if (!BCD &amp;&amp; !CD) {</span>
+<span class="lineNum">     438 </span>            :       break;
+<span class="lineNum">     439 </span>            :     }
+<span class="lineNum">     440 </span>            : 
+<span class="lineNum">     441 </span>            :     /* left merge */
+<span class="lineNum">     442 </span><span class="lineNoCov">          0 :     if (BCD &amp;&amp; !CD) {</span>
+<span class="lineNum">     443 </span><span class="lineNoCov">          0 :       TIM_SORT_MERGE(dst, stack, stack_curr - 1, store);</span>
+<span class="lineNum">     444 </span><span class="lineNoCov">          0 :       stack[stack_curr - 3].length += stack[stack_curr - 2].length;</span>
+<span class="lineNum">     445 </span><span class="lineNoCov">          0 :       stack[stack_curr - 2] = stack[stack_curr - 1];</span>
+<span class="lineNum">     446 </span><span class="lineNoCov">          0 :       stack_curr--;</span>
+<span class="lineNum">     447 </span>            :     } else {
+<span class="lineNum">     448 </span>            :       /* right merge */
+<span class="lineNum">     449 </span><span class="lineNoCov">          0 :       TIM_SORT_MERGE(dst, stack, stack_curr, store);</span>
+<span class="lineNum">     450 </span><span class="lineNoCov">          0 :       stack[stack_curr - 2].length += stack[stack_curr - 1].length;</span>
+<span class="lineNum">     451 </span><span class="lineNoCov">          0 :       stack_curr--;</span>
+<span class="lineNum">     452 </span>            :     }
+<span class="lineNum">     453 </span>            :   }
+<span class="lineNum">     454 </span>            : 
+<span class="lineNum">     455 </span><span class="lineNoCov">          0 :   return stack_curr;</span>
+<span class="lineNum">     456 </span>            : }
+<span class="lineNum">     457 </span>            : 
+<span class="lineNum">     458 </span><span class="lineNoCov">          0 : void TIM_SORT(SORT_TYPE *dst, const size_t size)</span>
+<span class="lineNum">     459 </span>            : {
+<span class="lineNum">     460 </span>            :   int minrun;
+<span class="lineNum">     461 </span>            :   TEMP_STORAGE_T _store, *store;
+<span class="lineNum">     462 </span>            :   TIM_SORT_RUN_T run_stack[128];
+<span class="lineNum">     463 </span><span class="lineNoCov">          0 :   int stack_curr = 0;</span>
+<span class="lineNum">     464 </span>            :   int64_t len, run;
+<span class="lineNum">     465 </span><span class="lineNoCov">          0 :   int64_t curr = 0;</span>
+<span class="lineNum">     466 </span>            : 
+<span class="lineNum">     467 </span><span class="lineNoCov">          0 :   if (size &lt; 64)</span>
+<span class="lineNum">     468 </span>            :   {
+<span class="lineNum">     469 </span>            :     BINARY_INSERTION_SORT(dst, size);
+<span class="lineNum">     470 </span>            :     return;
+<span class="lineNum">     471 </span>            :   }
+<span class="lineNum">     472 </span>            : 
+<span class="lineNum">     473 </span>            :   /* compute the minimum run length */
+<span class="lineNum">     474 </span><span class="lineNoCov">          0 :   minrun = compute_minrun(size);</span>
+<span class="lineNum">     475 </span>            : 
+<span class="lineNum">     476 </span>            :   /* temporary storage for merges */
+<span class="lineNum">     477 </span><span class="lineNoCov">          0 :   store = &amp;_store;</span>
+<span class="lineNum">     478 </span><span class="lineNoCov">          0 :   store-&gt;alloc = 0;</span>
+<span class="lineNum">     479 </span><span class="lineNoCov">          0 :   store-&gt;storage = NULL;</span>
+<span class="lineNum">     480 </span>            : 
+<span class="lineNum">     481 </span><span class="lineNoCov">          0 :   PUSH_NEXT();</span>
+<span class="lineNum">     482 </span><span class="lineNoCov">          0 :   PUSH_NEXT();</span>
+<span class="lineNum">     483 </span><span class="lineNoCov">          0 :   PUSH_NEXT();</span>
+<span class="lineNum">     484 </span>            : 
+<span class="lineNum">     485 </span>            :   while (1)
+<span class="lineNum">     486 </span>            :   {
+<span class="lineNum">     487 </span><span class="lineNoCov">          0 :     if (!CHECK_INVARIANT(run_stack, stack_curr))</span>
+<span class="lineNum">     488 </span>            :     {
+<span class="lineNum">     489 </span><span class="lineNoCov">          0 :       stack_curr = TIM_SORT_COLLAPSE(dst, run_stack, stack_curr, store, size);</span>
+<span class="lineNum">     490 </span><span class="lineNoCov">          0 :       continue;</span>
+<span class="lineNum">     491 </span>            :     }
+<span class="lineNum">     492 </span><span class="lineNoCov">          0 :     PUSH_NEXT();</span>
+<span class="lineNum">     493 </span>            :   }
+<span class="lineNum">     494 </span>            : }
+<span class="lineNum">     495 </span>            : 
+<span class="lineNum">     496 </span>            : #undef SORT_CONCAT
+<span class="lineNum">     497 </span>            : #undef SORT_MAKE_STR1
+<span class="lineNum">     498 </span>            : #undef SORT_MAKE_STR
+<span class="lineNum">     499 </span>            : #undef SORT_NAME
+<span class="lineNum">     500 </span>            : #undef SORT_TYPE
+<span class="lineNum">     501 </span>            : #undef SORT_CMP
+<span class="lineNum">     502 </span>            : #undef TEMP_STORAGE_T
+<span class="lineNum">     503 </span>            : #undef TIM_SORT_RUN_T
+<span class="lineNum">     504 </span>            : #undef PUSH_NEXT
+<span class="lineNum">     505 </span>            : #undef SORT_SWAP
+<span class="lineNum">     506 </span>            : #undef SORT_CONCAT
+<span class="lineNum">     507 </span>            : #undef SORT_MAKE_STR1
+<span class="lineNum">     508 </span>            : #undef SORT_MAKE_STR
+<span class="lineNum">     509 </span>            : #undef BINARY_INSERTION_FIND
+<span class="lineNum">     510 </span>            : #undef BINARY_INSERTION_SORT_START
+<span class="lineNum">     511 </span>            : #undef BINARY_INSERTION_SORT
+<span class="lineNum">     512 </span>            : #undef REVERSE_ELEMENTS
+<span class="lineNum">     513 </span>            : #undef COUNT_RUN
+<span class="lineNum">     514 </span>            : #undef TIM_SORT
+<span class="lineNum">     515 </span>            : #undef TIM_SORT_RESIZE
+<span class="lineNum">     516 </span>            : #undef TIM_SORT_COLLAPSE
+<span class="lineNum">     517 </span>            : #undef TIM_SORT_RUN_T
+<span class="lineNum">     518 </span>            : #undef TEMP_STORAGE_T
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

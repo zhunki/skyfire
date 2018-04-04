@@ -1,0 +1,919 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - libxslt/templates.c</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">libxslt</a> - templates.c<span style="font-size: 80%;"> (source / <a href="templates.c.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">66</td>
+            <td class="headerCovTableEntry">291</td>
+            <td class="headerCovTableEntryLo">22.7 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-10-23</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntry">11</td>
+            <td class="headerCovTableEntryLo">18.2 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /*</a>
+<span class="lineNum">       2 </span>            :  * templates.c: Implementation of the template processing
+<span class="lineNum">       3 </span>            :  *
+<span class="lineNum">       4 </span>            :  * Reference:
+<span class="lineNum">       5 </span>            :  *   http://www.w3.org/TR/1999/REC-xslt-19991116
+<span class="lineNum">       6 </span>            :  *
+<span class="lineNum">       7 </span>            :  * See Copyright for the status of this software.
+<span class="lineNum">       8 </span>            :  *
+<span class="lineNum">       9 </span>            :  * daniel@veillard.com
+<span class="lineNum">      10 </span>            :  */
+<span class="lineNum">      11 </span>            : 
+<span class="lineNum">      12 </span>            : #define IN_LIBXSLT
+<span class="lineNum">      13 </span>            : #include &quot;libxslt.h&quot;
+<span class="lineNum">      14 </span>            : 
+<span class="lineNum">      15 </span>            : #include &lt;string.h&gt;
+<span class="lineNum">      16 </span>            : 
+<span class="lineNum">      17 </span>            : #include &lt;libxml/xmlmemory.h&gt;
+<span class="lineNum">      18 </span>            : #include &lt;libxml/globals.h&gt;
+<span class="lineNum">      19 </span>            : #include &lt;libxml/xmlerror.h&gt;
+<span class="lineNum">      20 </span>            : #include &lt;libxml/tree.h&gt;
+<span class="lineNum">      21 </span>            : #include &lt;libxml/dict.h&gt;
+<span class="lineNum">      22 </span>            : #include &lt;libxml/xpathInternals.h&gt;
+<span class="lineNum">      23 </span>            : #include &lt;libxml/parserInternals.h&gt;
+<span class="lineNum">      24 </span>            : #include &quot;xslt.h&quot;
+<span class="lineNum">      25 </span>            : #include &quot;xsltInternals.h&quot;
+<span class="lineNum">      26 </span>            : #include &quot;xsltutils.h&quot;
+<span class="lineNum">      27 </span>            : #include &quot;variables.h&quot;
+<span class="lineNum">      28 </span>            : #include &quot;functions.h&quot;
+<span class="lineNum">      29 </span>            : #include &quot;templates.h&quot;
+<span class="lineNum">      30 </span>            : #include &quot;transform.h&quot;
+<span class="lineNum">      31 </span>            : #include &quot;namespaces.h&quot;
+<span class="lineNum">      32 </span>            : #include &quot;attributes.h&quot;
+<span class="lineNum">      33 </span>            : 
+<span class="lineNum">      34 </span>            : #ifdef WITH_XSLT_DEBUG
+<span class="lineNum">      35 </span>            : #define WITH_XSLT_DEBUG_TEMPLATES
+<span class="lineNum">      36 </span>            : #endif
+<span class="lineNum">      37 </span>            : 
+<span class="lineNum">      38 </span>            : /************************************************************************
+<span class="lineNum">      39 </span>            :  *                                                                      *
+<span class="lineNum">      40 </span>            :  *                      Module interfaces                               *
+<span class="lineNum">      41 </span>            :  *                                                                      *
+<span class="lineNum">      42 </span>            :  ************************************************************************/
+<span class="lineNum">      43 </span>            : 
+<span class="lineNum">      44 </span>            : /**
+<span class="lineNum">      45 </span>            :  * xsltEvalXPathPredicate:
+<span class="lineNum">      46 </span>            :  * @ctxt:  the XSLT transformation context
+<span class="lineNum">      47 </span>            :  * @comp:  the XPath compiled expression
+<span class="lineNum">      48 </span>            :  * @nsList:  the namespaces in scope
+<span class="lineNum">      49 </span>            :  * @nsNr:  the number of namespaces in scope
+<span class="lineNum">      50 </span>            :  *
+<span class="lineNum">      51 </span>            :  * Process the expression using XPath and evaluate the result as
+<span class="lineNum">      52 </span>            :  * an XPath predicate
+<span class="lineNum">      53 </span>            :  *
+<span class="lineNum">      54 </span>            :  * Returns 1 is the predicate was true, 0 otherwise
+<a name="55"><span class="lineNum">      55 </span>            :  */</a>
+<span class="lineNum">      56 </span>            : int
+<span class="lineNum">      57 </span><span class="lineNoCov">          0 : xsltEvalXPathPredicate(xsltTransformContextPtr ctxt, xmlXPathCompExprPtr comp,</span>
+<span class="lineNum">      58 </span>            :                        xmlNsPtr *nsList, int nsNr) {
+<span class="lineNum">      59 </span>            :     int ret;
+<span class="lineNum">      60 </span>            :     xmlXPathObjectPtr res;
+<span class="lineNum">      61 </span>            :     int oldNsNr;
+<span class="lineNum">      62 </span>            :     xmlNsPtr *oldNamespaces;
+<span class="lineNum">      63 </span>            :     xmlNodePtr oldInst;
+<span class="lineNum">      64 </span>            :     int oldProximityPosition, oldContextSize;
+<span class="lineNum">      65 </span>            : 
+<span class="lineNum">      66 </span><span class="lineNoCov">          0 :     oldContextSize = ctxt-&gt;xpathCtxt-&gt;contextSize;</span>
+<span class="lineNum">      67 </span><span class="lineNoCov">          0 :     oldProximityPosition = ctxt-&gt;xpathCtxt-&gt;proximityPosition;</span>
+<span class="lineNum">      68 </span><span class="lineNoCov">          0 :     oldNsNr = ctxt-&gt;xpathCtxt-&gt;nsNr;</span>
+<span class="lineNum">      69 </span><span class="lineNoCov">          0 :     oldNamespaces = ctxt-&gt;xpathCtxt-&gt;namespaces;</span>
+<span class="lineNum">      70 </span><span class="lineNoCov">          0 :     oldInst = ctxt-&gt;inst;</span>
+<span class="lineNum">      71 </span>            : 
+<span class="lineNum">      72 </span><span class="lineNoCov">          0 :     ctxt-&gt;xpathCtxt-&gt;node = ctxt-&gt;node;</span>
+<span class="lineNum">      73 </span><span class="lineNoCov">          0 :     ctxt-&gt;xpathCtxt-&gt;namespaces = nsList;</span>
+<span class="lineNum">      74 </span><span class="lineNoCov">          0 :     ctxt-&gt;xpathCtxt-&gt;nsNr = nsNr;</span>
+<span class="lineNum">      75 </span>            : 
+<span class="lineNum">      76 </span><span class="lineNoCov">          0 :     res = xmlXPathCompiledEval(comp, ctxt-&gt;xpathCtxt);</span>
+<span class="lineNum">      77 </span>            : 
+<span class="lineNum">      78 </span><span class="lineNoCov">          0 :     if (res != NULL) {</span>
+<span class="lineNum">      79 </span><span class="lineNoCov">          0 :         ret = xmlXPathEvalPredicate(ctxt-&gt;xpathCtxt, res);</span>
+<span class="lineNum">      80 </span><span class="lineNoCov">          0 :         xmlXPathFreeObject(res);</span>
+<span class="lineNum">      81 </span>            : #ifdef WITH_XSLT_DEBUG_TEMPLATES
+<span class="lineNum">      82 </span><span class="lineNoCov">          0 :         XSLT_TRACE(ctxt,XSLT_TRACE_TEMPLATES,xsltGenericDebug(xsltGenericDebugContext,</span>
+<span class="lineNum">      83 </span>            :              &quot;xsltEvalXPathPredicate: returns %d\n&quot;, ret));
+<span class="lineNum">      84 </span>            : #endif
+<span class="lineNum">      85 </span>            :     } else {
+<span class="lineNum">      86 </span>            : #ifdef WITH_XSLT_DEBUG_TEMPLATES
+<span class="lineNum">      87 </span><span class="lineNoCov">          0 :         XSLT_TRACE(ctxt,XSLT_TRACE_TEMPLATES,xsltGenericDebug(xsltGenericDebugContext,</span>
+<span class="lineNum">      88 </span>            :              &quot;xsltEvalXPathPredicate: failed\n&quot;));
+<span class="lineNum">      89 </span>            : #endif
+<span class="lineNum">      90 </span><span class="lineNoCov">          0 :         ctxt-&gt;state = XSLT_STATE_STOPPED;</span>
+<span class="lineNum">      91 </span><span class="lineNoCov">          0 :         ret = 0;</span>
+<span class="lineNum">      92 </span>            :     }
+<span class="lineNum">      93 </span><span class="lineNoCov">          0 :     ctxt-&gt;xpathCtxt-&gt;nsNr = oldNsNr;</span>
+<span class="lineNum">      94 </span>            : 
+<span class="lineNum">      95 </span><span class="lineNoCov">          0 :     ctxt-&gt;xpathCtxt-&gt;namespaces = oldNamespaces;</span>
+<span class="lineNum">      96 </span><span class="lineNoCov">          0 :     ctxt-&gt;inst = oldInst;</span>
+<span class="lineNum">      97 </span><span class="lineNoCov">          0 :     ctxt-&gt;xpathCtxt-&gt;contextSize = oldContextSize;</span>
+<span class="lineNum">      98 </span><span class="lineNoCov">          0 :     ctxt-&gt;xpathCtxt-&gt;proximityPosition = oldProximityPosition;</span>
+<span class="lineNum">      99 </span>            : 
+<span class="lineNum">     100 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">     101 </span>            : }
+<span class="lineNum">     102 </span>            : 
+<span class="lineNum">     103 </span>            : /**
+<span class="lineNum">     104 </span>            :  * xsltEvalXPathStringNs:
+<span class="lineNum">     105 </span>            :  * @ctxt:  the XSLT transformation context
+<span class="lineNum">     106 </span>            :  * @comp:  the compiled XPath expression
+<span class="lineNum">     107 </span>            :  * @nsNr:  the number of namespaces in the list
+<span class="lineNum">     108 </span>            :  * @nsList:  the list of in-scope namespaces to use
+<span class="lineNum">     109 </span>            :  *
+<span class="lineNum">     110 </span>            :  * Process the expression using XPath, allowing to pass a namespace mapping
+<span class="lineNum">     111 </span>            :  * context and get a string
+<span class="lineNum">     112 </span>            :  *
+<span class="lineNum">     113 </span>            :  * Returns the computed string value or NULL, must be deallocated by the
+<span class="lineNum">     114 </span>            :  *    caller.
+<a name="115"><span class="lineNum">     115 </span>            :  */</a>
+<span class="lineNum">     116 </span>            : xmlChar *
+<span class="lineNum">     117 </span><span class="lineNoCov">          0 : xsltEvalXPathStringNs(xsltTransformContextPtr ctxt, xmlXPathCompExprPtr comp,</span>
+<span class="lineNum">     118 </span>            :                       int nsNr, xmlNsPtr *nsList) {
+<span class="lineNum">     119 </span><span class="lineNoCov">          0 :     xmlChar *ret = NULL;</span>
+<span class="lineNum">     120 </span>            :     xmlXPathObjectPtr res;
+<span class="lineNum">     121 </span>            :     xmlNodePtr oldInst;
+<span class="lineNum">     122 </span>            :     xmlNodePtr oldNode;
+<span class="lineNum">     123 </span>            :     int oldPos, oldSize;
+<span class="lineNum">     124 </span>            :     int oldNsNr;
+<span class="lineNum">     125 </span>            :     xmlNsPtr *oldNamespaces;
+<span class="lineNum">     126 </span>            : 
+<span class="lineNum">     127 </span><span class="lineNoCov">          0 :     oldInst = ctxt-&gt;inst;</span>
+<span class="lineNum">     128 </span><span class="lineNoCov">          0 :     oldNode = ctxt-&gt;node;</span>
+<span class="lineNum">     129 </span><span class="lineNoCov">          0 :     oldPos = ctxt-&gt;xpathCtxt-&gt;proximityPosition;</span>
+<span class="lineNum">     130 </span><span class="lineNoCov">          0 :     oldSize = ctxt-&gt;xpathCtxt-&gt;contextSize;</span>
+<span class="lineNum">     131 </span><span class="lineNoCov">          0 :     oldNsNr = ctxt-&gt;xpathCtxt-&gt;nsNr;</span>
+<span class="lineNum">     132 </span><span class="lineNoCov">          0 :     oldNamespaces = ctxt-&gt;xpathCtxt-&gt;namespaces;</span>
+<span class="lineNum">     133 </span>            : 
+<span class="lineNum">     134 </span><span class="lineNoCov">          0 :     ctxt-&gt;xpathCtxt-&gt;node = ctxt-&gt;node;</span>
+<span class="lineNum">     135 </span>            :     /* TODO: do we need to propagate the namespaces here ? */
+<span class="lineNum">     136 </span><span class="lineNoCov">          0 :     ctxt-&gt;xpathCtxt-&gt;namespaces = nsList;</span>
+<span class="lineNum">     137 </span><span class="lineNoCov">          0 :     ctxt-&gt;xpathCtxt-&gt;nsNr = nsNr;</span>
+<span class="lineNum">     138 </span><span class="lineNoCov">          0 :     res = xmlXPathCompiledEval(comp, ctxt-&gt;xpathCtxt);</span>
+<span class="lineNum">     139 </span><span class="lineNoCov">          0 :     if (res != NULL) {</span>
+<span class="lineNum">     140 </span><span class="lineNoCov">          0 :         if (res-&gt;type != XPATH_STRING)</span>
+<span class="lineNum">     141 </span><span class="lineNoCov">          0 :             res = xmlXPathConvertString(res);</span>
+<span class="lineNum">     142 </span><span class="lineNoCov">          0 :         if (res-&gt;type == XPATH_STRING) {</span>
+<span class="lineNum">     143 </span><span class="lineNoCov">          0 :             ret = res-&gt;stringval;</span>
+<span class="lineNum">     144 </span><span class="lineNoCov">          0 :             res-&gt;stringval = NULL;</span>
+<span class="lineNum">     145 </span>            :         } else {
+<span class="lineNum">     146 </span><span class="lineNoCov">          0 :             xsltTransformError(ctxt, NULL, NULL,</span>
+<span class="lineNum">     147 </span>            :                  &quot;xpath : string() function didn't return a String\n&quot;);
+<span class="lineNum">     148 </span>            :         }
+<span class="lineNum">     149 </span><span class="lineNoCov">          0 :         xmlXPathFreeObject(res);</span>
+<span class="lineNum">     150 </span>            :     } else {
+<span class="lineNum">     151 </span><span class="lineNoCov">          0 :         ctxt-&gt;state = XSLT_STATE_STOPPED;</span>
+<span class="lineNum">     152 </span>            :     }
+<span class="lineNum">     153 </span>            : #ifdef WITH_XSLT_DEBUG_TEMPLATES
+<span class="lineNum">     154 </span><span class="lineNoCov">          0 :     XSLT_TRACE(ctxt,XSLT_TRACE_TEMPLATES,xsltGenericDebug(xsltGenericDebugContext,</span>
+<span class="lineNum">     155 </span>            :          &quot;xsltEvalXPathString: returns %s\n&quot;, ret));
+<span class="lineNum">     156 </span>            : #endif
+<span class="lineNum">     157 </span><span class="lineNoCov">          0 :     ctxt-&gt;inst = oldInst;</span>
+<span class="lineNum">     158 </span><span class="lineNoCov">          0 :     ctxt-&gt;node = oldNode;</span>
+<span class="lineNum">     159 </span><span class="lineNoCov">          0 :     ctxt-&gt;xpathCtxt-&gt;contextSize = oldSize;</span>
+<span class="lineNum">     160 </span><span class="lineNoCov">          0 :     ctxt-&gt;xpathCtxt-&gt;proximityPosition = oldPos;</span>
+<span class="lineNum">     161 </span><span class="lineNoCov">          0 :     ctxt-&gt;xpathCtxt-&gt;nsNr = oldNsNr;</span>
+<span class="lineNum">     162 </span><span class="lineNoCov">          0 :     ctxt-&gt;xpathCtxt-&gt;namespaces = oldNamespaces;</span>
+<span class="lineNum">     163 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">     164 </span>            : }
+<span class="lineNum">     165 </span>            : 
+<span class="lineNum">     166 </span>            : /**
+<span class="lineNum">     167 </span>            :  * xsltEvalXPathString:
+<span class="lineNum">     168 </span>            :  * @ctxt:  the XSLT transformation context
+<span class="lineNum">     169 </span>            :  * @comp:  the compiled XPath expression
+<span class="lineNum">     170 </span>            :  *
+<span class="lineNum">     171 </span>            :  * Process the expression using XPath and get a string
+<span class="lineNum">     172 </span>            :  *
+<span class="lineNum">     173 </span>            :  * Returns the computed string value or NULL, must be deallocated by the
+<span class="lineNum">     174 </span>            :  *    caller.
+<a name="175"><span class="lineNum">     175 </span>            :  */</a>
+<span class="lineNum">     176 </span>            : xmlChar *
+<span class="lineNum">     177 </span><span class="lineNoCov">          0 : xsltEvalXPathString(xsltTransformContextPtr ctxt, xmlXPathCompExprPtr comp) {</span>
+<span class="lineNum">     178 </span><span class="lineNoCov">          0 :     return(xsltEvalXPathStringNs(ctxt, comp, 0, NULL));</span>
+<span class="lineNum">     179 </span>            : }
+<span class="lineNum">     180 </span>            : 
+<span class="lineNum">     181 </span>            : /**
+<span class="lineNum">     182 </span>            :  * xsltEvalTemplateString:
+<span class="lineNum">     183 </span>            :  * @ctxt:  the XSLT transformation context
+<span class="lineNum">     184 </span>            :  * @contextNode:  the current node in the source tree
+<span class="lineNum">     185 </span>            :  * @inst:  the XSLT instruction (xsl:comment, xsl:processing-instruction)
+<span class="lineNum">     186 </span>            :  *
+<span class="lineNum">     187 </span>            :  * Processes the sequence constructor of the given instruction on
+<span class="lineNum">     188 </span>            :  * @contextNode and converts the resulting tree to a string.
+<span class="lineNum">     189 </span>            :  * This is needed by e.g. xsl:comment and xsl:processing-instruction.
+<span class="lineNum">     190 </span>            :  *
+<span class="lineNum">     191 </span>            :  * Returns the computed string value or NULL; it's up to the caller to
+<span class="lineNum">     192 </span>            :  *         free the result.
+<a name="193"><span class="lineNum">     193 </span>            :  */</a>
+<span class="lineNum">     194 </span>            : xmlChar *
+<span class="lineNum">     195 </span><span class="lineNoCov">          0 : xsltEvalTemplateString(xsltTransformContextPtr ctxt,</span>
+<span class="lineNum">     196 </span>            :                        xmlNodePtr contextNode,
+<span class="lineNum">     197 </span>            :                        xmlNodePtr inst)
+<span class="lineNum">     198 </span>            : {
+<span class="lineNum">     199 </span><span class="lineNoCov">          0 :     xmlNodePtr oldInsert, insert = NULL;</span>
+<span class="lineNum">     200 </span>            :     xmlChar *ret;
+<span class="lineNum">     201 </span>            : 
+<span class="lineNum">     202 </span><span class="lineNoCov">          0 :     if ((ctxt == NULL) || (contextNode == NULL) || (inst == NULL) ||</span>
+<span class="lineNum">     203 </span><span class="lineNoCov">          0 :         (inst-&gt;type != XML_ELEMENT_NODE))</span>
+<span class="lineNum">     204 </span>            :         return(NULL);
+<span class="lineNum">     205 </span>            : 
+<span class="lineNum">     206 </span><span class="lineNoCov">          0 :     if (inst-&gt;children == NULL)</span>
+<span class="lineNum">     207 </span>            :         return(NULL);
+<span class="lineNum">     208 </span>            : 
+<span class="lineNum">     209 </span>            :     /*
+<span class="lineNum">     210 </span>            :     * This creates a temporary element-node to add the resulting
+<span class="lineNum">     211 </span>            :     * text content to.
+<span class="lineNum">     212 </span>            :     * OPTIMIZE TODO: Keep such an element-node in the transformation
+<span class="lineNum">     213 </span>            :     *  context to avoid creating it every time.
+<span class="lineNum">     214 </span>            :     */
+<span class="lineNum">     215 </span><span class="lineNoCov">          0 :     insert = xmlNewDocNode(ctxt-&gt;output, NULL,</span>
+<span class="lineNum">     216 </span>            :                            (const xmlChar *)&quot;fake&quot;, NULL);
+<span class="lineNum">     217 </span><span class="lineNoCov">          0 :     if (insert == NULL) {</span>
+<span class="lineNum">     218 </span><span class="lineNoCov">          0 :         xsltTransformError(ctxt, NULL, contextNode,</span>
+<span class="lineNum">     219 </span>            :                 &quot;Failed to create temporary node\n&quot;);
+<span class="lineNum">     220 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">     221 </span>            :     }
+<span class="lineNum">     222 </span><span class="lineNoCov">          0 :     oldInsert = ctxt-&gt;insert;</span>
+<span class="lineNum">     223 </span><span class="lineNoCov">          0 :     ctxt-&gt;insert = insert;</span>
+<span class="lineNum">     224 </span>            :     /*
+<span class="lineNum">     225 </span>            :     * OPTIMIZE TODO: if inst-&gt;children consists only of text-nodes.
+<span class="lineNum">     226 </span>            :     */
+<span class="lineNum">     227 </span><span class="lineNoCov">          0 :     xsltApplyOneTemplate(ctxt, contextNode, inst-&gt;children, NULL, NULL);</span>
+<span class="lineNum">     228 </span>            : 
+<span class="lineNum">     229 </span><span class="lineNoCov">          0 :     ctxt-&gt;insert = oldInsert;</span>
+<span class="lineNum">     230 </span>            : 
+<span class="lineNum">     231 </span><span class="lineNoCov">          0 :     ret = xmlNodeGetContent(insert);</span>
+<span class="lineNum">     232 </span><span class="lineNoCov">          0 :     if (insert != NULL)</span>
+<span class="lineNum">     233 </span><span class="lineNoCov">          0 :         xmlFreeNode(insert);</span>
+<span class="lineNum">     234 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">     235 </span>            : }
+<span class="lineNum">     236 </span>            : 
+<span class="lineNum">     237 </span>            : /**
+<span class="lineNum">     238 </span>            :  * xsltAttrTemplateValueProcessNode:
+<span class="lineNum">     239 </span>            :  * @ctxt:  the XSLT transformation context
+<span class="lineNum">     240 </span>            :  * @str:  the attribute template node value
+<span class="lineNum">     241 </span>            :  * @inst:  the instruction (or LRE) in the stylesheet holding the
+<span class="lineNum">     242 </span>            :  *         attribute with an AVT
+<span class="lineNum">     243 </span>            :  *
+<span class="lineNum">     244 </span>            :  * Process the given string, allowing to pass a namespace mapping
+<span class="lineNum">     245 </span>            :  * context and return the new string value.
+<span class="lineNum">     246 </span>            :  *
+<span class="lineNum">     247 </span>            :  * Called by:
+<span class="lineNum">     248 </span>            :  *  - xsltAttrTemplateValueProcess() (templates.c)
+<span class="lineNum">     249 </span>            :  *  - xsltEvalAttrValueTemplate() (templates.c)
+<span class="lineNum">     250 </span>            :  *
+<span class="lineNum">     251 </span>            :  * QUESTION: Why is this function public? It is not used outside
+<span class="lineNum">     252 </span>            :  *  of templates.c.
+<span class="lineNum">     253 </span>            :  *
+<span class="lineNum">     254 </span>            :  * Returns the computed string value or NULL, must be deallocated by the
+<span class="lineNum">     255 </span>            :  *    caller.
+<a name="256"><span class="lineNum">     256 </span>            :  */</a>
+<span class="lineNum">     257 </span>            : xmlChar *
+<span class="lineNum">     258 </span><span class="lineNoCov">          0 : xsltAttrTemplateValueProcessNode(xsltTransformContextPtr ctxt,</span>
+<span class="lineNum">     259 </span>            :           const xmlChar *str, xmlNodePtr inst)
+<span class="lineNum">     260 </span>            : {
+<span class="lineNum">     261 </span><span class="lineNoCov">          0 :     xmlChar *ret = NULL;</span>
+<span class="lineNum">     262 </span>            :     const xmlChar *cur;
+<span class="lineNum">     263 </span>            :     xmlChar *expr, *val;
+<span class="lineNum">     264 </span><span class="lineNoCov">          0 :     xmlNsPtr *nsList = NULL;</span>
+<span class="lineNum">     265 </span><span class="lineNoCov">          0 :     int nsNr = 0;</span>
+<span class="lineNum">     266 </span>            : 
+<span class="lineNum">     267 </span><span class="lineNoCov">          0 :     if (str == NULL) return(NULL);</span>
+<span class="lineNum">     268 </span><span class="lineNoCov">          0 :     if (*str == 0)</span>
+<span class="lineNum">     269 </span><span class="lineNoCov">          0 :         return(xmlStrndup((xmlChar *)&quot;&quot;, 0));</span>
+<span class="lineNum">     270 </span>            : 
+<span class="lineNum">     271 </span>            :     cur = str;
+<span class="lineNum">     272 </span><span class="lineNoCov">          0 :     while (*cur != 0) {</span>
+<span class="lineNum">     273 </span><span class="lineNoCov">          0 :         if (*cur == '{') {</span>
+<span class="lineNum">     274 </span><span class="lineNoCov">          0 :             if (*(cur+1) == '{') {      /* escaped '{' */</span>
+<span class="lineNum">     275 </span><span class="lineNoCov">          0 :                 cur++;</span>
+<span class="lineNum">     276 </span><span class="lineNoCov">          0 :                 ret = xmlStrncat(ret, str, cur - str);</span>
+<span class="lineNum">     277 </span><span class="lineNoCov">          0 :                 cur++;</span>
+<span class="lineNum">     278 </span><span class="lineNoCov">          0 :                 str = cur;</span>
+<span class="lineNum">     279 </span><span class="lineNoCov">          0 :                 continue;</span>
+<span class="lineNum">     280 </span>            :             }
+<span class="lineNum">     281 </span><span class="lineNoCov">          0 :             ret = xmlStrncat(ret, str, cur - str);</span>
+<span class="lineNum">     282 </span><span class="lineNoCov">          0 :             str = cur;</span>
+<span class="lineNum">     283 </span><span class="lineNoCov">          0 :             cur++;</span>
+<span class="lineNum">     284 </span><span class="lineNoCov">          0 :             while ((*cur != 0) &amp;&amp; (*cur != '}')) {</span>
+<span class="lineNum">     285 </span>            :                 /* Need to check for literal (bug539741) */
+<span class="lineNum">     286 </span><span class="lineNoCov">          0 :                 if ((*cur == '\'') || (*cur == '&quot;')) {</span>
+<span class="lineNum">     287 </span><span class="lineNoCov">          0 :                     char delim = *(cur++);</span>
+<span class="lineNum">     288 </span><span class="lineNoCov">          0 :                     while ((*cur != 0) &amp;&amp; (*cur != delim))</span>
+<span class="lineNum">     289 </span><span class="lineNoCov">          0 :                         cur++;</span>
+<span class="lineNum">     290 </span><span class="lineNoCov">          0 :                     if (*cur != 0)</span>
+<span class="lineNum">     291 </span><span class="lineNoCov">          0 :                         cur++;  /* skip the ending delimiter */</span>
+<span class="lineNum">     292 </span>            :                 } else
+<span class="lineNum">     293 </span><span class="lineNoCov">          0 :                     cur++;</span>
+<span class="lineNum">     294 </span>            :             }
+<span class="lineNum">     295 </span><span class="lineNoCov">          0 :             if (*cur == 0) {</span>
+<span class="lineNum">     296 </span><span class="lineNoCov">          0 :                 xsltTransformError(ctxt, NULL, inst,</span>
+<span class="lineNum">     297 </span>            :                         &quot;xsltAttrTemplateValueProcessNode: unmatched '{'\n&quot;);
+<span class="lineNum">     298 </span><span class="lineNoCov">          0 :                 ret = xmlStrncat(ret, str, cur - str);</span>
+<span class="lineNum">     299 </span><span class="lineNoCov">          0 :                 return(ret);</span>
+<span class="lineNum">     300 </span>            :             }
+<span class="lineNum">     301 </span><span class="lineNoCov">          0 :             str++;</span>
+<span class="lineNum">     302 </span><span class="lineNoCov">          0 :             expr = xmlStrndup(str, cur - str);</span>
+<span class="lineNum">     303 </span><span class="lineNoCov">          0 :             if (expr == NULL)</span>
+<span class="lineNum">     304 </span>            :                 return(ret);
+<span class="lineNum">     305 </span><span class="lineNoCov">          0 :             else if (*expr == '{') {</span>
+<span class="lineNum">     306 </span><span class="lineNoCov">          0 :                 ret = xmlStrcat(ret, expr);</span>
+<span class="lineNum">     307 </span><span class="lineNoCov">          0 :                 xmlFree(expr);</span>
+<span class="lineNum">     308 </span>            :             } else {
+<span class="lineNum">     309 </span>            :                 xmlXPathCompExprPtr comp;
+<span class="lineNum">     310 </span>            :                 /*
+<span class="lineNum">     311 </span>            :                  * TODO: keep precompiled form around
+<span class="lineNum">     312 </span>            :                  */
+<span class="lineNum">     313 </span><span class="lineNoCov">          0 :                 if ((nsList == NULL) &amp;&amp; (inst != NULL)) {</span>
+<span class="lineNum">     314 </span><span class="lineNoCov">          0 :                     int i = 0;</span>
+<span class="lineNum">     315 </span>            : 
+<span class="lineNum">     316 </span><span class="lineNoCov">          0 :                     nsList = xmlGetNsList(inst-&gt;doc, inst);</span>
+<span class="lineNum">     317 </span><span class="lineNoCov">          0 :                     if (nsList != NULL) {</span>
+<span class="lineNum">     318 </span><span class="lineNoCov">          0 :                         while (nsList[i] != NULL)</span>
+<span class="lineNum">     319 </span><span class="lineNoCov">          0 :                             i++;</span>
+<span class="lineNum">     320 </span>            :                         nsNr = i;
+<span class="lineNum">     321 </span>            :                     }
+<span class="lineNum">     322 </span>            :                 }
+<span class="lineNum">     323 </span><span class="lineNoCov">          0 :                 comp = xmlXPathCompile(expr);</span>
+<span class="lineNum">     324 </span><span class="lineNoCov">          0 :                 val = xsltEvalXPathStringNs(ctxt, comp, nsNr, nsList);</span>
+<span class="lineNum">     325 </span><span class="lineNoCov">          0 :                 xmlXPathFreeCompExpr(comp);</span>
+<span class="lineNum">     326 </span><span class="lineNoCov">          0 :                 xmlFree(expr);</span>
+<span class="lineNum">     327 </span><span class="lineNoCov">          0 :                 if (val != NULL) {</span>
+<span class="lineNum">     328 </span><span class="lineNoCov">          0 :                     ret = xmlStrcat(ret, val);</span>
+<span class="lineNum">     329 </span><span class="lineNoCov">          0 :                     xmlFree(val);</span>
+<span class="lineNum">     330 </span>            :                 }
+<span class="lineNum">     331 </span>            :             }
+<span class="lineNum">     332 </span><span class="lineNoCov">          0 :             cur++;</span>
+<span class="lineNum">     333 </span><span class="lineNoCov">          0 :             str = cur;</span>
+<span class="lineNum">     334 </span><span class="lineNoCov">          0 :         } else if (*cur == '}') {</span>
+<span class="lineNum">     335 </span><span class="lineNoCov">          0 :             cur++;</span>
+<span class="lineNum">     336 </span><span class="lineNoCov">          0 :             if (*cur == '}') {  /* escaped '}' */</span>
+<span class="lineNum">     337 </span><span class="lineNoCov">          0 :                 ret = xmlStrncat(ret, str, cur - str);</span>
+<span class="lineNum">     338 </span><span class="lineNoCov">          0 :                 cur++;</span>
+<span class="lineNum">     339 </span><span class="lineNoCov">          0 :                 str = cur;</span>
+<span class="lineNum">     340 </span><span class="lineNoCov">          0 :                 continue;</span>
+<span class="lineNum">     341 </span>            :             } else {
+<span class="lineNum">     342 </span><span class="lineNoCov">          0 :                 xsltTransformError(ctxt, NULL, inst,</span>
+<span class="lineNum">     343 </span>            :                      &quot;xsltAttrTemplateValueProcessNode: unmatched '}'\n&quot;);
+<span class="lineNum">     344 </span>            :             }
+<span class="lineNum">     345 </span>            :         } else
+<span class="lineNum">     346 </span><span class="lineNoCov">          0 :             cur++;</span>
+<span class="lineNum">     347 </span>            :     }
+<span class="lineNum">     348 </span><span class="lineNoCov">          0 :     if (cur != str) {</span>
+<span class="lineNum">     349 </span><span class="lineNoCov">          0 :         ret = xmlStrncat(ret, str, cur - str);</span>
+<span class="lineNum">     350 </span>            :     }
+<span class="lineNum">     351 </span>            : 
+<span class="lineNum">     352 </span><span class="lineNoCov">          0 :     if (nsList != NULL)</span>
+<span class="lineNum">     353 </span><span class="lineNoCov">          0 :         xmlFree(nsList);</span>
+<span class="lineNum">     354 </span>            : 
+<span class="lineNum">     355 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">     356 </span>            : }
+<span class="lineNum">     357 </span>            : 
+<span class="lineNum">     358 </span>            : /**
+<span class="lineNum">     359 </span>            :  * xsltAttrTemplateValueProcess:
+<span class="lineNum">     360 </span>            :  * @ctxt:  the XSLT transformation context
+<span class="lineNum">     361 </span>            :  * @str:  the attribute template node value
+<span class="lineNum">     362 </span>            :  *
+<span class="lineNum">     363 </span>            :  * Process the given node and return the new string value.
+<span class="lineNum">     364 </span>            :  *
+<span class="lineNum">     365 </span>            :  * Returns the computed string value or NULL, must be deallocated by the
+<span class="lineNum">     366 </span>            :  *    caller.
+<a name="367"><span class="lineNum">     367 </span>            :  */</a>
+<span class="lineNum">     368 </span>            : xmlChar *
+<span class="lineNum">     369 </span><span class="lineNoCov">          0 : xsltAttrTemplateValueProcess(xsltTransformContextPtr ctxt, const xmlChar *str) {</span>
+<span class="lineNum">     370 </span><span class="lineNoCov">          0 :     return(xsltAttrTemplateValueProcessNode(ctxt, str, NULL));</span>
+<span class="lineNum">     371 </span>            : }
+<span class="lineNum">     372 </span>            : 
+<span class="lineNum">     373 </span>            : /**
+<span class="lineNum">     374 </span>            :  * xsltEvalAttrValueTemplate:
+<span class="lineNum">     375 </span>            :  * @ctxt:  the XSLT transformation context
+<span class="lineNum">     376 </span>            :  * @inst:  the instruction (or LRE) in the stylesheet holding the
+<span class="lineNum">     377 </span>            :  *         attribute with an AVT
+<span class="lineNum">     378 </span>            :  * @name:  the attribute QName
+<span class="lineNum">     379 </span>            :  * @ns:  the attribute namespace URI
+<span class="lineNum">     380 </span>            :  *
+<span class="lineNum">     381 </span>            :  * Evaluate a attribute value template, i.e. the attribute value can
+<span class="lineNum">     382 </span>            :  * contain expressions contained in curly braces ({}) and those are
+<span class="lineNum">     383 </span>            :  * substituted by they computed value.
+<span class="lineNum">     384 </span>            :  *
+<span class="lineNum">     385 </span>            :  * Returns the computed string value or NULL, must be deallocated by the
+<span class="lineNum">     386 </span>            :  *    caller.
+<a name="387"><span class="lineNum">     387 </span>            :  */</a>
+<span class="lineNum">     388 </span>            : xmlChar *
+<span class="lineNum">     389 </span><span class="lineNoCov">          0 : xsltEvalAttrValueTemplate(xsltTransformContextPtr ctxt, xmlNodePtr inst,</span>
+<span class="lineNum">     390 </span>            :                           const xmlChar *name, const xmlChar *ns)
+<span class="lineNum">     391 </span>            : {
+<span class="lineNum">     392 </span>            :     xmlChar *ret;
+<span class="lineNum">     393 </span>            :     xmlChar *expr;
+<span class="lineNum">     394 </span>            : 
+<span class="lineNum">     395 </span><span class="lineNoCov">          0 :     if ((ctxt == NULL) || (inst == NULL) || (name == NULL) ||</span>
+<span class="lineNum">     396 </span><span class="lineNoCov">          0 :         (inst-&gt;type != XML_ELEMENT_NODE))</span>
+<span class="lineNum">     397 </span>            :         return(NULL);
+<span class="lineNum">     398 </span>            : 
+<span class="lineNum">     399 </span><span class="lineNoCov">          0 :     expr = xsltGetNsProp(inst, name, ns);</span>
+<span class="lineNum">     400 </span><span class="lineNoCov">          0 :     if (expr == NULL)</span>
+<span class="lineNum">     401 </span>            :         return(NULL);
+<span class="lineNum">     402 </span>            : 
+<span class="lineNum">     403 </span>            :     /*
+<span class="lineNum">     404 </span>            :      * TODO: though now {} is detected ahead, it would still be good to
+<span class="lineNum">     405 </span>            :      *       optimize both functions to keep the splitted value if the
+<span class="lineNum">     406 </span>            :      *       attribute content and the XPath precompiled expressions around
+<span class="lineNum">     407 </span>            :      */
+<span class="lineNum">     408 </span>            : 
+<span class="lineNum">     409 </span><span class="lineNoCov">          0 :     ret = xsltAttrTemplateValueProcessNode(ctxt, expr, inst);</span>
+<span class="lineNum">     410 </span>            : #ifdef WITH_XSLT_DEBUG_TEMPLATES
+<span class="lineNum">     411 </span><span class="lineNoCov">          0 :     XSLT_TRACE(ctxt,XSLT_TRACE_TEMPLATES,xsltGenericDebug(xsltGenericDebugContext,</span>
+<span class="lineNum">     412 </span>            :          &quot;xsltEvalAttrValueTemplate: %s returns %s\n&quot;, expr, ret));
+<span class="lineNum">     413 </span>            : #endif
+<span class="lineNum">     414 </span><span class="lineNoCov">          0 :     if (expr != NULL)</span>
+<span class="lineNum">     415 </span><span class="lineNoCov">          0 :         xmlFree(expr);</span>
+<span class="lineNum">     416 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">     417 </span>            : }
+<span class="lineNum">     418 </span>            : 
+<span class="lineNum">     419 </span>            : /**
+<span class="lineNum">     420 </span>            :  * xsltEvalStaticAttrValueTemplate:
+<span class="lineNum">     421 </span>            :  * @style:  the XSLT stylesheet
+<span class="lineNum">     422 </span>            :  * @inst:  the instruction (or LRE) in the stylesheet holding the
+<span class="lineNum">     423 </span>            :  *         attribute with an AVT
+<span class="lineNum">     424 </span>            :  * @name:  the attribute Name
+<span class="lineNum">     425 </span>            :  * @ns:  the attribute namespace URI
+<span class="lineNum">     426 </span>            :  * @found:  indicator whether the attribute is present
+<span class="lineNum">     427 </span>            :  *
+<span class="lineNum">     428 </span>            :  * Check if an attribute value template has a static value, i.e. the
+<span class="lineNum">     429 </span>            :  * attribute value does not contain expressions contained in curly braces ({})
+<span class="lineNum">     430 </span>            :  *
+<span class="lineNum">     431 </span>            :  * Returns the static string value or NULL, must be deallocated by the
+<span class="lineNum">     432 </span>            :  *    caller.
+<a name="433"><span class="lineNum">     433 </span>            :  */</a>
+<span class="lineNum">     434 </span>            : const xmlChar *
+<span class="lineNum">     435 </span><span class="lineCov">      15132 : xsltEvalStaticAttrValueTemplate(xsltStylesheetPtr style, xmlNodePtr inst,</span>
+<span class="lineNum">     436 </span>            :                         const xmlChar *name, const xmlChar *ns, int *found) {
+<span class="lineNum">     437 </span>            :     const xmlChar *ret;
+<span class="lineNum">     438 </span>            :     xmlChar *expr;
+<span class="lineNum">     439 </span>            : 
+<span class="lineNum">     440 </span><span class="lineCov">      30264 :     if ((style == NULL) || (inst == NULL) || (name == NULL) ||</span>
+<span class="lineNum">     441 </span><span class="lineCov">      15132 :         (inst-&gt;type != XML_ELEMENT_NODE))</span>
+<span class="lineNum">     442 </span>            :         return(NULL);
+<span class="lineNum">     443 </span>            : 
+<span class="lineNum">     444 </span><span class="lineCov">      15132 :     expr = xsltGetNsProp(inst, name, ns);</span>
+<span class="lineNum">     445 </span><span class="lineCov">      15132 :     if (expr == NULL) {</span>
+<span class="lineNum">     446 </span><span class="lineCov">       7650 :         *found = 0;</span>
+<span class="lineNum">     447 </span><span class="lineCov">       7650 :         return(NULL);</span>
+<span class="lineNum">     448 </span>            :     }
+<span class="lineNum">     449 </span><span class="lineCov">       7482 :     *found = 1;</span>
+<span class="lineNum">     450 </span>            : 
+<span class="lineNum">     451 </span><span class="lineCov">       7482 :     ret = xmlStrchr(expr, '{');</span>
+<span class="lineNum">     452 </span><span class="lineCov">       7482 :     if (ret != NULL) {</span>
+<span class="lineNum">     453 </span><span class="lineCov">          4 :         xmlFree(expr);</span>
+<span class="lineNum">     454 </span><span class="lineCov">          4 :         return(NULL);</span>
+<span class="lineNum">     455 </span>            :     }
+<span class="lineNum">     456 </span><span class="lineCov">       7478 :     ret = xmlDictLookup(style-&gt;dict, expr, -1);</span>
+<span class="lineNum">     457 </span><span class="lineCov">       7478 :     xmlFree(expr);</span>
+<span class="lineNum">     458 </span><span class="lineCov">       7478 :     return(ret);</span>
+<span class="lineNum">     459 </span>            : }
+<span class="lineNum">     460 </span>            : 
+<span class="lineNum">     461 </span>            : /**
+<span class="lineNum">     462 </span>            :  * xsltAttrTemplateProcess:
+<span class="lineNum">     463 </span>            :  * @ctxt:  the XSLT transformation context
+<span class="lineNum">     464 </span>            :  * @target:  the element where the attribute will be grafted
+<span class="lineNum">     465 </span>            :  * @attr:  the attribute node of a literal result element
+<span class="lineNum">     466 </span>            :  *
+<span class="lineNum">     467 </span>            :  * Process one attribute of a Literal Result Element (in the stylesheet).
+<span class="lineNum">     468 </span>            :  * Evaluates Attribute Value Templates and copies the attribute over to
+<span class="lineNum">     469 </span>            :  * the result element.
+<span class="lineNum">     470 </span>            :  * This does *not* process attribute sets (xsl:use-attribute-set).
+<span class="lineNum">     471 </span>            :  *
+<span class="lineNum">     472 </span>            :  *
+<span class="lineNum">     473 </span>            :  * Returns the generated attribute node.
+<a name="474"><span class="lineNum">     474 </span>            :  */</a>
+<span class="lineNum">     475 </span>            : xmlAttrPtr
+<span class="lineNum">     476 </span><span class="lineNoCov">          0 : xsltAttrTemplateProcess(xsltTransformContextPtr ctxt, xmlNodePtr target,</span>
+<span class="lineNum">     477 </span>            :                         xmlAttrPtr attr)
+<span class="lineNum">     478 </span>            : {
+<span class="lineNum">     479 </span>            :     const xmlChar *value;
+<span class="lineNum">     480 </span>            :     xmlAttrPtr ret;
+<span class="lineNum">     481 </span>            : 
+<span class="lineNum">     482 </span><span class="lineNoCov">          0 :     if ((ctxt == NULL) || (attr == NULL) || (target == NULL) ||</span>
+<span class="lineNum">     483 </span><span class="lineNoCov">          0 :         (target-&gt;type != XML_ELEMENT_NODE))</span>
+<span class="lineNum">     484 </span>            :         return(NULL);
+<span class="lineNum">     485 </span>            : 
+<span class="lineNum">     486 </span><span class="lineNoCov">          0 :     if (attr-&gt;type != XML_ATTRIBUTE_NODE)</span>
+<span class="lineNum">     487 </span>            :         return(NULL);
+<span class="lineNum">     488 </span>            : 
+<span class="lineNum">     489 </span>            :     /*
+<span class="lineNum">     490 </span>            :     * Skip all XSLT attributes.
+<span class="lineNum">     491 </span>            :     */
+<span class="lineNum">     492 </span>            : #ifdef XSLT_REFACTORED
+<span class="lineNum">     493 </span>            :     if (attr-&gt;psvi == xsltXSLTAttrMarker)
+<span class="lineNum">     494 </span>            :         return(NULL);
+<span class="lineNum">     495 </span>            : #else
+<span class="lineNum">     496 </span><span class="lineNoCov">          0 :     if ((attr-&gt;ns != NULL) &amp;&amp; xmlStrEqual(attr-&gt;ns-&gt;href, XSLT_NAMESPACE))</span>
+<span class="lineNum">     497 </span>            :         return(NULL);
+<span class="lineNum">     498 </span>            : #endif
+<span class="lineNum">     499 </span>            :     /*
+<span class="lineNum">     500 </span>            :     * Get the value.
+<span class="lineNum">     501 </span>            :     */
+<span class="lineNum">     502 </span><span class="lineNoCov">          0 :     if (attr-&gt;children != NULL) {</span>
+<span class="lineNum">     503 </span><span class="lineNoCov">          0 :         if ((attr-&gt;children-&gt;type != XML_TEXT_NODE) ||</span>
+<span class="lineNum">     504 </span><span class="lineNoCov">          0 :             (attr-&gt;children-&gt;next != NULL))</span>
+<span class="lineNum">     505 </span>            :         {
+<span class="lineNum">     506 </span><span class="lineNoCov">          0 :             xsltTransformError(ctxt, NULL, attr-&gt;parent,</span>
+<span class="lineNum">     507 </span>            :                 &quot;Internal error: The children of an attribute node of a &quot;
+<span class="lineNum">     508 </span>            :                 &quot;literal result element are not in the expected form.\n&quot;);
+<span class="lineNum">     509 </span><span class="lineNoCov">          0 :             return(NULL);</span>
+<span class="lineNum">     510 </span>            :         }
+<span class="lineNum">     511 </span><span class="lineNoCov">          0 :         value = attr-&gt;children-&gt;content;</span>
+<span class="lineNum">     512 </span><span class="lineNoCov">          0 :         if (value == NULL)</span>
+<span class="lineNum">     513 </span><span class="lineNoCov">          0 :             value = xmlDictLookup(ctxt-&gt;dict, BAD_CAST &quot;&quot;, 0);</span>
+<span class="lineNum">     514 </span>            :     } else
+<span class="lineNum">     515 </span><span class="lineNoCov">          0 :         value = xmlDictLookup(ctxt-&gt;dict, BAD_CAST &quot;&quot;, 0);</span>
+<span class="lineNum">     516 </span>            :     /*
+<span class="lineNum">     517 </span>            :     * Overwrite duplicates.
+<span class="lineNum">     518 </span>            :     */
+<span class="lineNum">     519 </span><span class="lineNoCov">          0 :     ret = target-&gt;properties;</span>
+<span class="lineNum">     520 </span><span class="lineNoCov">          0 :     while (ret != NULL) {</span>
+<span class="lineNum">     521 </span><span class="lineNoCov">          0 :         if (((attr-&gt;ns != NULL) == (ret-&gt;ns != NULL)) &amp;&amp;</span>
+<span class="lineNum">     522 </span><span class="lineNoCov">          0 :             xmlStrEqual(ret-&gt;name, attr-&gt;name) &amp;&amp;</span>
+<span class="lineNum">     523 </span><span class="lineNoCov">          0 :             ((attr-&gt;ns == NULL) || xmlStrEqual(ret-&gt;ns-&gt;href, attr-&gt;ns-&gt;href)))</span>
+<span class="lineNum">     524 </span>            :         {
+<span class="lineNum">     525 </span>            :             break;
+<span class="lineNum">     526 </span>            :         }
+<span class="lineNum">     527 </span><span class="lineNoCov">          0 :         ret = ret-&gt;next;</span>
+<span class="lineNum">     528 </span>            :     }
+<span class="lineNum">     529 </span><span class="lineNoCov">          0 :     if (ret != NULL) {</span>
+<span class="lineNum">     530 </span>            :         /* free the existing value */
+<span class="lineNum">     531 </span><span class="lineNoCov">          0 :         xmlFreeNodeList(ret-&gt;children);</span>
+<span class="lineNum">     532 </span><span class="lineNoCov">          0 :         ret-&gt;children = ret-&gt;last = NULL;</span>
+<span class="lineNum">     533 </span>            :         /*
+<span class="lineNum">     534 </span>            :         * Adjust ns-prefix if needed.
+<span class="lineNum">     535 </span>            :         */
+<span class="lineNum">     536 </span><span class="lineNoCov">          0 :         if ((ret-&gt;ns != NULL) &amp;&amp;</span>
+<span class="lineNum">     537 </span><span class="lineNoCov">          0 :             (! xmlStrEqual(ret-&gt;ns-&gt;prefix, attr-&gt;ns-&gt;prefix)))</span>
+<span class="lineNum">     538 </span>            :         {
+<span class="lineNum">     539 </span><span class="lineNoCov">          0 :             ret-&gt;ns = xsltGetNamespace(ctxt, attr-&gt;parent, attr-&gt;ns, target);</span>
+<span class="lineNum">     540 </span>            :         }
+<span class="lineNum">     541 </span>            :     } else {
+<span class="lineNum">     542 </span>            :         /* create a new attribute */
+<span class="lineNum">     543 </span><span class="lineNoCov">          0 :         if (attr-&gt;ns != NULL)</span>
+<span class="lineNum">     544 </span><span class="lineNoCov">          0 :             ret = xmlNewNsProp(target,</span>
+<span class="lineNum">     545 </span><span class="lineNoCov">          0 :                 xsltGetNamespace(ctxt, attr-&gt;parent, attr-&gt;ns, target),</span>
+<span class="lineNum">     546 </span>            :                     attr-&gt;name, NULL);
+<span class="lineNum">     547 </span>            :         else
+<span class="lineNum">     548 </span><span class="lineNoCov">          0 :             ret = xmlNewNsProp(target, NULL, attr-&gt;name, NULL);</span>
+<span class="lineNum">     549 </span>            :     }
+<span class="lineNum">     550 </span>            :     /*
+<span class="lineNum">     551 </span>            :     * Set the value.
+<span class="lineNum">     552 </span>            :     */
+<span class="lineNum">     553 </span><span class="lineNoCov">          0 :     if (ret != NULL) {</span>
+<span class="lineNum">     554 </span>            :         xmlNodePtr text;
+<span class="lineNum">     555 </span>            : 
+<span class="lineNum">     556 </span><span class="lineNoCov">          0 :         text = xmlNewText(NULL);</span>
+<span class="lineNum">     557 </span><span class="lineNoCov">          0 :         if (text != NULL) {</span>
+<span class="lineNum">     558 </span><span class="lineNoCov">          0 :             ret-&gt;last = ret-&gt;children = text;</span>
+<span class="lineNum">     559 </span><span class="lineNoCov">          0 :             text-&gt;parent = (xmlNodePtr) ret;</span>
+<span class="lineNum">     560 </span><span class="lineNoCov">          0 :             text-&gt;doc = ret-&gt;doc;</span>
+<span class="lineNum">     561 </span>            : 
+<span class="lineNum">     562 </span><span class="lineNoCov">          0 :             if (attr-&gt;psvi != NULL) {</span>
+<span class="lineNum">     563 </span>            :                 /*
+<span class="lineNum">     564 </span>            :                 * Evaluate the Attribute Value Template.
+<span class="lineNum">     565 </span>            :                 */
+<span class="lineNum">     566 </span>            :                 xmlChar *val;
+<span class="lineNum">     567 </span><span class="lineNoCov">          0 :                 val = xsltEvalAVT(ctxt, attr-&gt;psvi, attr-&gt;parent);</span>
+<span class="lineNum">     568 </span><span class="lineNoCov">          0 :                 if (val == NULL) {</span>
+<span class="lineNum">     569 </span>            :                     /*
+<span class="lineNum">     570 </span>            :                     * TODO: Damn, we need an easy mechanism to report
+<span class="lineNum">     571 </span>            :                     * qualified names!
+<span class="lineNum">     572 </span>            :                     */
+<span class="lineNum">     573 </span><span class="lineNoCov">          0 :                     if (attr-&gt;ns) {</span>
+<span class="lineNum">     574 </span><span class="lineNoCov">          0 :                         xsltTransformError(ctxt, NULL, attr-&gt;parent,</span>
+<span class="lineNum">     575 </span>            :                             &quot;Internal error: Failed to evaluate the AVT &quot;
+<span class="lineNum">     576 </span>            :                             &quot;of attribute '{%s}%s'.\n&quot;,
+<span class="lineNum">     577 </span>            :                             attr-&gt;ns-&gt;href, attr-&gt;name);
+<span class="lineNum">     578 </span>            :                     } else {
+<span class="lineNum">     579 </span><span class="lineNoCov">          0 :                         xsltTransformError(ctxt, NULL, attr-&gt;parent,</span>
+<span class="lineNum">     580 </span>            :                             &quot;Internal error: Failed to evaluate the AVT &quot;
+<span class="lineNum">     581 </span>            :                             &quot;of attribute '%s'.\n&quot;,
+<span class="lineNum">     582 </span>            :                             attr-&gt;name);
+<span class="lineNum">     583 </span>            :                     }
+<span class="lineNum">     584 </span><span class="lineNoCov">          0 :                     text-&gt;content = xmlStrdup(BAD_CAST &quot;&quot;);</span>
+<span class="lineNum">     585 </span>            :                 } else {
+<span class="lineNum">     586 </span><span class="lineNoCov">          0 :                     text-&gt;content = val;</span>
+<span class="lineNum">     587 </span>            :                 }
+<span class="lineNum">     588 </span><span class="lineNoCov">          0 :             } else if ((ctxt-&gt;internalized) &amp;&amp; (target != NULL) &amp;&amp;</span>
+<span class="lineNum">     589 </span><span class="lineNoCov">          0 :                        (target-&gt;doc != NULL) &amp;&amp;</span>
+<span class="lineNum">     590 </span><span class="lineNoCov">          0 :                        (target-&gt;doc-&gt;dict == ctxt-&gt;dict) &amp;&amp;</span>
+<span class="lineNum">     591 </span><span class="lineNoCov">          0 :                        xmlDictOwns(ctxt-&gt;dict, value)) {</span>
+<span class="lineNum">     592 </span><span class="lineNoCov">          0 :                 text-&gt;content = (xmlChar *) value;</span>
+<span class="lineNum">     593 </span>            :             } else {
+<span class="lineNum">     594 </span><span class="lineNoCov">          0 :                 text-&gt;content = xmlStrdup(value);</span>
+<span class="lineNum">     595 </span>            :             }
+<span class="lineNum">     596 </span>            :         }
+<span class="lineNum">     597 </span>            :     } else {
+<span class="lineNum">     598 </span><span class="lineNoCov">          0 :         if (attr-&gt;ns) {</span>
+<span class="lineNum">     599 </span><span class="lineNoCov">          0 :             xsltTransformError(ctxt, NULL, attr-&gt;parent,</span>
+<span class="lineNum">     600 </span>            :                 &quot;Internal error: Failed to create attribute '{%s}%s'.\n&quot;,
+<span class="lineNum">     601 </span>            :                 attr-&gt;ns-&gt;href, attr-&gt;name);
+<span class="lineNum">     602 </span>            :         } else {
+<span class="lineNum">     603 </span><span class="lineNoCov">          0 :             xsltTransformError(ctxt, NULL, attr-&gt;parent,</span>
+<span class="lineNum">     604 </span>            :                 &quot;Internal error: Failed to create attribute '%s'.\n&quot;,
+<span class="lineNum">     605 </span>            :                 attr-&gt;name);
+<span class="lineNum">     606 </span>            :         }
+<span class="lineNum">     607 </span>            :     }
+<span class="lineNum">     608 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">     609 </span>            : }
+<span class="lineNum">     610 </span>            : 
+<span class="lineNum">     611 </span>            : 
+<span class="lineNum">     612 </span>            : /**
+<span class="lineNum">     613 </span>            :  * xsltAttrListTemplateProcess:
+<span class="lineNum">     614 </span>            :  * @ctxt:  the XSLT transformation context
+<span class="lineNum">     615 </span>            :  * @target:  the element where the attributes will be grafted
+<span class="lineNum">     616 </span>            :  * @attrs:  the first attribute
+<span class="lineNum">     617 </span>            :  *
+<span class="lineNum">     618 </span>            :  * Processes all attributes of a Literal Result Element.
+<span class="lineNum">     619 </span>            :  * Attribute references are applied via xsl:use-attribute-set
+<span class="lineNum">     620 </span>            :  * attributes.
+<span class="lineNum">     621 </span>            :  * Copies all non XSLT-attributes over to the @target element
+<span class="lineNum">     622 </span>            :  * and evaluates Attribute Value Templates.
+<span class="lineNum">     623 </span>            :  *
+<span class="lineNum">     624 </span>            :  * Called by xsltApplySequenceConstructor() (transform.c).
+<span class="lineNum">     625 </span>            :  *
+<span class="lineNum">     626 </span>            :  * Returns a new list of attribute nodes, or NULL in case of error.
+<span class="lineNum">     627 </span>            :  *         (Don't assign the result to @target-&gt;properties; if
+<span class="lineNum">     628 </span>            :  *         the result is NULL, you'll get memory leaks, since the
+<span class="lineNum">     629 </span>            :  *         attributes will be disattached.)
+<a name="630"><span class="lineNum">     630 </span>            :  */</a>
+<span class="lineNum">     631 </span>            : xmlAttrPtr
+<span class="lineNum">     632 </span><span class="lineCov">         92 : xsltAttrListTemplateProcess(xsltTransformContextPtr ctxt,</span>
+<span class="lineNum">     633 </span>            :                             xmlNodePtr target, xmlAttrPtr attrs)
+<span class="lineNum">     634 </span>            : {
+<span class="lineNum">     635 </span>            :     xmlAttrPtr attr, copy, last;
+<span class="lineNum">     636 </span>            :     xmlNodePtr oldInsert, text;
+<span class="lineNum">     637 </span><span class="lineCov">         92 :     xmlNsPtr origNs = NULL, copyNs = NULL;</span>
+<span class="lineNum">     638 </span>            :     const xmlChar *value;
+<span class="lineNum">     639 </span>            :     xmlChar *valueAVT;
+<span class="lineNum">     640 </span>            : 
+<span class="lineNum">     641 </span><span class="lineCov">        184 :     if ((ctxt == NULL) || (target == NULL) || (attrs == NULL) ||</span>
+<span class="lineNum">     642 </span><span class="lineCov">         92 :         (target-&gt;type != XML_ELEMENT_NODE))</span>
+<span class="lineNum">     643 </span>            :         return(NULL);
+<span class="lineNum">     644 </span>            : 
+<span class="lineNum">     645 </span><span class="lineCov">         92 :     oldInsert = ctxt-&gt;insert;</span>
+<span class="lineNum">     646 </span><span class="lineCov">         92 :     ctxt-&gt;insert = target;</span>
+<span class="lineNum">     647 </span>            : 
+<span class="lineNum">     648 </span>            :     /*
+<span class="lineNum">     649 </span>            :     * Instantiate LRE-attributes.
+<span class="lineNum">     650 </span>            :     */
+<span class="lineNum">     651 </span><span class="lineCov">         92 :     if (target-&gt;properties) {</span>
+<span class="lineNum">     652 </span>            :         last = target-&gt;properties;
+<span class="lineNum">     653 </span><span class="lineNoCov">          0 :         while (last-&gt;next != NULL)</span>
+<span class="lineNum">     654 </span>            :             last = last-&gt;next;
+<span class="lineNum">     655 </span>            :     } else {
+<span class="lineNum">     656 </span>            :         last = NULL;
+<span class="lineNum">     657 </span>            :     }
+<span class="lineNum">     658 </span><span class="lineCov">         92 :     attr = attrs;</span>
+<span class="lineNum">     659 </span>            :     do {
+<span class="lineNum">     660 </span>            :         /*
+<span class="lineNum">     661 </span>            :         * Skip XSLT attributes.
+<span class="lineNum">     662 </span>            :         */
+<span class="lineNum">     663 </span>            : #ifdef XSLT_REFACTORED
+<span class="lineNum">     664 </span>            :         if (attr-&gt;psvi == xsltXSLTAttrMarker) {
+<span class="lineNum">     665 </span>            :             goto next_attribute;
+<span class="lineNum">     666 </span>            :         }
+<span class="lineNum">     667 </span>            : #else
+<span class="lineNum">     668 </span><span class="lineCov">         99 :         if ((attr-&gt;ns != NULL) &amp;&amp;</span>
+<span class="lineNum">     669 </span><span class="lineCov">          3 :             xmlStrEqual(attr-&gt;ns-&gt;href, XSLT_NAMESPACE))</span>
+<span class="lineNum">     670 </span>            :         {
+<span class="lineNum">     671 </span>            :             goto next_attribute;
+<span class="lineNum">     672 </span>            :         }
+<span class="lineNum">     673 </span>            : #endif
+<span class="lineNum">     674 </span>            :         /*
+<span class="lineNum">     675 </span>            :         * Get the value.
+<span class="lineNum">     676 </span>            :         */
+<span class="lineNum">     677 </span><span class="lineCov">         96 :         if (attr-&gt;children != NULL) {</span>
+<span class="lineNum">     678 </span><span class="lineCov">        192 :             if ((attr-&gt;children-&gt;type != XML_TEXT_NODE) ||</span>
+<span class="lineNum">     679 </span><span class="lineCov">         96 :                 (attr-&gt;children-&gt;next != NULL))</span>
+<span class="lineNum">     680 </span>            :             {
+<span class="lineNum">     681 </span><span class="lineNoCov">          0 :                 xsltTransformError(ctxt, NULL, attr-&gt;parent,</span>
+<span class="lineNum">     682 </span>            :                     &quot;Internal error: The children of an attribute node of a &quot;
+<span class="lineNum">     683 </span>            :                     &quot;literal result element are not in the expected form.\n&quot;);
+<span class="lineNum">     684 </span><span class="lineNoCov">          0 :                 goto error;</span>
+<span class="lineNum">     685 </span>            :             }
+<span class="lineNum">     686 </span><span class="lineCov">         96 :             value = attr-&gt;children-&gt;content;</span>
+<span class="lineNum">     687 </span><span class="lineCov">         96 :             if (value == NULL)</span>
+<span class="lineNum">     688 </span><span class="lineNoCov">          0 :                 value = xmlDictLookup(ctxt-&gt;dict, BAD_CAST &quot;&quot;, 0);</span>
+<span class="lineNum">     689 </span>            :         } else
+<span class="lineNum">     690 </span><span class="lineNoCov">          0 :             value = xmlDictLookup(ctxt-&gt;dict, BAD_CAST &quot;&quot;, 0);</span>
+<span class="lineNum">     691 </span>            : 
+<span class="lineNum">     692 </span>            :         /*
+<span class="lineNum">     693 </span>            :         * Create a new attribute.
+<span class="lineNum">     694 </span>            :         */
+<span class="lineNum">     695 </span><span class="lineCov">         96 :         copy = xmlNewDocProp(target-&gt;doc, attr-&gt;name, NULL);</span>
+<span class="lineNum">     696 </span><span class="lineCov">         96 :         if (copy == NULL) {</span>
+<span class="lineNum">     697 </span><span class="lineNoCov">          0 :             if (attr-&gt;ns) {</span>
+<span class="lineNum">     698 </span><span class="lineNoCov">          0 :                 xsltTransformError(ctxt, NULL, attr-&gt;parent,</span>
+<span class="lineNum">     699 </span>            :                     &quot;Internal error: Failed to create attribute '{%s}%s'.\n&quot;,
+<span class="lineNum">     700 </span>            :                     attr-&gt;ns-&gt;href, attr-&gt;name);
+<span class="lineNum">     701 </span>            :             } else {
+<span class="lineNum">     702 </span><span class="lineNoCov">          0 :                 xsltTransformError(ctxt, NULL, attr-&gt;parent,</span>
+<span class="lineNum">     703 </span>            :                     &quot;Internal error: Failed to create attribute '%s'.\n&quot;,
+<span class="lineNum">     704 </span>            :                     attr-&gt;name);
+<span class="lineNum">     705 </span>            :             }
+<span class="lineNum">     706 </span>            :             goto error;
+<span class="lineNum">     707 </span>            :         }
+<span class="lineNum">     708 </span>            :         /*
+<span class="lineNum">     709 </span>            :         * Attach it to the target element.
+<span class="lineNum">     710 </span>            :         */
+<span class="lineNum">     711 </span><span class="lineCov">         96 :         copy-&gt;parent = target;</span>
+<span class="lineNum">     712 </span><span class="lineCov">         96 :         if (last == NULL) {</span>
+<span class="lineNum">     713 </span><span class="lineCov">         92 :             target-&gt;properties = copy;</span>
+<span class="lineNum">     714 </span><span class="lineCov">         92 :             last = copy;</span>
+<span class="lineNum">     715 </span>            :         } else {
+<span class="lineNum">     716 </span><span class="lineCov">          4 :             last-&gt;next = copy;</span>
+<span class="lineNum">     717 </span><span class="lineCov">          4 :             copy-&gt;prev = last;</span>
+<span class="lineNum">     718 </span><span class="lineCov">          4 :             last = copy;</span>
+<span class="lineNum">     719 </span>            :         }
+<span class="lineNum">     720 </span>            :         /*
+<span class="lineNum">     721 </span>            :         * Set the namespace. Avoid lookups of same namespaces.
+<span class="lineNum">     722 </span>            :         */
+<span class="lineNum">     723 </span><span class="lineCov">         96 :         if (attr-&gt;ns != origNs) {</span>
+<span class="lineNum">     724 </span><span class="lineCov">          4 :             origNs = attr-&gt;ns;</span>
+<span class="lineNum">     725 </span><span class="lineCov">          4 :             if (attr-&gt;ns != NULL) {</span>
+<span class="lineNum">     726 </span>            : #ifdef XSLT_REFACTORED
+<span class="lineNum">     727 </span>            :                 copyNs = xsltGetSpecialNamespace(ctxt, attr-&gt;parent,
+<span class="lineNum">     728 </span>            :                     attr-&gt;ns-&gt;href, attr-&gt;ns-&gt;prefix, target);
+<span class="lineNum">     729 </span>            : #else
+<span class="lineNum">     730 </span><span class="lineCov">          3 :                 copyNs = xsltGetNamespace(ctxt, attr-&gt;parent,</span>
+<span class="lineNum">     731 </span>            :                     attr-&gt;ns, target);
+<span class="lineNum">     732 </span>            : #endif
+<span class="lineNum">     733 </span><span class="lineCov">          3 :                 if (copyNs == NULL)</span>
+<span class="lineNum">     734 </span>            :                     goto error;
+<span class="lineNum">     735 </span>            :             } else
+<span class="lineNum">     736 </span>            :                 copyNs = NULL;
+<span class="lineNum">     737 </span>            :         }
+<span class="lineNum">     738 </span><span class="lineCov">         96 :         copy-&gt;ns = copyNs;</span>
+<span class="lineNum">     739 </span>            : 
+<span class="lineNum">     740 </span>            :         /*
+<span class="lineNum">     741 </span>            :         * Set the value.
+<span class="lineNum">     742 </span>            :         */
+<span class="lineNum">     743 </span><span class="lineCov">         96 :         text = xmlNewText(NULL);</span>
+<span class="lineNum">     744 </span><span class="lineCov">         96 :         if (text != NULL) {</span>
+<span class="lineNum">     745 </span><span class="lineCov">         96 :             copy-&gt;last = copy-&gt;children = text;</span>
+<span class="lineNum">     746 </span><span class="lineCov">         96 :             text-&gt;parent = (xmlNodePtr) copy;</span>
+<span class="lineNum">     747 </span><span class="lineCov">         96 :             text-&gt;doc = copy-&gt;doc;</span>
+<span class="lineNum">     748 </span>            : 
+<span class="lineNum">     749 </span><span class="lineCov">         96 :             if (attr-&gt;psvi != NULL) {</span>
+<span class="lineNum">     750 </span>            :                 /*
+<span class="lineNum">     751 </span>            :                 * Evaluate the Attribute Value Template.
+<span class="lineNum">     752 </span>            :                 */
+<span class="lineNum">     753 </span><span class="lineNoCov">          0 :                 valueAVT = xsltEvalAVT(ctxt, attr-&gt;psvi, attr-&gt;parent);</span>
+<span class="lineNum">     754 </span><span class="lineNoCov">          0 :                 if (valueAVT == NULL) {</span>
+<span class="lineNum">     755 </span>            :                     /*
+<span class="lineNum">     756 </span>            :                     * TODO: Damn, we need an easy mechanism to report
+<span class="lineNum">     757 </span>            :                     * qualified names!
+<span class="lineNum">     758 </span>            :                     */
+<span class="lineNum">     759 </span><span class="lineNoCov">          0 :                     if (attr-&gt;ns) {</span>
+<span class="lineNum">     760 </span><span class="lineNoCov">          0 :                         xsltTransformError(ctxt, NULL, attr-&gt;parent,</span>
+<span class="lineNum">     761 </span>            :                             &quot;Internal error: Failed to evaluate the AVT &quot;
+<span class="lineNum">     762 </span>            :                             &quot;of attribute '{%s}%s'.\n&quot;,
+<span class="lineNum">     763 </span>            :                             attr-&gt;ns-&gt;href, attr-&gt;name);
+<span class="lineNum">     764 </span>            :                     } else {
+<span class="lineNum">     765 </span><span class="lineNoCov">          0 :                         xsltTransformError(ctxt, NULL, attr-&gt;parent,</span>
+<span class="lineNum">     766 </span>            :                             &quot;Internal error: Failed to evaluate the AVT &quot;
+<span class="lineNum">     767 </span>            :                             &quot;of attribute '%s'.\n&quot;,
+<span class="lineNum">     768 </span>            :                             attr-&gt;name);
+<span class="lineNum">     769 </span>            :                     }
+<span class="lineNum">     770 </span><span class="lineNoCov">          0 :                     text-&gt;content = xmlStrdup(BAD_CAST &quot;&quot;);</span>
+<span class="lineNum">     771 </span><span class="lineNoCov">          0 :                     goto error;</span>
+<span class="lineNum">     772 </span>            :                 } else {
+<span class="lineNum">     773 </span><span class="lineNoCov">          0 :                     text-&gt;content = valueAVT;</span>
+<span class="lineNum">     774 </span>            :                 }
+<span class="lineNum">     775 </span><span class="lineCov">        192 :             } else if ((ctxt-&gt;internalized) &amp;&amp;</span>
+<span class="lineNum">     776 </span><span class="lineCov">        192 :                 (target-&gt;doc != NULL) &amp;&amp;</span>
+<span class="lineNum">     777 </span><span class="lineCov">        192 :                 (target-&gt;doc-&gt;dict == ctxt-&gt;dict) &amp;&amp;</span>
+<span class="lineNum">     778 </span><span class="lineCov">         96 :                 xmlDictOwns(ctxt-&gt;dict, value))</span>
+<span class="lineNum">     779 </span>            :             {
+<span class="lineNum">     780 </span><span class="lineCov">         96 :                 text-&gt;content = (xmlChar *) value;</span>
+<span class="lineNum">     781 </span>            :             } else {
+<span class="lineNum">     782 </span><span class="lineNoCov">          0 :                 text-&gt;content = xmlStrdup(value);</span>
+<span class="lineNum">     783 </span>            :             }
+<span class="lineNum">     784 </span><span class="lineCov">        192 :             if ((copy != NULL) &amp;&amp; (text != NULL) &amp;&amp;</span>
+<span class="lineNum">     785 </span><span class="lineCov">         96 :                 (xmlIsID(copy-&gt;doc, copy-&gt;parent, copy)))</span>
+<span class="lineNum">     786 </span><span class="lineNoCov">          0 :                 xmlAddID(NULL, copy-&gt;doc, text-&gt;content, copy);</span>
+<span class="lineNum">     787 </span>            :         }
+<span class="lineNum">     788 </span>            : 
+<span class="lineNum">     789 </span>            : next_attribute:
+<span class="lineNum">     790 </span><span class="lineCov">         96 :         attr = attr-&gt;next;</span>
+<span class="lineNum">     791 </span><span class="lineCov">         96 :     } while (attr != NULL);</span>
+<span class="lineNum">     792 </span>            : 
+<span class="lineNum">     793 </span>            :     /*
+<span class="lineNum">     794 </span>            :     * Apply attribute-sets.
+<span class="lineNum">     795 </span>            :     * The creation of such attributes will not overwrite any existing
+<span class="lineNum">     796 </span>            :     * attribute.
+<span class="lineNum">     797 </span>            :     */
+<span class="lineNum">     798 </span>            :     attr = attrs;
+<span class="lineNum">     799 </span>            :     do {
+<span class="lineNum">     800 </span>            : #ifdef XSLT_REFACTORED
+<span class="lineNum">     801 </span>            :         if ((attr-&gt;psvi == xsltXSLTAttrMarker) &amp;&amp;
+<span class="lineNum">     802 </span>            :             xmlStrEqual(attr-&gt;name, (const xmlChar *)&quot;use-attribute-sets&quot;))
+<span class="lineNum">     803 </span>            :         {
+<span class="lineNum">     804 </span>            :             xsltApplyAttributeSet(ctxt, ctxt-&gt;node, (xmlNodePtr) attr, NULL);
+<span class="lineNum">     805 </span>            :         }
+<span class="lineNum">     806 </span>            : #else
+<span class="lineNum">     807 </span><span class="lineCov">         99 :         if ((attr-&gt;ns != NULL) &amp;&amp;</span>
+<span class="lineNum">     808 </span><span class="lineCov">          3 :             xmlStrEqual(attr-&gt;name, (const xmlChar *)&quot;use-attribute-sets&quot;) &amp;&amp;</span>
+<span class="lineNum">     809 </span><span class="lineNoCov">          0 :             xmlStrEqual(attr-&gt;ns-&gt;href, XSLT_NAMESPACE))</span>
+<span class="lineNum">     810 </span>            :         {
+<span class="lineNum">     811 </span><span class="lineNoCov">          0 :             xsltApplyAttributeSet(ctxt, ctxt-&gt;node, (xmlNodePtr) attr, NULL);</span>
+<span class="lineNum">     812 </span>            :         }
+<span class="lineNum">     813 </span>            : #endif
+<span class="lineNum">     814 </span><span class="lineCov">         96 :         attr = attr-&gt;next;</span>
+<span class="lineNum">     815 </span><span class="lineCov">         96 :     } while (attr != NULL);</span>
+<span class="lineNum">     816 </span>            : 
+<span class="lineNum">     817 </span><span class="lineCov">         92 :     ctxt-&gt;insert = oldInsert;</span>
+<span class="lineNum">     818 </span><span class="lineCov">         92 :     return(target-&gt;properties);</span>
+<span class="lineNum">     819 </span>            : 
+<span class="lineNum">     820 </span>            : error:
+<span class="lineNum">     821 </span><span class="lineNoCov">          0 :     ctxt-&gt;insert = oldInsert;</span>
+<span class="lineNum">     822 </span><span class="lineNoCov">          0 :     return(NULL);</span>
+<span class="lineNum">     823 </span>            : }
+<span class="lineNum">     824 </span>            : 
+<span class="lineNum">     825 </span>            : 
+<span class="lineNum">     826 </span>            : /**
+<span class="lineNum">     827 </span>            :  * xsltTemplateProcess:
+<span class="lineNum">     828 </span>            :  * @ctxt:  the XSLT transformation context
+<span class="lineNum">     829 </span>            :  * @node:  the attribute template node
+<span class="lineNum">     830 </span>            :  *
+<span class="lineNum">     831 </span>            :  * Obsolete. Don't use it.
+<span class="lineNum">     832 </span>            :  *
+<span class="lineNum">     833 </span>            :  * Returns NULL.
+<a name="834"><span class="lineNum">     834 </span>            :  */</a>
+<span class="lineNum">     835 </span>            : xmlNodePtr *
+<span class="lineNum">     836 </span><span class="lineNoCov">          0 : xsltTemplateProcess(xsltTransformContextPtr ctxt ATTRIBUTE_UNUSED, xmlNodePtr node) {</span>
+<span class="lineNum">     837 </span>            :     if (node == NULL)
+<span class="lineNum">     838 </span>            :         return(NULL);
+<span class="lineNum">     839 </span>            : 
+<span class="lineNum">     840 </span>            :     return(0);
+<span class="lineNum">     841 </span>            : }
+<span class="lineNum">     842 </span>            : 
+<span class="lineNum">     843 </span>            : 
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

@@ -1,0 +1,849 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - command/sabcmd.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">command</a> - sabcmd.cpp<span style="font-size: 80%;"> (source / <a href="sabcmd.cpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">51</td>
+            <td class="headerCovTableEntry">251</td>
+            <td class="headerCovTableEntryLo">20.3 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-10-12</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">4</td>
+            <td class="headerCovTableEntry">19</td>
+            <td class="headerCovTableEntryLo">21.1 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* </a>
+<span class="lineNum">       2 </span>            :  * The contents of this file are subject to the Mozilla Public
+<span class="lineNum">       3 </span>            :  * License Version 1.1 (the &quot;License&quot;); you may not use this file
+<span class="lineNum">       4 </span>            :  * except in compliance with the License. You may obtain a copy of
+<span class="lineNum">       5 </span>            :  * the License at http://www.mozilla.org/MPL/
+<span class="lineNum">       6 </span>            :  * 
+<span class="lineNum">       7 </span>            :  * Software distributed under the License is distributed on an &quot;AS
+<span class="lineNum">       8 </span>            :  * IS&quot; basis, WITHOUT WARRANTY OF ANY KIND, either express or
+<span class="lineNum">       9 </span>            :  * implied. See the License for the specific language governing
+<span class="lineNum">      10 </span>            :  * rights and limitations under the License.
+<span class="lineNum">      11 </span>            :  * 
+<span class="lineNum">      12 </span>            :  * The Original Code is the Sablotron XSLT Processor.
+<span class="lineNum">      13 </span>            :  * 
+<span class="lineNum">      14 </span>            :  * The Initial Developer of the Original Code is Ginger Alliance Ltd.
+<span class="lineNum">      15 </span>            :  * Portions created by Ginger Alliance are Copyright (C) 2000-2003
+<span class="lineNum">      16 </span>            :  * Ginger Alliance Ltd. All Rights Reserved.
+<span class="lineNum">      17 </span>            :  * 
+<span class="lineNum">      18 </span>            :  * Contributor(s): Christian Lefebvre, Stefan Behnel
+<span class="lineNum">      19 </span>            :  * 
+<span class="lineNum">      20 </span>            :  * Alternatively, the contents of this file may be used under the
+<span class="lineNum">      21 </span>            :  * terms of the GNU General Public License Version 2 or later (the
+<span class="lineNum">      22 </span>            :  * &quot;GPL&quot;), in which case the provisions of the GPL are applicable 
+<span class="lineNum">      23 </span>            :  * instead of those above.  If you wish to allow use of your 
+<span class="lineNum">      24 </span>            :  * version of this file only under the terms of the GPL and not to
+<span class="lineNum">      25 </span>            :  * allow others to use your version of this file under the MPL,
+<span class="lineNum">      26 </span>            :  * indicate your decision by deleting the provisions above and
+<span class="lineNum">      27 </span>            :  * replace them with the notice and other provisions required by
+<span class="lineNum">      28 </span>            :  * the GPL.  If you do not delete the provisions above, a recipient
+<span class="lineNum">      29 </span>            :  * may use your version of this file under either the MPL or the
+<span class="lineNum">      30 </span>            :  * GPL.
+<span class="lineNum">      31 </span>            :  */
+<span class="lineNum">      32 </span>            : 
+<span class="lineNum">      33 </span>            : /*****************************************************************
+<span class="lineNum">      34 </span>            : 
+<span class="lineNum">      35 </span>            :   s a b c m d
+<span class="lineNum">      36 </span>            : 
+<span class="lineNum">      37 </span>            : *****************************************************************/
+<span class="lineNum">      38 </span>            : 
+<span class="lineNum">      39 </span>            : /*****************************************************************
+<span class="lineNum">      40 </span>            : defines
+<span class="lineNum">      41 </span>            : *****************************************************************/
+<span class="lineNum">      42 </span>            : 
+<span class="lineNum">      43 </span>            : #define BARE_SIGN '@'
+<span class="lineNum">      44 </span>            : 
+<span class="lineNum">      45 </span>            : #define MAX_BARE        64
+<span class="lineNum">      46 </span>            : #define MAX_EQ          16
+<span class="lineNum">      47 </span>            : #define MAX_ARG_OR_PAR  MAX_EQ
+<span class="lineNum">      48 </span>            : 
+<span class="lineNum">      49 </span>            : /*****************************************************************
+<span class="lineNum">      50 </span>            : includes
+<span class="lineNum">      51 </span>            : *****************************************************************/
+<span class="lineNum">      52 </span>            : 
+<span class="lineNum">      53 </span>            : #include &lt;stdio.h&gt;
+<span class="lineNum">      54 </span>            : #include &lt;stdlib.h&gt;
+<span class="lineNum">      55 </span>            : #include &lt;string.h&gt;
+<span class="lineNum">      56 </span>            : #include &lt;sablot.h&gt;
+<span class="lineNum">      57 </span>            : 
+<span class="lineNum">      58 </span>            : // include for time measurement
+<span class="lineNum">      59 </span>            : #include &lt;time.h&gt;      // needed by &lt;sys/timeb.h&gt; for definition of time_t
+<span class="lineNum">      60 </span>            : 
+<span class="lineNum">      61 </span>            : #if defined(HAVE_CONFIG_H)
+<span class="lineNum">      62 </span>            : #include &lt;config.h&gt;
+<span class="lineNum">      63 </span>            : #endif
+<span class="lineNum">      64 </span>            : 
+<span class="lineNum">      65 </span>            : #ifdef SABLOT_DEBUGGER
+<span class="lineNum">      66 </span>            : #include &lt;sabdbg.h&gt;
+<span class="lineNum">      67 </span>            : #endif
+<span class="lineNum">      68 </span>            : 
+<span class="lineNum">      69 </span>            : #if defined(HAVE_SYS_TIMEB_H) || defined(WIN32)
+<span class="lineNum">      70 </span>            : #include &lt;sys/timeb.h&gt;
+<span class="lineNum">      71 </span>            : #endif
+<span class="lineNum">      72 </span>            : 
+<span class="lineNum">      73 </span>            : #ifdef HAVE_SYS_TYPES_H
+<span class="lineNum">      74 </span>            : #include &lt;sys/types.h&gt; // needed too in Windows
+<span class="lineNum">      75 </span>            : #endif
+<span class="lineNum">      76 </span>            : 
+<span class="lineNum">      77 </span>            : #ifdef HAVE_SYS_TIME_H
+<span class="lineNum">      78 </span>            : #include &lt;sys/time.h&gt;
+<span class="lineNum">      79 </span>            : #endif
+<span class="lineNum">      80 </span>            : 
+<span class="lineNum">      81 </span>            : /*****************************************************************
+<span class="lineNum">      82 </span>            : vars to hold the results of switch parsing
+<span class="lineNum">      83 </span>            : *****************************************************************/
+<span class="lineNum">      84 </span>            : 
+<span class="lineNum">      85 </span>            : int batchMode = 0,
+<span class="lineNum">      86 </span>            :   numberTimes = 0,
+<span class="lineNum">      87 </span>            :   numberMode = 0,
+<span class="lineNum">      88 </span>            :   numberMeasure = 0,
+<span class="lineNum">      89 </span>            :   commandFlags = 0;
+<span class="lineNum">      90 </span>            : 
+<span class="lineNum">      91 </span>            : char * stringBase = NULL,
+<span class="lineNum">      92 </span>            :     * stringLog = NULL;
+<span class="lineNum">      93 </span>            : 
+<span class="lineNum">      94 </span>            : /*****************************************************************
+<span class="lineNum">      95 </span>            : switch definitions
+<span class="lineNum">      96 </span>            : *****************************************************************/
+<span class="lineNum">      97 </span>            : 
+<span class="lineNum">      98 </span>            : typedef enum 
+<span class="lineNum">      99 </span>            : {
+<span class="lineNum">     100 </span>            :   ID_NONE,
+<span class="lineNum">     101 </span>            :   ID_SPS, ID_SPF, ID_SPS_ON_FILES, ID_BASE, ID_TIMES,
+<span class="lineNum">     102 </span>            :   ID_LOG, ID_HELP, ID_DEBUG, ID_DEBUGGER, ID_DBG_HELP, ID_FLAGS, 
+<span class="lineNum">     103 </span>            :   ID_VERSION, ID_MEASURE, ID_BATCH_XML, ID_BATCH_XSL,
+<span class="lineNum">     104 </span>            :   ID_CHAIN_XSL
+<span class="lineNum">     105 </span>            : } SwitchId;
+<span class="lineNum">     106 </span>            : 
+<span class="lineNum">     107 </span>            : struct SwitchData
+<span class="lineNum">     108 </span>            : {
+<span class="lineNum">     109 </span>            :   SwitchId id;
+<span class="lineNum">     110 </span>            :   const char *longName;
+<span class="lineNum">     111 </span>            :   char shortName;
+<span class="lineNum">     112 </span>            :   char type;  // Integer, String, Ordinal
+<span class="lineNum">     113 </span>            :   void *destination;
+<span class="lineNum">     114 </span>            : };
+<span class="lineNum">     115 </span>            : 
+<span class="lineNum">     116 </span>            : struct SwitchData switches[] =
+<span class="lineNum">     117 </span>            : {
+<span class="lineNum">     118 </span>            :     {ID_SPS, &quot;use-SPS&quot;, 'S', 'O', &amp;numberMode},   
+<span class="lineNum">     119 </span>            :     {ID_SPF, &quot;use-SPF&quot;, 'F', 'O', &amp;numberMode},   
+<span class="lineNum">     120 </span>            :     {ID_SPS_ON_FILES, &quot;use-SPS-on-files&quot;, 0, 'O', &amp;numberMode},
+<span class="lineNum">     121 </span>            :     {ID_BASE, &quot;base&quot;, 'b', 'S', &amp;stringBase},            
+<span class="lineNum">     122 </span>            :     {ID_TIMES, &quot;times&quot;, 't', 'N', &amp;numberTimes},          
+<span class="lineNum">     123 </span>            :     {ID_LOG, &quot;log-file&quot;, 'L', 'S', &amp;stringLog},         
+<span class="lineNum">     124 </span>            :     {ID_HELP, &quot;help&quot;, '?', 'O', &amp;numberMode},            
+<span class="lineNum">     125 </span>            :     {ID_DEBUG, &quot;debug&quot;, 0, 'O', &amp;numberMode},
+<span class="lineNum">     126 </span>            :     {ID_DEBUGGER, &quot;debugger&quot;, 0, 'O', &amp;numberMode},
+<span class="lineNum">     127 </span>            :     {ID_DBG_HELP, &quot;debug-options&quot;, 0, 'O', &amp;numberMode},
+<span class="lineNum">     128 </span>            :     {ID_FLAGS, &quot;flags&quot;, 'f', 'N', &amp;commandFlags},
+<span class="lineNum">     129 </span>            :     {ID_VERSION, &quot;version&quot;, 'v', 'O', &amp;numberMode},
+<span class="lineNum">     130 </span>            :     {ID_MEASURE, &quot;measure&quot;, 'm', 'O', &amp;numberMeasure},
+<span class="lineNum">     131 </span>            :     {ID_BATCH_XML, &quot;batch-xml&quot;, 'x', 'O', &amp;batchMode},
+<span class="lineNum">     132 </span>            :     {ID_BATCH_XSL, &quot;batch-xsl&quot;, 's', 'O', &amp;batchMode},
+<span class="lineNum">     133 </span>            :     {ID_CHAIN_XSL, &quot;chain-xsl&quot;, 'c', 'O', &amp;batchMode},
+<span class="lineNum">     134 </span>            :     {ID_NONE, NULL, 0, 0, NULL }
+<span class="lineNum">     135 </span>            : };
+<span class="lineNum">     136 </span>            : 
+<span class="lineNum">     137 </span>            : /*****************************************************************
+<span class="lineNum">     138 </span>            : texts
+<span class="lineNum">     139 </span>            : *****************************************************************/
+<span class="lineNum">     140 </span>            : 
+<span class="lineNum">     141 </span>            : char usage[] = 
+<span class="lineNum">     142 </span>            : &quot;\nUsage for single XSLT:\n&quot;\
+<span class="lineNum">     143 </span>            : &quot;\tsabcmd [options] &lt;stylesheet&gt; [&lt;input&gt; [&lt;output&gt;]] [assignments]\n&quot;\
+<span class="lineNum">     144 </span>            : &quot;\nUsage in batch processing:\n&quot;\
+<span class="lineNum">     145 </span>            : &quot;    chain multiple stylesheets, starting with a single input file:\n&quot;\
+<span class="lineNum">     146 </span>            : &quot;    \tsabcmd [options] --chain-xsl &lt;input&gt; &lt;output&gt; [&lt;stylesheet&gt;]+ [assignments]\n&quot;\
+<span class="lineNum">     147 </span>            : &quot;    run multiple stylesheets on a single input file:\n&quot;\
+<span class="lineNum">     148 </span>            : &quot;    \tsabcmd [options] --batch-xml &lt;input&gt; [&lt;stylesheet&gt; &lt;output&gt;]+ [assignments]\n&quot;\
+<span class="lineNum">     149 </span>            : &quot;    run a single stylesheet on multiple input files:\n&quot;\
+<span class="lineNum">     150 </span>            : &quot;    \tsabcmd [options] --batch-xsl &lt;stylesheet&gt; [&lt;input&gt; &lt;output&gt;]+ [assignments]\n&quot;\
+<span class="lineNum">     151 </span>            : &quot;Options:\n&quot;\
+<span class="lineNum">     152 </span>            : &quot;\t--chain-xsl, -c      single input file, multiple chained stylesheets\n&quot;\
+<span class="lineNum">     153 </span>            : &quot;\t--batch-xml, -x      single input file, multiple stylesheets\n&quot;\
+<span class="lineNum">     154 </span>            : &quot;\t--batch-xsl, -s      multiple input files, single stylesheet\n&quot;\
+<span class="lineNum">     155 </span>            : &quot;\t--base=NAME, -b      set the hard base URI to NAME\n&quot;\
+<span class="lineNum">     156 </span>            : &quot;\t--debug-options      display information on debugging options\n&quot;\
+<span class="lineNum">     157 </span>            : &quot;\t--help, -?           display this help message\n&quot;\
+<span class="lineNum">     158 </span>            : &quot;\t--log-file=NAME, -L  set the log file, turn logging on\n&quot;\
+<span class="lineNum">     159 </span>            : &quot;\t--measure, -m        measure the processing time\n&quot;\
+<span class="lineNum">     160 </span>            : &quot;\t--version, -v        display version information\n&quot;\
+<span class="lineNum">     161 </span>            : &quot;Defaults:\n\t&lt;input&gt; = stdin, &lt;output&gt; = stdout\n&quot;\
+<span class="lineNum">     162 </span>            : &quot;\tlogging off, no hard base URI\n&quot;\
+<span class="lineNum">     163 </span>            : &quot;Notes:\n&quot;\
+<span class="lineNum">     164 </span>            : &quot;\t- assignments define named buffers (name=value)\n&quot;\
+<span class="lineNum">     165 </span>            : &quot;\t  and top-level params ($name=value).\n&quot;\
+<span class="lineNum">     166 </span>            : &quot;\t- to specify value in an option, use -b=NAME or -b NAME\n&quot;\
+<span class="lineNum">     167 </span>            : &quot;\t  (correspondingly for the equivalent long options)&quot;;
+<span class="lineNum">     168 </span>            : 
+<span class="lineNum">     169 </span>            : char askhelp[] = &quot;Type sabcmd --help to display a help message.\n&quot;;
+<span class="lineNum">     170 </span>            : char msgConflict[] = &quot;conflict with preceding switches: &quot;;
+<span class="lineNum">     171 </span>            : char version_txt[] = &quot;\nsabcmd &quot;SAB_VERSION&quot; (&quot;SAB_DATE&quot;)\n&quot;\
+<span class="lineNum">     172 </span>            :     &quot;copyright (C) 2000 - 2005 Ginger Alliance (www.gingerall.com)\n&quot;;
+<span class="lineNum">     173 </span>            : char dbg_usage[] = &quot;\nDebugging options:\n&quot;\
+<span class="lineNum">     174 </span>            :     &quot;\t--debug\t\t\tdisplay results of the command line parse\n&quot;\
+<span class="lineNum">     175 </span>            :     &quot;\t--debugger\t\trun the xslt debugger\n&quot;\
+<span class="lineNum">     176 </span>            :     &quot;\t--times=COUNT, -t\trun sabcmd the specified number of times\n&quot;\
+<span class="lineNum">     177 </span>            :     &quot;\t--flags=FLAGS, -f\tset processor flags for the processing\n&quot;\
+<span class="lineNum">     178 </span>            :     &quot;\t--use-SPF, -F\t\tuse SablotProcessFiles().\n&quot;\
+<span class="lineNum">     179 </span>            :     &quot;\t--use-SPS, -S\t\tuse SablotProcessStrings(). Give 2 args\n&quot;\
+<span class="lineNum">     180 </span>            :     &quot;\t\t\t\t(stylesheet, input). Precede each by @.\n&quot; \
+<span class="lineNum">     181 </span>            :     &quot;\t--use-SPS-on-files\tuse SablotProcessStrings() on the contents\n&quot;\
+<span class="lineNum">     182 </span>            :     &quot;\t\t\t\tof the given files.\n&quot;;
+<span class="lineNum">     183 </span>            : /* removed the GPL notice: 
+<span class="lineNum">     184 </span>            : char startup_licence[]=&quot;sabcmd and Sablotron come with ABSOLUTELY NO WARRANTY. &quot;\
+<span class="lineNum">     185 </span>            :     &quot;They are free software,\n&quot;\
+<span class="lineNum">     186 </span>            :     &quot;and you are welcome to redistribute them under certain conditions.\n&quot;\
+<span class="lineNum">     187 </span>            :     &quot;For details on warranty and the redistribution terms, see the README file.\n&quot;;
+<span class="lineNum">     188 </span>            : */
+<span class="lineNum">     189 </span>            : char startup_licence[] = &quot;The Sablotron XSLT Processor comes with NO WARRANTY.\n&quot;\
+<span class="lineNum">     190 </span>            :     &quot;It is subject to the Mozilla Public License Version 1.1.\n&quot;\
+<span class="lineNum">     191 </span>            :     &quot;Alternatively, you may use Sablotron under the GNU General Public License.\n&quot;;
+<span class="lineNum">     192 </span>            : 
+<span class="lineNum">     193 </span>            : /*****************************************************************
+<span class="lineNum">     194 </span>            : handy functions
+<a name="195"><span class="lineNum">     195 </span>            : *****************************************************************/</a>
+<span class="lineNum">     196 </span>            : 
+<span class="lineNum">     197 </span><span class="lineNoCov">          0 : void saberr(const char *msg1, const char *msg2)</span>
+<span class="lineNum">     198 </span>            : {
+<span class="lineNum">     199 </span><span class="lineNoCov">          0 :     fprintf(stderr, &quot;Error: %s&quot;, msg1);</span>
+<span class="lineNum">     200 </span><span class="lineNoCov">          0 :     if (msg2) fputs(msg2, stderr);</span>
+<span class="lineNum">     201 </span><span class="lineNoCov">          0 :     fprintf(stderr, &quot;\n%s&quot;, askhelp);</span>
+<span class="lineNum">     202 </span><span class="lineNoCov">          0 :     exit(EXIT_FAILURE);</span>
+<a name="203"><span class="lineNum">     203 </span>            : }</a>
+<span class="lineNum">     204 </span>            : 
+<span class="lineNum">     205 </span><span class="lineNoCov">          0 : void saberrn(const char *msg, int num)</span>
+<span class="lineNum">     206 </span>            : {
+<span class="lineNum">     207 </span>            :     char buf[10];
+<span class="lineNum">     208 </span>            :     sprintf(buf,&quot;%d&quot;,num);
+<span class="lineNum">     209 </span><span class="lineNoCov">          0 :     saberr(msg, buf);</span>
+<a name="210"><span class="lineNum">     210 </span>            : }</a>
+<span class="lineNum">     211 </span>            : 
+<a name="212"><span class="lineNum">     212 </span><span class="lineNoCov">          0 : int chrpos(const char *text, char c)</span></a>
+<span class="lineNum">     213 </span>            : {
+<span class="lineNum">     214 </span><span class="lineCov">      23724 :     const char *p = strchr(text, c);</span>
+<span class="lineNum">     215 </span><span class="lineCov">      11862 :     return p ? (int)(p - text) : -1;</span>
+<a name="216"><span class="lineNum">     216 </span>            : }</a>
+<span class="lineNum">     217 </span>            : 
+<a name="218"><span class="lineNum">     218 </span><span class="lineNoCov">          0 : void freefirst(char **array)</span></a>
+<span class="lineNum">     219 </span>            : {
+<span class="lineNum">     220 </span><span class="lineNoCov">          0 :     for (; *array; array += 2)</span>
+<span class="lineNum">     221 </span><span class="lineNoCov">          0 :         free(*array);</span>
+<a name="222"><span class="lineNum">     222 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     223 </span>            : 
+<span class="lineNum">     224 </span><span class="lineNoCov">          0 : void copyAssignment(char **array, int index, char *text, int split)</span>
+<span class="lineNum">     225 </span>            : {
+<span class="lineNum">     226 </span>            :     char *p;
+<span class="lineNum">     227 </span><span class="lineNoCov">          0 :     if (index &gt;= MAX_ARG_OR_PAR)</span>
+<span class="lineNum">     228 </span><span class="lineNoCov">          0 :       saberr(&quot;too many assignments&quot;, NULL);</span>
+<span class="lineNum">     229 </span><span class="lineNoCov">          0 :     array[2 * index + 1] = text + split + 1;</span>
+<span class="lineNum">     230 </span><span class="lineNoCov">          0 :     p = array[2 * index] = (char*) malloc(split + 1);</span>
+<span class="lineNum">     231 </span><span class="lineNoCov">          0 :     memcpy(p, text, split);</span>
+<span class="lineNum">     232 </span><span class="lineNoCov">          0 :     p[split] = 0;</span>
+<span class="lineNum">     233 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">     234 </span>            : 
+<span class="lineNum">     235 </span>            : /*****************************************************************
+<span class="lineNum">     236 </span>            :     switch support
+<span class="lineNum">     237 </span>            : *****************************************************************/
+<span class="lineNum">     238 </span>            : 
+<span class="lineNum">     239 </span>            : // globals to hold the names and assignments
+<span class="lineNum">     240 </span>            : 
+<span class="lineNum">     241 </span>            : char* arrayBare[MAX_BARE];
+<span class="lineNum">     242 </span>            : char* arrayEq[MAX_EQ]; 
+<span class="lineNum">     243 </span>            : int indexBare = 0, indexEq = 0;
+<span class="lineNum">     244 </span>            : 
+<span class="lineNum">     245 </span>            : /*****************************************************************
+<span class="lineNum">     246 </span>            : findSwitch
+<a name="247"><span class="lineNum">     247 </span>            : *****************************************************************/</a>
+<span class="lineNum">     248 </span>            : 
+<span class="lineNum">     249 </span><span class="lineNoCov">          0 : int max_strncmp(const char *s1, const char *s2, int len1)</span>
+<span class="lineNum">     250 </span>            : {
+<span class="lineNum">     251 </span><span class="lineNoCov">          0 :     int len2 = strlen(s2);</span>
+<span class="lineNum">     252 </span><span class="lineNoCov">          0 :     return strncmp(s1, s2, len1 &gt;= len2 ? len1 : len2);</span>
+<span class="lineNum">     253 </span>            : }
+<span class="lineNum">     254 </span>            : 
+<span class="lineNum">     255 </span><span class="lineNoCov">          0 : int findSwitch(char *text)</span>
+<span class="lineNum">     256 </span>            : {
+<span class="lineNum">     257 </span><span class="lineNoCov">          0 :     int islong = (text[1] == '-');</span>
+<span class="lineNum">     258 </span><span class="lineNoCov">          0 :     char *stripped = text + (islong ? 2 : 1);</span>
+<span class="lineNum">     259 </span><span class="lineNoCov">          0 :     int eqpos = chrpos(stripped, '=');</span>
+<span class="lineNum">     260 </span><span class="lineNoCov">          0 :     int index = 0;</span>
+<span class="lineNum">     261 </span><span class="lineNoCov">          0 :     while (switches[index].id != ID_NONE)</span>
+<span class="lineNum">     262 </span>            :     {
+<span class="lineNum">     263 </span><span class="lineNoCov">          0 :         if ((eqpos &gt;= 0 &amp;&amp; islong &amp;&amp; !max_strncmp(stripped, switches[index].longName, eqpos)) ||</span>
+<span class="lineNum">     264 </span><span class="lineNoCov">          0 :             (eqpos &lt; 0 &amp;&amp; islong &amp;&amp; !strcmp(stripped, switches[index].longName)) ||</span>
+<span class="lineNum">     265 </span><span class="lineNoCov">          0 :             (stripped[0] == switches[index].shortName &amp;&amp; ! islong &amp;&amp; (eqpos == 1 || !stripped[1])))</span>
+<span class="lineNum">     266 </span><span class="lineNoCov">          0 :             return index + 1;</span>
+<span class="lineNum">     267 </span><span class="lineNoCov">          0 :         index++;</span>
+<span class="lineNum">     268 </span>            :     }
+<span class="lineNum">     269 </span>            :     return 0;
+<span class="lineNum">     270 </span>            : }
+<span class="lineNum">     271 </span>            : 
+<span class="lineNum">     272 </span>            : /*****************************************************************
+<span class="lineNum">     273 </span>            : applySwitch
+<span class="lineNum">     274 </span>            : ord is the 1-based index of the switch!
+<span class="lineNum">     275 </span>            : *****************************************************************/
+<span class="lineNum">     276 </span>            : 
+<span class="lineNum">     277 </span>            : #define cassign(WHERE, WHAT, TEXT) \
+<span class="lineNum">     278 </span>            : { if (WHERE) saberr(msgConflict, (TEXT)); else WHERE = (WHAT); }
+<span class="lineNum">     279 </span>            : 
+<span class="lineNum">     280 </span>            : 
+<span class="lineNum">     281 </span><span class="lineNoCov">          0 : int applySwitch(int ord, char *text, char *following)</span>
+<span class="lineNum">     282 </span>            : {
+<span class="lineNum">     283 </span><span class="lineNoCov">          0 :     char *value = NULL;</span>
+<span class="lineNum">     284 </span><span class="lineNoCov">          0 :     char type = switches[--ord].type;       // make ord 0-based</span>
+<span class="lineNum">     285 </span>            : 
+<span class="lineNum">     286 </span><span class="lineNoCov">          0 :     int skip = 0;</span>
+<span class="lineNum">     287 </span><span class="lineNoCov">          0 :     int eqpos = chrpos(text, '=');</span>
+<span class="lineNum">     288 </span><span class="lineNoCov">          0 :     if (eqpos &gt;= 0)</span>
+<span class="lineNum">     289 </span><span class="lineNoCov">          0 :         value = text + eqpos + 1;</span>
+<span class="lineNum">     290 </span>            :     else
+<span class="lineNum">     291 </span>            :     {
+<span class="lineNum">     292 </span><span class="lineNoCov">          0 :         if ((type == 'S' || type == 'N') &amp;&amp; following &amp;&amp; *following != '-')</span>
+<span class="lineNum">     293 </span>            :         {
+<span class="lineNum">     294 </span><span class="lineNoCov">          0 :             value = following;</span>
+<span class="lineNum">     295 </span><span class="lineNoCov">          0 :             skip = 1;</span>
+<span class="lineNum">     296 </span>            :         }
+<span class="lineNum">     297 </span>            :     }
+<span class="lineNum">     298 </span><span class="lineNoCov">          0 :     switch (switches[ord].type)</span>
+<span class="lineNum">     299 </span>            :     {
+<span class="lineNum">     300 </span>            :     case 'S': 
+<span class="lineNum">     301 </span>            :         {
+<span class="lineNum">     302 </span><span class="lineNoCov">          0 :             if (!value) saberr(&quot;switch needs a string value: &quot;, text);</span>
+<span class="lineNum">     303 </span><span class="lineNoCov">          0 :             cassign(*(char**)(switches[ord].destination), value, text);</span>
+<span class="lineNum">     304 </span>            :         }; break;
+<span class="lineNum">     305 </span>            :     case 'N':
+<span class="lineNum">     306 </span>            :         {
+<span class="lineNum">     307 </span>            :             char *stopper;
+<span class="lineNum">     308 </span><span class="lineNoCov">          0 :             long number = 0;</span>
+<span class="lineNum">     309 </span><span class="lineNoCov">          0 :             if (value)</span>
+<span class="lineNum">     310 </span><span class="lineNoCov">          0 :                 number = strtol(value, &amp;stopper, 0);</span>
+<span class="lineNum">     311 </span><span class="lineNoCov">          0 :             if (!value || *stopper)</span>
+<span class="lineNum">     312 </span><span class="lineNoCov">          0 :                 saberr(&quot;switch needs a number value: &quot;, text);</span>
+<span class="lineNum">     313 </span><span class="lineNoCov">          0 :             cassign(*(int*)(switches[ord].destination), (int) number, text);</span>
+<span class="lineNum">     314 </span><span class="lineNoCov">          0 :         }; break;</span>
+<span class="lineNum">     315 </span>            :     case 'O':
+<span class="lineNum">     316 </span>            :         {
+<span class="lineNum">     317 </span><span class="lineNoCov">          0 :             if (value)</span>
+<span class="lineNum">     318 </span><span class="lineNoCov">          0 :                 saberr(&quot;value not recognized in switch: &quot;, text);</span>
+<span class="lineNum">     319 </span><span class="lineNoCov">          0 :             cassign(*(int*)(switches[ord].destination), switches[ord].id, text);</span>
+<span class="lineNum">     320 </span>            :         }; break;
+<span class="lineNum">     321 </span>            :     default:
+<span class="lineNum">     322 </span><span class="lineNoCov">          0 :         saberr(&quot;error processing the switches&quot;, NULL);</span>
+<span class="lineNum">     323 </span>            :     }
+<span class="lineNum">     324 </span><span class="lineNoCov">          0 :     return skip;</span>
+<span class="lineNum">     325 </span>            : }
+<span class="lineNum">     326 </span>            : 
+<span class="lineNum">     327 </span>            : /*****************************************************************
+<span class="lineNum">     328 </span>            : readSwitches
+<span class="lineNum">     329 </span>            : *****************************************************************/
+<span class="lineNum">     330 </span>            : 
+<span class="lineNum">     331 </span><span class="lineCov">       5931 : void readSwitches(int argc, char** argv)</span>
+<span class="lineNum">     332 </span>            : {
+<span class="lineNum">     333 </span>            :     int i, ord;
+<span class="lineNum">     334 </span><span class="lineCov">      17793 :     for (i = 1; i &lt; argc; i++)</span>
+<span class="lineNum">     335 </span>            :     {
+<span class="lineNum">     336 </span><span class="lineCov">      11862 :         if (argv[i][0] == '-')</span>
+<span class="lineNum">     337 </span>            :         {
+<span class="lineNum">     338 </span><span class="lineNoCov">          0 :             if (!(ord = findSwitch(argv[i])))</span>
+<span class="lineNum">     339 </span><span class="lineNoCov">          0 :                 saberr(&quot;invalid switch &quot;, argv[i]);</span>
+<span class="lineNum">     340 </span>            :             else
+<span class="lineNum">     341 </span>            :                 i += applySwitch(ord, argv[i], 
+<span class="lineNum">     342 </span><span class="lineNoCov">          0 :                     (i &lt; argc-1) ? argv[i+1] : NULL);</span>
+<span class="lineNum">     343 </span>            :                 continue;
+<span class="lineNum">     344 </span>            :         }
+<span class="lineNum">     345 </span>            :         else
+<span class="lineNum">     346 </span>            :         {
+<span class="lineNum">     347 </span><span class="lineCov">      23724 :             if (((chrpos(argv[i], '=')) != -1) &amp;&amp; (argv[i][0] != BARE_SIGN))</span>
+<span class="lineNum">     348 </span>            :             {
+<span class="lineNum">     349 </span><span class="lineNoCov">          0 :                 if (indexEq &gt;= MAX_EQ)</span>
+<span class="lineNum">     350 </span><span class="lineNoCov">          0 :                     saberrn(&quot;too many assignments, allowing &quot;, MAX_EQ);</span>
+<span class="lineNum">     351 </span>            :                 else
+<span class="lineNum">     352 </span><span class="lineNoCov">          0 :                     arrayEq[indexEq++] = argv[i];</span>
+<span class="lineNum">     353 </span>            :             }
+<span class="lineNum">     354 </span>            :             else
+<span class="lineNum">     355 </span>            :             {
+<span class="lineNum">     356 </span><span class="lineCov">      11862 :                 if (indexEq &gt;= MAX_BARE)</span>
+<span class="lineNum">     357 </span><span class="lineNoCov">          0 :                     saberrn(&quot;too many names, allowing &quot;, MAX_BARE);</span>
+<span class="lineNum">     358 </span>            :                 else
+<span class="lineNum">     359 </span><span class="lineCov">      11862 :                     arrayBare[indexBare++] = argv[i] + (argv[i][0] == BARE_SIGN);</span>
+<span class="lineNum">     360 </span>            :             }
+<span class="lineNum">     361 </span>            :         }
+<span class="lineNum">     362 </span>            :     }
+<span class="lineNum">     363 </span><span class="lineCov">       5931 : };</span>
+<span class="lineNum">     364 </span>            : 
+<span class="lineNum">     365 </span>            : /*****************************************************************
+<span class="lineNum">     366 </span>            : xformToPairs
+<span class="lineNum">     367 </span>            : *****************************************************************/
+<span class="lineNum">     368 </span>            : 
+<span class="lineNum">     369 </span><span class="lineCov">       5931 : void xformToPairs(char** array, int count,</span>
+<span class="lineNum">     370 </span>            :     char** _params, int* _paramsC,
+<span class="lineNum">     371 </span>            :     char** _args, int* _argsC)
+<span class="lineNum">     372 </span>            : {
+<span class="lineNum">     373 </span>            :     int i, pos;
+<span class="lineNum">     374 </span><span class="lineCov">       5931 :     *_paramsC = *_argsC = 0;</span>
+<span class="lineNum">     375 </span><span class="lineCov">       5931 :     for (i = 0 ; i &lt; count; i++)</span>
+<span class="lineNum">     376 </span>            :     {
+<span class="lineNum">     377 </span><span class="lineNoCov">          0 :         pos = chrpos(array[i], '=');</span>
+<span class="lineNum">     378 </span><span class="lineNoCov">          0 :         if (array[i][0] == '$')</span>
+<span class="lineNum">     379 </span><span class="lineNoCov">          0 :             copyAssignment(_params, (*_paramsC)++, array[i] + 1, pos-1);</span>
+<span class="lineNum">     380 </span>            :         else
+<span class="lineNum">     381 </span><span class="lineNoCov">          0 :             copyAssignment(_args, (*_argsC)++, array[i], pos);</span>
+<span class="lineNum">     382 </span>            :     };
+<span class="lineNum">     383 </span><span class="lineCov">       5931 :     _args[2 * *_argsC] = NULL;</span>
+<span class="lineNum">     384 </span><span class="lineCov">       5931 :     _params[2 * *_paramsC] = NULL;</span>
+<span class="lineNum">     385 </span><span class="lineCov">       5931 : }</span>
+<span class="lineNum">     386 </span>            : 
+<span class="lineNum">     387 </span>            : /*****************************************************************
+<span class="lineNum">     388 </span>            : debug()
+<span class="lineNum">     389 </span>            : for debugging sabcmd itself
+<span class="lineNum">     390 </span>            : *****************************************************************/
+<span class="lineNum">     391 </span>            : 
+<a name="392"><span class="lineNum">     392 </span>            : #define safe(PTR) (PTR? PTR : &quot;[null]&quot;)</a>
+<span class="lineNum">     393 </span>            : 
+<span class="lineNum">     394 </span><span class="lineNoCov">          0 : void dumparray(char* caption, char** array, int count, int asPairs)</span>
+<span class="lineNum">     395 </span>            : {
+<span class="lineNum">     396 </span><span class="lineNoCov">          0 :     char **p = array;</span>
+<span class="lineNum">     397 </span>            :     printf(&quot;%s (%d)\n&quot;,caption, count);
+<span class="lineNum">     398 </span><span class="lineNoCov">          0 :     while(*p)</span>
+<span class="lineNum">     399 </span>            :     {
+<span class="lineNum">     400 </span><span class="lineNoCov">          0 :         printf(&quot;\t%s&quot;,*p);</span>
+<span class="lineNum">     401 </span><span class="lineNoCov">          0 :         if (asPairs)</span>
+<span class="lineNum">     402 </span>            :         {
+<span class="lineNum">     403 </span><span class="lineNoCov">          0 :             printf(&quot; = %s\n&quot;,safe(p[1]));</span>
+<span class="lineNum">     404 </span><span class="lineNoCov">          0 :             p += 2;</span>
+<span class="lineNum">     405 </span>            :         }
+<span class="lineNum">     406 </span>            :         else 
+<span class="lineNum">     407 </span>            :         {
+<span class="lineNum">     408 </span><span class="lineNoCov">          0 :             puts(&quot;&quot;);</span>
+<span class="lineNum">     409 </span><span class="lineNoCov">          0 :             p++;</span>
+<span class="lineNum">     410 </span>            :         }
+<span class="lineNum">     411 </span>            :     }
+<a name="412"><span class="lineNum">     412 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     413 </span>            : 
+<span class="lineNum">     414 </span><span class="lineNoCov">          0 : void debug(int cParams, char **params, int cArgs, char **args)</span>
+<span class="lineNum">     415 </span>            : {
+<span class="lineNum">     416 </span><span class="lineNoCov">          0 :     puts(&quot;\nCommand line parse results:&quot;);</span>
+<span class="lineNum">     417 </span><span class="lineNoCov">          0 :     dumparray(&quot;Names&quot;, arrayBare, indexBare, 0);</span>
+<span class="lineNum">     418 </span><span class="lineNoCov">          0 :     dumparray(&quot;Parameters&quot;, params, cParams, 1);</span>
+<span class="lineNum">     419 </span><span class="lineNoCov">          0 :     dumparray(&quot;Named buffers&quot;, args, cArgs, 1);   </span>
+<span class="lineNum">     420 </span>            :     printf(&quot;Settings \n\tTimes\t\t%d \n\tMode\t\t%d\n&quot;,
+<span class="lineNum">     421 </span><span class="lineNoCov">          0 :         numberTimes, numberMode);</span>
+<span class="lineNum">     422 </span><span class="lineNoCov">          0 :     printf(&quot;\tBase\t\t%s \n\tLog\t\t%s\n&quot;, safe(stringBase), safe(stringLog));</span>
+<a name="423"><span class="lineNum">     423 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     424 </span>            : 
+<span class="lineNum">     425 </span><span class="lineNoCov">          0 : double getExactTime()</span>
+<span class="lineNum">     426 </span>            : {
+<span class="lineNum">     427 </span>            :     double ret;
+<span class="lineNum">     428 </span>            : #if defined (WIN32)
+<span class="lineNum">     429 </span>            :     struct _timeb theTime;
+<span class="lineNum">     430 </span>            :     _ftime(&amp;theTime);
+<span class="lineNum">     431 </span>            :     ret = theTime.time + theTime.millitm/1000.0;
+<span class="lineNum">     432 </span>            : #elif defined (HAVE_FTIME)
+<span class="lineNum">     433 </span>            :     struct timeb theTime;
+<span class="lineNum">     434 </span><span class="lineNoCov">          0 :     ftime(&amp;theTime);</span>
+<span class="lineNum">     435 </span><span class="lineNoCov">          0 :     ret = theTime.time + theTime.millitm/1000.0;</span>
+<span class="lineNum">     436 </span>            : #elif defined (HAVE_GETTIMEOFDAY)
+<span class="lineNum">     437 </span>            :     timeval theTime;
+<span class="lineNum">     438 </span>            :     gettimeofday(&amp;theTime, NULL);
+<span class="lineNum">     439 </span>            :     ret = theTime.tv_sec + theTime.tv_usec/1000000.0;
+<span class="lineNum">     440 </span>            : #else
+<span class="lineNum">     441 </span>            : #error &quot;Can't find function ftime() or similar&quot;
+<span class="lineNum">     442 </span>            : #endif
+<span class="lineNum">     443 </span><span class="lineNoCov">          0 :     return ret;</span>
+<span class="lineNum">     444 </span>            : }
+<span class="lineNum">     445 </span>            : 
+<span class="lineNum">     446 </span>            : 
+<span class="lineNum">     447 </span>            : /*****************************************************************
+<span class="lineNum">     448 </span>            : main
+<a name="449"><span class="lineNum">     449 </span>            : *****************************************************************/</a>
+<span class="lineNum">     450 </span>            : 
+<span class="lineNum">     451 </span><span class="lineNoCov">          0 : void full_version_txt()</span>
+<span class="lineNum">     452 </span>            : {
+<span class="lineNum">     453 </span><span class="lineNoCov">          0 :     puts(version_txt);</span>
+<span class="lineNum">     454 </span><span class="lineNoCov">          0 :     puts(startup_licence);</span>
+<span class="lineNum">     455 </span><span class="lineNoCov">          0 : }</span>
+<a name="456"><span class="lineNum">     456 </span>            : </a>
+<span class="lineNum">     457 </span>            : 
+<span class="lineNum">     458 </span><span class="lineNoCov">          0 : char* readToBuffer(char *filename)</span>
+<span class="lineNum">     459 </span>            : {
+<span class="lineNum">     460 </span>            :     long length;
+<span class="lineNum">     461 </span>            :     int count;
+<span class="lineNum">     462 </span>            :     char *buf;
+<span class="lineNum">     463 </span><span class="lineNoCov">          0 :     FILE *f = fopen(filename, &quot;rt&quot;);</span>
+<span class="lineNum">     464 </span><span class="lineNoCov">          0 :     if (!f)</span>
+<span class="lineNum">     465 </span><span class="lineNoCov">          0 :         saberr(&quot;cannot open file &quot;, filename);</span>
+<span class="lineNum">     466 </span><span class="lineNoCov">          0 :     length = 0xffff;</span>
+<span class="lineNum">     467 </span><span class="lineNoCov">          0 :     buf = (char*) malloc(length + 1);</span>
+<span class="lineNum">     468 </span><span class="lineNoCov">          0 :     count = fread(buf, 1, length + 1, f);</span>
+<span class="lineNum">     469 </span><span class="lineNoCov">          0 :     fclose(f);</span>
+<span class="lineNum">     470 </span><span class="lineNoCov">          0 :     if (count &gt; length)</span>
+<span class="lineNum">     471 </span><span class="lineNoCov">          0 :         saberr(&quot;file too large (64k limit)&quot;, NULL);</span>
+<span class="lineNum">     472 </span><span class="lineNoCov">          0 :     buf[count] = 0;</span>
+<span class="lineNum">     473 </span><span class="lineNoCov">          0 :     return buf;</span>
+<span class="lineNum">     474 </span>            : }
+<a name="475"><span class="lineNum">     475 </span>            : </a>
+<span class="lineNum">     476 </span>            : 
+<span class="lineNum">     477 </span><span class="lineCov">       5931 : int runSingleXSLT(const char **arrayParams, const char **arrayArgs, </span>
+<span class="lineNum">     478 </span>            :                   char **resultArg)
+<span class="lineNum">     479 </span>            : {
+<span class="lineNum">     480 </span>            :    void *theProcessor;
+<span class="lineNum">     481 </span><span class="lineCov">       5931 :    char *resultURI = NULL;</span>
+<span class="lineNum">     482 </span>            :    int ecode;
+<span class="lineNum">     483 </span><span class="lineCov">       5931 :    void *situa = NULL;</span>
+<span class="lineNum">     484 </span>            :    
+<span class="lineNum">     485 </span><span class="lineCov">       5931 :    if (ecode = SablotCreateSituation(&amp;situa))</span>
+<span class="lineNum">     486 </span>            :      return ecode;
+<span class="lineNum">     487 </span>            : 
+<span class="lineNum">     488 </span><span class="lineCov">       5931 :    if (commandFlags)</span>
+<span class="lineNum">     489 </span><span class="lineNoCov">          0 :      SablotSetOptions(situa, commandFlags);</span>
+<span class="lineNum">     490 </span>            : 
+<span class="lineNum">     491 </span><span class="lineCov">       5931 :    if (ecode = SablotCreateProcessorForSituation(situa, &amp;theProcessor))</span>
+<span class="lineNum">     492 </span>            :       return ecode;
+<span class="lineNum">     493 </span>            : 
+<span class="lineNum">     494 </span><span class="lineCov">       5931 :    if (stringLog)</span>
+<span class="lineNum">     495 </span><span class="lineNoCov">          0 :       SablotSetLog(theProcessor, stringLog, 0);</span>
+<span class="lineNum">     496 </span>            : 
+<span class="lineNum">     497 </span><span class="lineCov">       5931 :    if (stringBase)</span>
+<span class="lineNum">     498 </span><span class="lineNoCov">          0 :       SablotSetBase(theProcessor, stringBase);</span>
+<span class="lineNum">     499 </span>            : 
+<span class="lineNum">     500 </span><span class="lineCov">       5931 :    if (indexBare &lt;= 2)</span>
+<span class="lineNum">     501 </span>            :       resultURI = (char*)&quot;file:///__stdout&quot;;
+<span class="lineNum">     502 </span>            :    else
+<span class="lineNum">     503 </span><span class="lineNoCov">          0 :       resultURI = arrayBare[2];</span>
+<span class="lineNum">     504 </span>            : 
+<span class="lineNum">     505 </span>            :    ecode = SablotRunProcessor(theProcessor,
+<span class="lineNum">     506 </span><span class="lineCov">       5931 :         arrayBare[0],</span>
+<span class="lineNum">     507 </span>            :         indexBare &lt;= 1  ? (char*)&quot;file:///__stdin&quot; : arrayBare[1],
+<span class="lineNum">     508 </span>            :         resultURI,
+<span class="lineNum">     509 </span><span class="lineCov">      11862 :         arrayParams, arrayArgs);</span>
+<span class="lineNum">     510 </span>            : 
+<span class="lineNum">     511 </span><span class="lineCov">       5931 :    if (ecode == 0)</span>
+<span class="lineNum">     512 </span><span class="lineCov">       3361 :       SablotGetResultArg(theProcessor, resultURI, resultArg);</span>
+<span class="lineNum">     513 </span>            :                 
+<span class="lineNum">     514 </span><span class="lineCov">       5931 :    if (theProcessor)</span>
+<span class="lineNum">     515 </span><span class="lineCov">       5931 :       SablotDestroyProcessor(theProcessor);</span>
+<span class="lineNum">     516 </span>            : 
+<span class="lineNum">     517 </span><span class="lineCov">       5931 :    if (situa)</span>
+<span class="lineNum">     518 </span><span class="lineCov">       5931 :      SablotDestroySituation(situa);</span>
+<span class="lineNum">     519 </span>            : 
+<span class="lineNum">     520 </span><span class="lineCov">       5931 :    return ecode;</span>
+<a name="521"><span class="lineNum">     521 </span>            : }</a>
+<span class="lineNum">     522 </span>            : 
+<span class="lineNum">     523 </span><span class="lineNoCov">          0 : int runBatchXSLT(const char **arrayParams, const char **arrayArgs, </span>
+<span class="lineNum">     524 </span>            :                  char **resultArg)
+<span class="lineNum">     525 </span>            : {
+<span class="lineNum">     526 </span><span class="lineNoCov">          0 :    void *theProcessor = NULL, *sabSit = NULL, *preparsed = NULL;</span>
+<span class="lineNum">     527 </span><span class="lineNoCov">          0 :    char *resultURI = (char*)&quot;file:///__stdout&quot;;</span>
+<span class="lineNum">     528 </span><span class="lineNoCov">          0 :    char *input = NULL;</span>
+<span class="lineNum">     529 </span>            :    int ecode;
+<span class="lineNum">     530 </span><span class="lineNoCov">          0 :    int argcount = 2, firstarg = 1;</span>
+<span class="lineNum">     531 </span>            : 
+<span class="lineNum">     532 </span><span class="lineNoCov">          0 :    if ((batchMode != ID_BATCH_XML) &amp;&amp;</span>
+<span class="lineNum">     533 </span><span class="lineNoCov">          0 :        (batchMode != ID_BATCH_XSL) &amp;&amp;</span>
+<span class="lineNum">     534 </span>            :        (batchMode != ID_CHAIN_XSL))
+<span class="lineNum">     535 </span><span class="lineNoCov">          0 :       return runSingleXSLT(arrayParams, arrayArgs, resultArg);</span>
+<span class="lineNum">     536 </span>            : 
+<span class="lineNum">     537 </span><span class="lineNoCov">          0 :    ecode = SablotCreateSituation(&amp;sabSit);</span>
+<span class="lineNum">     538 </span><span class="lineNoCov">          0 :    if (ecode != 0)</span>
+<span class="lineNum">     539 </span>            :       return ecode;
+<span class="lineNum">     540 </span>            : 
+<span class="lineNum">     541 </span><span class="lineNoCov">          0 :    if (commandFlags)</span>
+<span class="lineNum">     542 </span><span class="lineNoCov">          0 :      SablotSetOptions(sabSit, commandFlags);</span>
+<span class="lineNum">     543 </span>            : 
+<span class="lineNum">     544 </span><span class="lineNoCov">          0 :    ecode = SablotCreateProcessorForSituation(sabSit, &amp;theProcessor);</span>
+<span class="lineNum">     545 </span>            : 
+<span class="lineNum">     546 </span><span class="lineNoCov">          0 :    if (ecode == 0)</span>
+<span class="lineNum">     547 </span>            :    {
+<span class="lineNum">     548 </span><span class="lineNoCov">          0 :       if (stringLog)</span>
+<span class="lineNum">     549 </span><span class="lineNoCov">          0 :          SablotSetLog(theProcessor, stringLog, 0);</span>
+<span class="lineNum">     550 </span>            : 
+<span class="lineNum">     551 </span><span class="lineNoCov">          0 :       if (stringBase)</span>
+<span class="lineNum">     552 </span><span class="lineNoCov">          0 :          SablotSetBase(theProcessor, stringBase);</span>
+<span class="lineNum">     553 </span>            : 
+<span class="lineNum">     554 </span><span class="lineNoCov">          0 :       switch (batchMode)</span>
+<span class="lineNum">     555 </span>            :       {
+<span class="lineNum">     556 </span>            :          case ID_BATCH_XSL:
+<span class="lineNum">     557 </span><span class="lineNoCov">          0 :             ecode = SablotParseStylesheet(sabSit, arrayBare[0], &amp;preparsed);</span>
+<span class="lineNum">     558 </span>            :             break;
+<span class="lineNum">     559 </span>            :          case ID_BATCH_XML:
+<span class="lineNum">     560 </span><span class="lineNoCov">          0 :             ecode = SablotParse(sabSit, arrayBare[0], &amp;preparsed);</span>
+<span class="lineNum">     561 </span>            :             break;
+<span class="lineNum">     562 </span>            :          case ID_CHAIN_XSL:
+<span class="lineNum">     563 </span><span class="lineNoCov">          0 :             input = arrayBare[0];</span>
+<span class="lineNum">     564 </span><span class="lineNoCov">          0 :             argcount = 1;</span>
+<span class="lineNum">     565 </span><span class="lineNoCov">          0 :             firstarg = 2;</span>
+<span class="lineNum">     566 </span><span class="lineNoCov">          0 :             break;</span>
+<span class="lineNum">     567 </span>            :       }
+<span class="lineNum">     568 </span>            :    }
+<span class="lineNum">     569 </span>            : 
+<span class="lineNum">     570 </span><span class="lineNoCov">          0 :    for (int t = firstarg; (t &lt;= indexBare-argcount) &amp;&amp; (ecode == 0); t += argcount)</span>
+<span class="lineNum">     571 </span>            :       {
+<span class="lineNum">     572 </span><span class="lineNoCov">          0 :          if (arrayParams)</span>
+<span class="lineNum">     573 </span>            :          {
+<span class="lineNum">     574 </span>            :             const char **params = arrayParams;
+<span class="lineNum">     575 </span><span class="lineNoCov">          0 :             while ((params[0] != NULL) &amp;&amp; (ecode == 0))</span>
+<span class="lineNum">     576 </span>            :             {
+<span class="lineNum">     577 </span><span class="lineNoCov">          0 :                ecode = SablotAddParam(sabSit, theProcessor, params[0], params[1]);</span>
+<span class="lineNum">     578 </span><span class="lineNoCov">          0 :                params += 2;</span>
+<span class="lineNum">     579 </span>            :             }
+<span class="lineNum">     580 </span>            :          }
+<span class="lineNum">     581 </span>            : 
+<span class="lineNum">     582 </span><span class="lineNoCov">          0 :          if (arrayArgs)</span>
+<span class="lineNum">     583 </span>            :          {
+<span class="lineNum">     584 </span>            :             const char **args = arrayArgs;
+<span class="lineNum">     585 </span><span class="lineNoCov">          0 :             while ((args[0] != NULL) &amp;&amp; (ecode == 0))</span>
+<span class="lineNum">     586 </span>            :             {
+<span class="lineNum">     587 </span><span class="lineNoCov">          0 :                ecode = SablotAddArgBuffer(sabSit, theProcessor, args[0], args[1]);</span>
+<span class="lineNum">     588 </span><span class="lineNoCov">          0 :                args += 2;</span>
+<span class="lineNum">     589 </span>            :             }
+<span class="lineNum">     590 </span>            :          }
+<span class="lineNum">     591 </span>            : 
+<span class="lineNum">     592 </span><span class="lineNoCov">          0 :          if (ecode == 0)</span>
+<span class="lineNum">     593 </span>            :          {
+<span class="lineNum">     594 </span><span class="lineNoCov">          0 :          switch (batchMode)</span>
+<span class="lineNum">     595 </span>            :             {
+<span class="lineNum">     596 </span>            :             case ID_BATCH_XSL:
+<span class="lineNum">     597 </span>            :             {
+<span class="lineNum">     598 </span><span class="lineNoCov">          0 :                const char *document = arrayBare[t];</span>
+<span class="lineNum">     599 </span><span class="lineNoCov">          0 :                const char *output = arrayBare[t+1];</span>
+<span class="lineNum">     600 </span><span class="lineNoCov">          0 :                SablotAddArgTree(sabSit, theProcessor, &quot;stylesheet&quot;, preparsed);</span>
+<span class="lineNum">     601 </span><span class="lineNoCov">          0 :                ecode = SablotRunProcessorGen(sabSit, theProcessor, &quot;arg:stylesheet&quot;, document, output);</span>
+<span class="lineNum">     602 </span>            :             } break;
+<span class="lineNum">     603 </span>            :             case ID_BATCH_XML:
+<span class="lineNum">     604 </span>            :             {
+<span class="lineNum">     605 </span><span class="lineNoCov">          0 :                const char *stylesheet = arrayBare[t];</span>
+<span class="lineNum">     606 </span><span class="lineNoCov">          0 :                const char *output = arrayBare[t+1];</span>
+<span class="lineNum">     607 </span><span class="lineNoCov">          0 :                SablotAddArgTree(sabSit, theProcessor, &quot;source&quot;, preparsed);</span>
+<span class="lineNum">     608 </span><span class="lineNoCov">          0 :                ecode = SablotRunProcessorGen(sabSit, theProcessor, stylesheet, &quot;arg:source&quot;, output);</span>
+<span class="lineNum">     609 </span>            :             } break;
+<span class="lineNum">     610 </span>            :             case ID_CHAIN_XSL:
+<span class="lineNum">     611 </span>            :             {
+<span class="lineNum">     612 </span><span class="lineNoCov">          0 :                const char *stylesheet = arrayBare[t];</span>
+<span class="lineNum">     613 </span>            :                char *output;
+<span class="lineNum">     614 </span><span class="lineNoCov">          0 :                if (t &lt; indexBare-argcount)</span>
+<span class="lineNum">     615 </span>            :                   output = (char*)&quot;arg:output&quot;;
+<span class="lineNum">     616 </span>            :                else
+<span class="lineNum">     617 </span><span class="lineNoCov">          0 :                   output = arrayBare[1];</span>
+<span class="lineNum">     618 </span>            : 
+<span class="lineNum">     619 </span><span class="lineNoCov">          0 :                ecode = SablotRunProcessorGen(sabSit, theProcessor, stylesheet, input, output);</span>
+<span class="lineNum">     620 </span>            : 
+<span class="lineNum">     621 </span><span class="lineNoCov">          0 :             if (ecode == 0)</span>
+<span class="lineNum">     622 </span>            :                {
+<span class="lineNum">     623 </span><span class="lineNoCov">          0 :                   if (input == arrayBare[0])</span>
+<span class="lineNum">     624 </span>            :                      input = &quot;arg:buffer&quot;;
+<span class="lineNum">     625 </span>            :                   else
+<span class="lineNum">     626 </span><span class="lineNoCov">          0 :                      SablotFree(*resultArg);</span>
+<span class="lineNum">     627 </span>            : 
+<span class="lineNum">     628 </span><span class="lineNoCov">          0 :                   SablotGetResultArg(theProcessor, output, resultArg);</span>
+<span class="lineNum">     629 </span><span class="lineNoCov">          0 :                   SablotAddArgBuffer(sabSit, theProcessor, &quot;buffer&quot;, *resultArg);</span>
+<span class="lineNum">     630 </span>            :                }
+<span class="lineNum">     631 </span>            :             } break;
+<span class="lineNum">     632 </span>            :          }
+<span class="lineNum">     633 </span>            :       }
+<span class="lineNum">     634 </span>            :    }
+<span class="lineNum">     635 </span>            : 
+<span class="lineNum">     636 </span><span class="lineNoCov">          0 :    if ((ecode == 0) &amp;&amp; (batchMode != ID_CHAIN_XSL))</span>
+<span class="lineNum">     637 </span><span class="lineNoCov">          0 :       SablotGetResultArg(theProcessor, resultURI, resultArg);</span>
+<span class="lineNum">     638 </span>            : 
+<span class="lineNum">     639 </span><span class="lineNoCov">          0 :    if (preparsed)</span>
+<span class="lineNum">     640 </span><span class="lineNoCov">          0 :       SablotDestroyDocument(sabSit, preparsed);</span>
+<span class="lineNum">     641 </span>            : 
+<span class="lineNum">     642 </span><span class="lineNoCov">          0 :    if (theProcessor)</span>
+<span class="lineNum">     643 </span><span class="lineNoCov">          0 :       SablotDestroyProcessor(theProcessor);</span>
+<span class="lineNum">     644 </span>            : 
+<span class="lineNum">     645 </span><span class="lineNoCov">          0 :    if (sabSit)</span>
+<span class="lineNum">     646 </span><span class="lineNoCov">          0 :       SablotDestroySituation(sabSit);</span>
+<span class="lineNum">     647 </span>            : 
+<span class="lineNum">     648 </span><span class="lineNoCov">          0 :    return ecode;</span>
+<a name="649"><span class="lineNum">     649 </span>            : }</a>
+<span class="lineNum">     650 </span>            : 
+<span class="lineNum">     651 </span><span class="lineNoCov">          0 : void runDebugger()</span>
+<span class="lineNum">     652 </span>            : {
+<span class="lineNum">     653 </span>            : #ifdef SABLOT_DEBUGGER
+<span class="lineNum">     654 </span>            :   debuggerInit();
+<span class="lineNum">     655 </span>            :   debuggerEnterIdle();
+<span class="lineNum">     656 </span>            :   debuggerDone();
+<span class="lineNum">     657 </span>            : #else
+<span class="lineNum">     658 </span>            :   printf(&quot;Debugegr is not supported in this build\n&quot;);
+<span class="lineNum">     659 </span>            : #endif
+<span class="lineNum">     660 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">     661 </span>            : 
+<span class="lineNum">     662 </span><span class="lineCov">       5931 : int main(int argc, char *argv[])</span>
+<span class="lineNum">     663 </span>            : {
+<span class="lineNum">     664 </span>            :     int indexParams, indexArgs, ecode, i;
+<span class="lineNum">     665 </span>            :     char *arrayParams[2 * MAX_ARG_OR_PAR + 2],
+<span class="lineNum">     666 </span>            :       *arrayArgs[2 * MAX_ARG_OR_PAR + 2];
+<span class="lineNum">     667 </span><span class="lineCov">       5931 :     char *resultArg = NULL;</span>
+<span class="lineNum">     668 </span><span class="lineCov">       5931 :     double timeZero = 0;</span>
+<span class="lineNum">     669 </span>            : 
+<span class="lineNum">     670 </span>            :     // the following set the globals arrayBare and arrayEq
+<span class="lineNum">     671 </span>            :     // we get the number of words/assignments in indexBare/indexEq
+<span class="lineNum">     672 </span>            :     
+<span class="lineNum">     673 </span><span class="lineCov">       5931 :     readSwitches(argc, argv);</span>
+<span class="lineNum">     674 </span>            :     
+<span class="lineNum">     675 </span><span class="lineCov">       5931 :     switch(numberMode)</span>
+<span class="lineNum">     676 </span>            :       {
+<span class="lineNum">     677 </span>            :       case ID_HELP:
+<span class="lineNum">     678 </span>            :         {
+<span class="lineNum">     679 </span><span class="lineNoCov">          0 :           puts(usage); return 0;</span>
+<span class="lineNum">     680 </span>            :         }; break;
+<span class="lineNum">     681 </span>            :       case ID_DBG_HELP:
+<span class="lineNum">     682 </span>            :         {
+<span class="lineNum">     683 </span><span class="lineNoCov">          0 :           puts(dbg_usage); return 0;</span>
+<span class="lineNum">     684 </span>            :         }; break;
+<span class="lineNum">     685 </span>            :       case ID_VERSION:
+<span class="lineNum">     686 </span>            :         {
+<span class="lineNum">     687 </span>            :           full_version_txt(); return 0;
+<span class="lineNum">     688 </span>            :         }; break;
+<span class="lineNum">     689 </span>            :       case ID_DEBUGGER:
+<span class="lineNum">     690 </span>            :         {
+<span class="lineNum">     691 </span>            :           runDebugger(); return 0;
+<span class="lineNum">     692 </span>            :         }; break;
+<span class="lineNum">     693 </span>            :       }
+<span class="lineNum">     694 </span>            : 
+<span class="lineNum">     695 </span><span class="lineCov">       5931 :     if (!indexBare &amp;&amp; numberMode != ID_DEBUG)</span>
+<span class="lineNum">     696 </span>            :     {
+<span class="lineNum">     697 </span>            :         full_version_txt();
+<span class="lineNum">     698 </span><span class="lineNoCov">          0 :         saberr(&quot;stylesheet not given&quot;, NULL);</span>
+<span class="lineNum">     699 </span>            :     }
+<span class="lineNum">     700 </span>            : 
+<span class="lineNum">     701 </span>            :     xformToPairs(arrayEq, indexEq, 
+<span class="lineNum">     702 </span>            :         arrayParams, &amp;indexParams,
+<span class="lineNum">     703 </span><span class="lineCov">       5931 :         arrayArgs, &amp;indexArgs);</span>
+<span class="lineNum">     704 </span>            : 
+<span class="lineNum">     705 </span><span class="lineCov">       5931 :     if (numberMode == ID_DEBUG)</span>
+<span class="lineNum">     706 </span>            :     {   
+<span class="lineNum">     707 </span><span class="lineNoCov">          0 :         debug(indexParams, arrayParams, indexArgs, arrayArgs); </span>
+<span class="lineNum">     708 </span>            :         return 0;
+<span class="lineNum">     709 </span>            :     };
+<span class="lineNum">     710 </span>            : 
+<span class="lineNum">     711 </span><span class="lineCov">       5931 :     if (!numberTimes)</span>
+<span class="lineNum">     712 </span><span class="lineCov">       5931 :         numberTimes = 1;</span>
+<span class="lineNum">     713 </span><span class="lineCov">       5931 :     if (numberMeasure)</span>
+<span class="lineNum">     714 </span><span class="lineNoCov">          0 :         timeZero = getExactTime();</span>
+<span class="lineNum">     715 </span>            : 
+<span class="lineNum">     716 </span><span class="lineCov">       9292 :     for (i = 0; i &lt; numberTimes; i++)</span>
+<span class="lineNum">     717 </span>            :     {
+<span class="lineNum">     718 </span><span class="lineCov">       5931 :         switch(numberMode)</span>
+<span class="lineNum">     719 </span>            :         {
+<span class="lineNum">     720 </span>            :         case 0: 
+<span class="lineNum">     721 </span>            :           {
+<span class="lineNum">     722 </span><span class="lineCov">       5931 :              if ((batchMode == ID_BATCH_XML) || (batchMode == ID_BATCH_XSL) || (batchMode == ID_CHAIN_XSL))</span>
+<span class="lineNum">     723 </span>            :               ecode = runBatchXSLT((const char**)arrayParams, 
+<span class="lineNum">     724 </span><span class="lineNoCov">          0 :                 (const char**)arrayArgs, &amp;resultArg);</span>
+<span class="lineNum">     725 </span>            :             else
+<span class="lineNum">     726 </span>            :               ecode = runSingleXSLT((const char**)arrayParams, 
+<span class="lineNum">     727 </span><span class="lineCov">       5931 :                                     (const char**)arrayArgs, &amp;resultArg);</span>
+<span class="lineNum">     728 </span>            :           }; break;
+<span class="lineNum">     729 </span>            :         case ID_SPS:
+<span class="lineNum">     730 </span>            :             {
+<span class="lineNum">     731 </span><span class="lineNoCov">          0 :                 if (indexBare != 2)</span>
+<span class="lineNum">     732 </span><span class="lineNoCov">          0 :                     saberr(&quot;SablotProcessStrings() needs exactly two arguments&quot;, NULL);</span>
+<span class="lineNum">     733 </span><span class="lineNoCov">          0 :                 ecode = SablotProcessStrings(arrayBare[0], arrayBare[1], &amp;resultArg);</span>
+<span class="lineNum">     734 </span>            :             }; break;
+<span class="lineNum">     735 </span>            :         case ID_SPS_ON_FILES:
+<span class="lineNum">     736 </span>            :             {
+<span class="lineNum">     737 </span>            :                 char *sheetBuf, *inputBuf;
+<span class="lineNum">     738 </span><span class="lineNoCov">          0 :                 if (indexBare != 2)</span>
+<span class="lineNum">     739 </span><span class="lineNoCov">          0 :                     saberr(&quot;need exactly two arguments&quot;, NULL);</span>
+<span class="lineNum">     740 </span><span class="lineNoCov">          0 :                 sheetBuf = readToBuffer(arrayBare[0]);</span>
+<span class="lineNum">     741 </span><span class="lineNoCov">          0 :                 inputBuf = readToBuffer(arrayBare[1]);</span>
+<span class="lineNum">     742 </span><span class="lineNoCov">          0 :                 ecode = SablotProcessStrings(sheetBuf, inputBuf, &amp;resultArg);</span>
+<span class="lineNum">     743 </span><span class="lineNoCov">          0 :                 free(sheetBuf);</span>
+<span class="lineNum">     744 </span><span class="lineNoCov">          0 :                 free(inputBuf);</span>
+<span class="lineNum">     745 </span><span class="lineNoCov">          0 :             }; break;</span>
+<span class="lineNum">     746 </span>            :         case ID_SPF: 
+<span class="lineNum">     747 </span><span class="lineNoCov">          0 :             ecode = SablotProcessFiles(arrayBare[0],</span>
+<span class="lineNum">     748 </span>            :                 indexBare &lt;= 1  ? (char*)&quot;file:///__stdin&quot; : arrayBare[1],
+<span class="lineNum">     749 </span><span class="lineNoCov">          0 :                 indexBare &lt;= 2  ? (char*)&quot;file:///__stdout&quot; : arrayBare[2]);</span>
+<span class="lineNum">     750 </span>            :             break;
+<span class="lineNum">     751 </span>            :         }
+<span class="lineNum">     752 </span>            :         
+<span class="lineNum">     753 </span><span class="lineCov">       5931 :         if (ecode)</span>
+<span class="lineNum">     754 </span>            :             return ecode;
+<span class="lineNum">     755 </span>            :         
+<span class="lineNum">     756 </span><span class="lineCov">       3361 :         if (resultArg)</span>
+<span class="lineNum">     757 </span>            :         {
+<span class="lineNum">     758 </span><span class="lineNoCov">          0 :             fprintf(stderr, &quot;output buffer sent to stdout\n&quot;);</span>
+<span class="lineNum">     759 </span><span class="lineNoCov">          0 :             puts(resultArg);</span>
+<span class="lineNum">     760 </span><span class="lineNoCov">          0 :             SablotFree(resultArg);</span>
+<span class="lineNum">     761 </span><span class="lineNoCov">          0 :             resultArg = NULL;</span>
+<span class="lineNum">     762 </span>            :         }
+<span class="lineNum">     763 </span>            :     };
+<span class="lineNum">     764 </span>            : 
+<span class="lineNum">     765 </span><span class="lineCov">       3361 :     if (numberMeasure)</span>
+<span class="lineNum">     766 </span><span class="lineNoCov">          0 :         fprintf(stderr, &quot;Total time: %4.3f seconds\n&quot;, getExactTime() - timeZero);</span>
+<span class="lineNum">     767 </span>            :         
+<span class="lineNum">     768 </span>            :     freefirst(arrayArgs);
+<span class="lineNum">     769 </span>            :     freefirst(arrayParams);
+<span class="lineNum">     770 </span>            : 
+<span class="lineNum">     771 </span>            :     return 0;
+<span class="lineNum">     772 </span>            : }
+<span class="lineNum">     773 </span>            : 
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

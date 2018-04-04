@@ -1,0 +1,1966 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - gcov/nanohttp.c</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">gcov</a> - nanohttp.c<span style="font-size: 80%;"> (source / <a href="nanohttp.c.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">591</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-11-01</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">29</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /*</a>
+<span class="lineNum">       2 </span>            :  * nanohttp.c: minimalist HTTP GET implementation to fetch external subsets.
+<span class="lineNum">       3 </span>            :  *             focuses on size, streamability, reentrancy and portability
+<span class="lineNum">       4 </span>            :  *
+<span class="lineNum">       5 </span>            :  * This is clearly not a general purpose HTTP implementation
+<span class="lineNum">       6 </span>            :  * If you look for one, check:
+<span class="lineNum">       7 </span>            :  *         http://www.w3.org/Library/
+<span class="lineNum">       8 </span>            :  *
+<span class="lineNum">       9 </span>            :  * See Copyright for the status of this software.
+<span class="lineNum">      10 </span>            :  *
+<span class="lineNum">      11 </span>            :  * daniel@veillard.com
+<span class="lineNum">      12 </span>            :  */
+<span class="lineNum">      13 </span>            : 
+<span class="lineNum">      14 </span>            : #define NEED_SOCKETS
+<span class="lineNum">      15 </span>            : #define IN_LIBXML
+<span class="lineNum">      16 </span>            : #include &quot;libxml.h&quot;
+<span class="lineNum">      17 </span>            : 
+<span class="lineNum">      18 </span>            : #ifdef LIBXML_HTTP_ENABLED
+<span class="lineNum">      19 </span>            : #include &lt;string.h&gt;
+<span class="lineNum">      20 </span>            : 
+<span class="lineNum">      21 </span>            : #ifdef HAVE_STDLIB_H
+<span class="lineNum">      22 </span>            : #include &lt;stdlib.h&gt;
+<span class="lineNum">      23 </span>            : #endif
+<span class="lineNum">      24 </span>            : #ifdef HAVE_UNISTD_H
+<span class="lineNum">      25 </span>            : #include &lt;unistd.h&gt;
+<span class="lineNum">      26 </span>            : #endif
+<span class="lineNum">      27 </span>            : #ifdef HAVE_SYS_TYPES_H
+<span class="lineNum">      28 </span>            : #include &lt;sys/types.h&gt;
+<span class="lineNum">      29 </span>            : #endif
+<span class="lineNum">      30 </span>            : #ifdef HAVE_SYS_SOCKET_H
+<span class="lineNum">      31 </span>            : #include &lt;sys/socket.h&gt;
+<span class="lineNum">      32 </span>            : #endif
+<span class="lineNum">      33 </span>            : #ifdef HAVE_NETINET_IN_H
+<span class="lineNum">      34 </span>            : #include &lt;netinet/in.h&gt;
+<span class="lineNum">      35 </span>            : #endif
+<span class="lineNum">      36 </span>            : #ifdef HAVE_ARPA_INET_H
+<span class="lineNum">      37 </span>            : #include &lt;arpa/inet.h&gt;
+<span class="lineNum">      38 </span>            : #endif
+<span class="lineNum">      39 </span>            : #ifdef HAVE_NETDB_H
+<span class="lineNum">      40 </span>            : #include &lt;netdb.h&gt;
+<span class="lineNum">      41 </span>            : #endif
+<span class="lineNum">      42 </span>            : #ifdef HAVE_RESOLV_H
+<span class="lineNum">      43 </span>            : #ifdef HAVE_ARPA_NAMESER_H
+<span class="lineNum">      44 </span>            : #include &lt;arpa/nameser.h&gt;
+<span class="lineNum">      45 </span>            : #endif
+<span class="lineNum">      46 </span>            : #include &lt;resolv.h&gt;
+<span class="lineNum">      47 </span>            : #endif
+<span class="lineNum">      48 </span>            : #ifdef HAVE_FCNTL_H
+<span class="lineNum">      49 </span>            : #include &lt;fcntl.h&gt;
+<span class="lineNum">      50 </span>            : #endif
+<span class="lineNum">      51 </span>            : #ifdef HAVE_ERRNO_H
+<span class="lineNum">      52 </span>            : #include &lt;errno.h&gt;
+<span class="lineNum">      53 </span>            : #endif
+<span class="lineNum">      54 </span>            : #ifdef HAVE_SYS_TIME_H
+<span class="lineNum">      55 </span>            : #include &lt;sys/time.h&gt;
+<span class="lineNum">      56 </span>            : #endif
+<span class="lineNum">      57 </span>            : #ifndef HAVE_POLL_H
+<span class="lineNum">      58 </span>            : #ifdef HAVE_SYS_SELECT_H
+<span class="lineNum">      59 </span>            : #include &lt;sys/select.h&gt;
+<span class="lineNum">      60 </span>            : #endif
+<span class="lineNum">      61 </span>            : #else
+<span class="lineNum">      62 </span>            : #include &lt;poll.h&gt;
+<span class="lineNum">      63 </span>            : #endif
+<span class="lineNum">      64 </span>            : #ifdef HAVE_STRINGS_H
+<span class="lineNum">      65 </span>            : #include &lt;strings.h&gt;
+<span class="lineNum">      66 </span>            : #endif
+<span class="lineNum">      67 </span>            : #ifdef HAVE_ZLIB_H
+<span class="lineNum">      68 </span>            : #include &lt;zlib.h&gt;
+<span class="lineNum">      69 </span>            : #endif
+<span class="lineNum">      70 </span>            : 
+<span class="lineNum">      71 </span>            : 
+<span class="lineNum">      72 </span>            : #ifdef VMS
+<span class="lineNum">      73 </span>            : #include &lt;stropts&gt;
+<span class="lineNum">      74 </span>            : #define XML_SOCKLEN_T unsigned int
+<span class="lineNum">      75 </span>            : #endif
+<span class="lineNum">      76 </span>            : 
+<span class="lineNum">      77 </span>            : #if defined(__MINGW32__) || defined(_WIN32_WCE)
+<span class="lineNum">      78 </span>            : #ifndef _WINSOCKAPI_
+<span class="lineNum">      79 </span>            : #define _WINSOCKAPI_
+<span class="lineNum">      80 </span>            : #endif
+<span class="lineNum">      81 </span>            : #include &lt;wsockcompat.h&gt;
+<span class="lineNum">      82 </span>            : #include &lt;winsock2.h&gt;
+<span class="lineNum">      83 </span>            : #undef XML_SOCKLEN_T
+<span class="lineNum">      84 </span>            : #define XML_SOCKLEN_T unsigned int
+<span class="lineNum">      85 </span>            : #endif
+<span class="lineNum">      86 </span>            : 
+<span class="lineNum">      87 </span>            : #include &lt;libxml/globals.h&gt;
+<span class="lineNum">      88 </span>            : #include &lt;libxml/xmlerror.h&gt;
+<span class="lineNum">      89 </span>            : #include &lt;libxml/xmlmemory.h&gt;
+<span class="lineNum">      90 </span>            : #include &lt;libxml/parser.h&gt; /* for xmlStr(n)casecmp() */
+<span class="lineNum">      91 </span>            : #include &lt;libxml/nanohttp.h&gt;
+<span class="lineNum">      92 </span>            : #include &lt;libxml/globals.h&gt;
+<span class="lineNum">      93 </span>            : #include &lt;libxml/uri.h&gt;
+<span class="lineNum">      94 </span>            : 
+<span class="lineNum">      95 </span>            : /**
+<span class="lineNum">      96 </span>            :  * A couple portability macros
+<span class="lineNum">      97 </span>            :  */
+<span class="lineNum">      98 </span>            : #ifndef _WINSOCKAPI_
+<span class="lineNum">      99 </span>            : #if !defined(__BEOS__) || defined(__HAIKU__)
+<span class="lineNum">     100 </span>            : #define closesocket(s) close(s)
+<span class="lineNum">     101 </span>            : #endif
+<span class="lineNum">     102 </span>            : #define SOCKET int
+<span class="lineNum">     103 </span>            : #define INVALID_SOCKET (-1)
+<span class="lineNum">     104 </span>            : #endif
+<span class="lineNum">     105 </span>            : 
+<span class="lineNum">     106 </span>            : #ifdef __BEOS__
+<span class="lineNum">     107 </span>            : #ifndef PF_INET
+<span class="lineNum">     108 </span>            : #define PF_INET AF_INET
+<span class="lineNum">     109 </span>            : #endif
+<span class="lineNum">     110 </span>            : #endif
+<span class="lineNum">     111 </span>            : 
+<span class="lineNum">     112 </span>            : #ifndef XML_SOCKLEN_T
+<span class="lineNum">     113 </span>            : #define XML_SOCKLEN_T unsigned int
+<span class="lineNum">     114 </span>            : #endif
+<span class="lineNum">     115 </span>            : 
+<span class="lineNum">     116 </span>            : #ifdef STANDALONE
+<span class="lineNum">     117 </span>            : #define DEBUG_HTTP
+<span class="lineNum">     118 </span>            : #define xmlStrncasecmp(a, b, n) strncasecmp((char *)a, (char *)b, n)
+<span class="lineNum">     119 </span>            : #define xmlStrcasecmpi(a, b) strcasecmp((char *)a, (char *)b)
+<span class="lineNum">     120 </span>            : #endif
+<span class="lineNum">     121 </span>            : 
+<span class="lineNum">     122 </span>            : #define XML_NANO_HTTP_MAX_REDIR 10
+<span class="lineNum">     123 </span>            : 
+<span class="lineNum">     124 </span>            : #define XML_NANO_HTTP_CHUNK     4096
+<span class="lineNum">     125 </span>            : 
+<span class="lineNum">     126 </span>            : #define XML_NANO_HTTP_CLOSED    0
+<span class="lineNum">     127 </span>            : #define XML_NANO_HTTP_WRITE     1
+<span class="lineNum">     128 </span>            : #define XML_NANO_HTTP_READ      2
+<span class="lineNum">     129 </span>            : #define XML_NANO_HTTP_NONE      4
+<span class="lineNum">     130 </span>            : 
+<span class="lineNum">     131 </span>            : typedef struct xmlNanoHTTPCtxt {
+<span class="lineNum">     132 </span>            :     char *protocol;     /* the protocol name */
+<span class="lineNum">     133 </span>            :     char *hostname;     /* the host name */
+<span class="lineNum">     134 </span>            :     int port;           /* the port */
+<span class="lineNum">     135 </span>            :     char *path;         /* the path within the URL */
+<span class="lineNum">     136 </span>            :     char *query;        /* the query string */
+<span class="lineNum">     137 </span>            :     SOCKET fd;          /* the file descriptor for the socket */
+<span class="lineNum">     138 </span>            :     int state;          /* WRITE / READ / CLOSED */
+<span class="lineNum">     139 </span>            :     char *out;          /* buffer sent (zero terminated) */
+<span class="lineNum">     140 </span>            :     char *outptr;       /* index within the buffer sent */
+<span class="lineNum">     141 </span>            :     char *in;           /* the receiving buffer */
+<span class="lineNum">     142 </span>            :     char *content;      /* the start of the content */
+<span class="lineNum">     143 </span>            :     char *inptr;        /* the next byte to read from network */
+<span class="lineNum">     144 </span>            :     char *inrptr;       /* the next byte to give back to the client */
+<span class="lineNum">     145 </span>            :     int inlen;          /* len of the input buffer */
+<span class="lineNum">     146 </span>            :     int last;           /* return code for last operation */
+<span class="lineNum">     147 </span>            :     int returnValue;    /* the protocol return value */
+<span class="lineNum">     148 </span>            :     int version;        /* the protocol version */
+<span class="lineNum">     149 </span>            :     int ContentLength;  /* specified content length from HTTP header */
+<span class="lineNum">     150 </span>            :     char *contentType;  /* the MIME type for the input */
+<span class="lineNum">     151 </span>            :     char *location;     /* the new URL in case of redirect */
+<span class="lineNum">     152 </span>            :     char *authHeader;   /* contents of {WWW,Proxy}-Authenticate header */
+<span class="lineNum">     153 </span>            :     char *encoding;     /* encoding extracted from the contentType */
+<span class="lineNum">     154 </span>            :     char *mimeType;     /* Mime-Type extracted from the contentType */
+<span class="lineNum">     155 </span>            : #ifdef HAVE_ZLIB_H
+<span class="lineNum">     156 </span>            :     z_stream *strm;     /* Zlib stream object */
+<span class="lineNum">     157 </span>            :     int usesGzip;       /* &quot;Content-Encoding: gzip&quot; was detected */
+<span class="lineNum">     158 </span>            : #endif
+<span class="lineNum">     159 </span>            : } xmlNanoHTTPCtxt, *xmlNanoHTTPCtxtPtr;
+<span class="lineNum">     160 </span>            : 
+<span class="lineNum">     161 </span>            : static int initialized = 0;
+<span class="lineNum">     162 </span>            : static char *proxy = NULL;       /* the proxy name if any */
+<span class="lineNum">     163 </span>            : static int proxyPort;   /* the proxy port if any */
+<span class="lineNum">     164 </span>            : static unsigned int timeout = 60;/* the select() timeout in seconds */
+<span class="lineNum">     165 </span>            : 
+<span class="lineNum">     166 </span>            : static int xmlNanoHTTPFetchContent( void * ctx, char ** ptr, int * len );
+<span class="lineNum">     167 </span>            : 
+<span class="lineNum">     168 </span>            : /**
+<span class="lineNum">     169 </span>            :  * xmlHTTPErrMemory:
+<span class="lineNum">     170 </span>            :  * @extra:  extra informations
+<span class="lineNum">     171 </span>            :  *
+<span class="lineNum">     172 </span>            :  * Handle an out of memory condition
+<span class="lineNum">     173 </span>            :  */
+<span class="lineNum">     174 </span>            : static void
+<a name="175"><span class="lineNum">     175 </span>            : xmlHTTPErrMemory(const char *extra)</a>
+<span class="lineNum">     176 </span>            : {
+<span class="lineNum">     177 </span><span class="lineNoCov">          0 :     __xmlSimpleError(XML_FROM_HTTP, XML_ERR_NO_MEMORY, NULL, NULL, extra);</span>
+<span class="lineNum">     178 </span>            : }
+<span class="lineNum">     179 </span>            : 
+<span class="lineNum">     180 </span>            : /**
+<span class="lineNum">     181 </span>            :  * A portability function
+<span class="lineNum">     182 </span>            :  */
+<span class="lineNum">     183 </span>            : static int socket_errno(void) {
+<span class="lineNum">     184 </span>            : #ifdef _WINSOCKAPI_
+<a name="185"><span class="lineNum">     185 </span>            :     return(WSAGetLastError());</a>
+<span class="lineNum">     186 </span>            : #else
+<span class="lineNum">     187 </span><span class="lineNoCov">          0 :     return(errno);</span>
+<span class="lineNum">     188 </span>            : #endif
+<span class="lineNum">     189 </span>            : }
+<span class="lineNum">     190 </span>            : 
+<a name="191"><span class="lineNum">     191 </span>            : #ifdef SUPPORT_IP6</a>
+<span class="lineNum">     192 </span>            : static
+<span class="lineNum">     193 </span><span class="lineNoCov">          0 : int have_ipv6(void) {</span>
+<span class="lineNum">     194 </span>            :     SOCKET s;
+<span class="lineNum">     195 </span>            : 
+<span class="lineNum">     196 </span><span class="lineNoCov">          0 :     s = socket (AF_INET6, SOCK_STREAM, 0);</span>
+<span class="lineNum">     197 </span><span class="lineNoCov">          0 :     if (s != INVALID_SOCKET) {</span>
+<span class="lineNum">     198 </span><span class="lineNoCov">          0 :         close (s);</span>
+<span class="lineNum">     199 </span><span class="lineNoCov">          0 :         return (1);</span>
+<span class="lineNum">     200 </span>            :     }
+<span class="lineNum">     201 </span>            :     return (0);
+<span class="lineNum">     202 </span>            : }
+<span class="lineNum">     203 </span>            : #endif
+<span class="lineNum">     204 </span>            : 
+<span class="lineNum">     205 </span>            : /**
+<span class="lineNum">     206 </span>            :  * xmlNanoHTTPInit:
+<span class="lineNum">     207 </span>            :  *
+<span class="lineNum">     208 </span>            :  * Initialize the HTTP protocol layer.
+<span class="lineNum">     209 </span>            :  * Currently it just checks for proxy informations
+<span class="lineNum">     210 </span>            :  */
+<a name="211"><span class="lineNum">     211 </span>            : </a>
+<span class="lineNum">     212 </span>            : void
+<span class="lineNum">     213 </span><span class="lineNoCov">          0 : xmlNanoHTTPInit(void) {</span>
+<span class="lineNum">     214 </span>            :     const char *env;
+<span class="lineNum">     215 </span>            : #ifdef _WINSOCKAPI_
+<span class="lineNum">     216 </span>            :     WSADATA wsaData;
+<span class="lineNum">     217 </span>            : #endif
+<span class="lineNum">     218 </span>            : 
+<span class="lineNum">     219 </span><span class="lineNoCov">          0 :     if (initialized)</span>
+<span class="lineNum">     220 </span><span class="lineNoCov">          0 :         return;</span>
+<span class="lineNum">     221 </span>            : 
+<span class="lineNum">     222 </span>            : #ifdef _WINSOCKAPI_
+<span class="lineNum">     223 </span>            :     if (WSAStartup(MAKEWORD(1, 1), &amp;wsaData) != 0)
+<span class="lineNum">     224 </span>            :         return;
+<span class="lineNum">     225 </span>            : #endif
+<span class="lineNum">     226 </span>            : 
+<span class="lineNum">     227 </span><span class="lineNoCov">          0 :     if (proxy == NULL) {</span>
+<span class="lineNum">     228 </span><span class="lineNoCov">          0 :         proxyPort = 80;</span>
+<span class="lineNum">     229 </span><span class="lineNoCov">          0 :         env = getenv(&quot;no_proxy&quot;);</span>
+<span class="lineNum">     230 </span><span class="lineNoCov">          0 :         if (env &amp;&amp; ((env[0] == '*') &amp;&amp; (env[1] == 0)))</span>
+<span class="lineNum">     231 </span>            :             goto done;
+<span class="lineNum">     232 </span><span class="lineNoCov">          0 :         env = getenv(&quot;http_proxy&quot;);</span>
+<span class="lineNum">     233 </span><span class="lineNoCov">          0 :         if (env != NULL) {</span>
+<span class="lineNum">     234 </span><span class="lineNoCov">          0 :             xmlNanoHTTPScanProxy(env);</span>
+<span class="lineNum">     235 </span><span class="lineNoCov">          0 :             goto done;</span>
+<span class="lineNum">     236 </span>            :         }
+<span class="lineNum">     237 </span><span class="lineNoCov">          0 :         env = getenv(&quot;HTTP_PROXY&quot;);</span>
+<span class="lineNum">     238 </span><span class="lineNoCov">          0 :         if (env != NULL) {</span>
+<span class="lineNum">     239 </span><span class="lineNoCov">          0 :             xmlNanoHTTPScanProxy(env);</span>
+<span class="lineNum">     240 </span><span class="lineNoCov">          0 :             goto done;</span>
+<span class="lineNum">     241 </span>            :         }
+<span class="lineNum">     242 </span>            :     }
+<span class="lineNum">     243 </span>            : done:
+<span class="lineNum">     244 </span><span class="lineNoCov">          0 :     initialized = 1;</span>
+<span class="lineNum">     245 </span>            : }
+<span class="lineNum">     246 </span>            : 
+<span class="lineNum">     247 </span>            : /**
+<span class="lineNum">     248 </span>            :  * xmlNanoHTTPCleanup:
+<span class="lineNum">     249 </span>            :  *
+<span class="lineNum">     250 </span>            :  * Cleanup the HTTP protocol layer.
+<span class="lineNum">     251 </span>            :  */
+<a name="252"><span class="lineNum">     252 </span>            : </a>
+<span class="lineNum">     253 </span>            : void
+<span class="lineNum">     254 </span><span class="lineNoCov">          0 : xmlNanoHTTPCleanup(void) {</span>
+<span class="lineNum">     255 </span><span class="lineNoCov">          0 :     if (proxy != NULL) {</span>
+<span class="lineNum">     256 </span><span class="lineNoCov">          0 :         xmlFree(proxy);</span>
+<span class="lineNum">     257 </span><span class="lineNoCov">          0 :         proxy = NULL;</span>
+<span class="lineNum">     258 </span>            :     }
+<span class="lineNum">     259 </span>            : #ifdef _WINSOCKAPI_
+<span class="lineNum">     260 </span>            :     if (initialized)
+<span class="lineNum">     261 </span>            :         WSACleanup();
+<span class="lineNum">     262 </span>            : #endif
+<span class="lineNum">     263 </span><span class="lineNoCov">          0 :     initialized = 0;</span>
+<span class="lineNum">     264 </span><span class="lineNoCov">          0 :     return;</span>
+<span class="lineNum">     265 </span>            : }
+<span class="lineNum">     266 </span>            : 
+<span class="lineNum">     267 </span>            : /**
+<span class="lineNum">     268 </span>            :  * xmlNanoHTTPScanURL:
+<span class="lineNum">     269 </span>            :  * @ctxt:  an HTTP context
+<span class="lineNum">     270 </span>            :  * @URL:  The URL used to initialize the context
+<span class="lineNum">     271 </span>            :  *
+<span class="lineNum">     272 </span>            :  * (Re)Initialize an HTTP context by parsing the URL and finding
+<span class="lineNum">     273 </span>            :  * the protocol host port and path it indicates.
+<span class="lineNum">     274 </span>            :  */
+<a name="275"><span class="lineNum">     275 </span>            : </a>
+<span class="lineNum">     276 </span>            : static void
+<span class="lineNum">     277 </span><span class="lineNoCov">          0 : xmlNanoHTTPScanURL(xmlNanoHTTPCtxtPtr ctxt, const char *URL) {</span>
+<span class="lineNum">     278 </span>            :     xmlURIPtr uri;
+<span class="lineNum">     279 </span>            :     int len;
+<span class="lineNum">     280 </span>            : 
+<span class="lineNum">     281 </span>            :     /*
+<span class="lineNum">     282 </span>            :      * Clear any existing data from the context
+<span class="lineNum">     283 </span>            :      */
+<span class="lineNum">     284 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;protocol != NULL) {</span>
+<span class="lineNum">     285 </span><span class="lineNoCov">          0 :         xmlFree(ctxt-&gt;protocol);</span>
+<span class="lineNum">     286 </span><span class="lineNoCov">          0 :         ctxt-&gt;protocol = NULL;</span>
+<span class="lineNum">     287 </span>            :     }
+<span class="lineNum">     288 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;hostname != NULL) {</span>
+<span class="lineNum">     289 </span><span class="lineNoCov">          0 :         xmlFree(ctxt-&gt;hostname);</span>
+<span class="lineNum">     290 </span><span class="lineNoCov">          0 :         ctxt-&gt;hostname = NULL;</span>
+<span class="lineNum">     291 </span>            :     }
+<span class="lineNum">     292 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;path != NULL) {</span>
+<span class="lineNum">     293 </span><span class="lineNoCov">          0 :         xmlFree(ctxt-&gt;path);</span>
+<span class="lineNum">     294 </span><span class="lineNoCov">          0 :         ctxt-&gt;path = NULL;</span>
+<span class="lineNum">     295 </span>            :     }
+<span class="lineNum">     296 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;query != NULL) {</span>
+<span class="lineNum">     297 </span><span class="lineNoCov">          0 :         xmlFree(ctxt-&gt;query);</span>
+<span class="lineNum">     298 </span><span class="lineNoCov">          0 :         ctxt-&gt;query = NULL;</span>
+<span class="lineNum">     299 </span>            :     }
+<span class="lineNum">     300 </span><span class="lineNoCov">          0 :     if (URL == NULL) return;</span>
+<span class="lineNum">     301 </span>            : 
+<span class="lineNum">     302 </span><span class="lineNoCov">          0 :     uri = xmlParseURIRaw(URL, 1);</span>
+<span class="lineNum">     303 </span><span class="lineNoCov">          0 :     if (uri == NULL)</span>
+<span class="lineNum">     304 </span>            :         return;
+<span class="lineNum">     305 </span>            : 
+<span class="lineNum">     306 </span><span class="lineNoCov">          0 :     if ((uri-&gt;scheme == NULL) || (uri-&gt;server == NULL)) {</span>
+<span class="lineNum">     307 </span><span class="lineNoCov">          0 :         xmlFreeURI(uri);</span>
+<span class="lineNum">     308 </span><span class="lineNoCov">          0 :         return;</span>
+<span class="lineNum">     309 </span>            :     }
+<span class="lineNum">     310 </span>            : 
+<span class="lineNum">     311 </span><span class="lineNoCov">          0 :     ctxt-&gt;protocol = xmlMemStrdup(uri-&gt;scheme);</span>
+<span class="lineNum">     312 </span>            :     /* special case of IPv6 addresses, the [] need to be removed */
+<span class="lineNum">     313 </span><span class="lineNoCov">          0 :     if ((uri-&gt;server != NULL) &amp;&amp; (*uri-&gt;server == '[')) {</span>
+<span class="lineNum">     314 </span><span class="lineNoCov">          0 :         len = strlen(uri-&gt;server);</span>
+<span class="lineNum">     315 </span><span class="lineNoCov">          0 :         if ((len &gt; 2) &amp;&amp; (uri-&gt;server[len - 1] == ']')) {</span>
+<span class="lineNum">     316 </span><span class="lineNoCov">          0 :             ctxt-&gt;hostname = (char *) xmlCharStrndup(uri-&gt;server + 1, len -2);</span>
+<span class="lineNum">     317 </span>            :         } else
+<span class="lineNum">     318 </span><span class="lineNoCov">          0 :             ctxt-&gt;hostname = xmlMemStrdup(uri-&gt;server);</span>
+<span class="lineNum">     319 </span>            :     } else
+<span class="lineNum">     320 </span><span class="lineNoCov">          0 :         ctxt-&gt;hostname = xmlMemStrdup(uri-&gt;server);</span>
+<span class="lineNum">     321 </span><span class="lineNoCov">          0 :     if (uri-&gt;path != NULL)</span>
+<span class="lineNum">     322 </span><span class="lineNoCov">          0 :         ctxt-&gt;path = xmlMemStrdup(uri-&gt;path);</span>
+<span class="lineNum">     323 </span>            :     else
+<span class="lineNum">     324 </span><span class="lineNoCov">          0 :         ctxt-&gt;path = xmlMemStrdup(&quot;/&quot;);</span>
+<span class="lineNum">     325 </span><span class="lineNoCov">          0 :     if (uri-&gt;query != NULL)</span>
+<span class="lineNum">     326 </span><span class="lineNoCov">          0 :         ctxt-&gt;query = xmlMemStrdup(uri-&gt;query);</span>
+<span class="lineNum">     327 </span><span class="lineNoCov">          0 :     if (uri-&gt;port != 0)</span>
+<span class="lineNum">     328 </span><span class="lineNoCov">          0 :         ctxt-&gt;port = uri-&gt;port;</span>
+<span class="lineNum">     329 </span>            : 
+<span class="lineNum">     330 </span><span class="lineNoCov">          0 :     xmlFreeURI(uri);</span>
+<span class="lineNum">     331 </span>            : }
+<span class="lineNum">     332 </span>            : 
+<span class="lineNum">     333 </span>            : /**
+<span class="lineNum">     334 </span>            :  * xmlNanoHTTPScanProxy:
+<span class="lineNum">     335 </span>            :  * @URL:  The proxy URL used to initialize the proxy context
+<span class="lineNum">     336 </span>            :  *
+<span class="lineNum">     337 </span>            :  * (Re)Initialize the HTTP Proxy context by parsing the URL and finding
+<span class="lineNum">     338 </span>            :  * the protocol host port it indicates.
+<span class="lineNum">     339 </span>            :  * Should be like http://myproxy/ or http://myproxy:3128/
+<span class="lineNum">     340 </span>            :  * A NULL URL cleans up proxy informations.
+<span class="lineNum">     341 </span>            :  */
+<a name="342"><span class="lineNum">     342 </span>            : </a>
+<span class="lineNum">     343 </span>            : void
+<span class="lineNum">     344 </span><span class="lineNoCov">          0 : xmlNanoHTTPScanProxy(const char *URL) {</span>
+<span class="lineNum">     345 </span>            :     xmlURIPtr uri;
+<span class="lineNum">     346 </span>            : 
+<span class="lineNum">     347 </span><span class="lineNoCov">          0 :     if (proxy != NULL) {</span>
+<span class="lineNum">     348 </span><span class="lineNoCov">          0 :         xmlFree(proxy);</span>
+<span class="lineNum">     349 </span><span class="lineNoCov">          0 :         proxy = NULL;</span>
+<span class="lineNum">     350 </span>            :     }
+<span class="lineNum">     351 </span><span class="lineNoCov">          0 :     proxyPort = 0;</span>
+<span class="lineNum">     352 </span>            : 
+<span class="lineNum">     353 </span>            : #ifdef DEBUG_HTTP
+<span class="lineNum">     354 </span>            :     if (URL == NULL)
+<span class="lineNum">     355 </span>            :         xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">     356 </span>            :                 &quot;Removing HTTP proxy info\n&quot;);
+<span class="lineNum">     357 </span>            :     else
+<span class="lineNum">     358 </span>            :         xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">     359 </span>            :                 &quot;Using HTTP proxy %s\n&quot;, URL);
+<span class="lineNum">     360 </span>            : #endif
+<span class="lineNum">     361 </span><span class="lineNoCov">          0 :     if (URL == NULL) return;</span>
+<span class="lineNum">     362 </span>            : 
+<span class="lineNum">     363 </span><span class="lineNoCov">          0 :     uri = xmlParseURIRaw(URL, 1);</span>
+<span class="lineNum">     364 </span><span class="lineNoCov">          0 :     if ((uri == NULL) || (uri-&gt;scheme == NULL) ||</span>
+<span class="lineNum">     365 </span><span class="lineNoCov">          0 :         (strcmp(uri-&gt;scheme, &quot;http&quot;)) || (uri-&gt;server == NULL)) {</span>
+<span class="lineNum">     366 </span><span class="lineNoCov">          0 :         __xmlIOErr(XML_FROM_HTTP, XML_HTTP_URL_SYNTAX, &quot;Syntax Error\n&quot;);</span>
+<span class="lineNum">     367 </span><span class="lineNoCov">          0 :         if (uri != NULL)</span>
+<span class="lineNum">     368 </span><span class="lineNoCov">          0 :             xmlFreeURI(uri);</span>
+<span class="lineNum">     369 </span>            :         return;
+<span class="lineNum">     370 </span>            :     }
+<span class="lineNum">     371 </span>            : 
+<span class="lineNum">     372 </span><span class="lineNoCov">          0 :     proxy = xmlMemStrdup(uri-&gt;server);</span>
+<span class="lineNum">     373 </span><span class="lineNoCov">          0 :     if (uri-&gt;port != 0)</span>
+<span class="lineNum">     374 </span><span class="lineNoCov">          0 :         proxyPort = uri-&gt;port;</span>
+<span class="lineNum">     375 </span>            : 
+<span class="lineNum">     376 </span><span class="lineNoCov">          0 :     xmlFreeURI(uri);</span>
+<span class="lineNum">     377 </span>            : }
+<span class="lineNum">     378 </span>            : 
+<span class="lineNum">     379 </span>            : /**
+<span class="lineNum">     380 </span>            :  * xmlNanoHTTPNewCtxt:
+<span class="lineNum">     381 </span>            :  * @URL:  The URL used to initialize the context
+<span class="lineNum">     382 </span>            :  *
+<span class="lineNum">     383 </span>            :  * Allocate and initialize a new HTTP context.
+<span class="lineNum">     384 </span>            :  *
+<span class="lineNum">     385 </span>            :  * Returns an HTTP context or NULL in case of error.
+<span class="lineNum">     386 </span>            :  */
+<span class="lineNum">     387 </span>            : 
+<span class="lineNum">     388 </span>            : static xmlNanoHTTPCtxtPtr
+<span class="lineNum">     389 </span><span class="lineNoCov">          0 : xmlNanoHTTPNewCtxt(const char *URL) {</span>
+<span class="lineNum">     390 </span>            :     xmlNanoHTTPCtxtPtr ret;
+<span class="lineNum">     391 </span>            : 
+<span class="lineNum">     392 </span><span class="lineNoCov">          0 :     ret = (xmlNanoHTTPCtxtPtr) xmlMalloc(sizeof(xmlNanoHTTPCtxt));</span>
+<span class="lineNum">     393 </span><span class="lineNoCov">          0 :     if (ret == NULL) {</span>
+<span class="lineNum">     394 </span>            :         xmlHTTPErrMemory(&quot;allocating context&quot;);
+<span class="lineNum">     395 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">     396 </span>            :     }
+<span class="lineNum">     397 </span>            : 
+<span class="lineNum">     398 </span>            :     memset(ret, 0, sizeof(xmlNanoHTTPCtxt));
+<span class="lineNum">     399 </span><span class="lineNoCov">          0 :     ret-&gt;port = 80;</span>
+<span class="lineNum">     400 </span><span class="lineNoCov">          0 :     ret-&gt;returnValue = 0;</span>
+<span class="lineNum">     401 </span><span class="lineNoCov">          0 :     ret-&gt;fd = INVALID_SOCKET;</span>
+<span class="lineNum">     402 </span><span class="lineNoCov">          0 :     ret-&gt;ContentLength = -1;</span>
+<span class="lineNum">     403 </span>            : 
+<span class="lineNum">     404 </span><span class="lineNoCov">          0 :     xmlNanoHTTPScanURL(ret, URL);</span>
+<span class="lineNum">     405 </span>            : 
+<span class="lineNum">     406 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">     407 </span>            : }
+<span class="lineNum">     408 </span>            : 
+<span class="lineNum">     409 </span>            : /**
+<span class="lineNum">     410 </span>            :  * xmlNanoHTTPFreeCtxt:
+<span class="lineNum">     411 </span>            :  * @ctxt:  an HTTP context
+<span class="lineNum">     412 </span>            :  *
+<span class="lineNum">     413 </span>            :  * Frees the context after closing the connection.
+<span class="lineNum">     414 </span>            :  */
+<a name="415"><span class="lineNum">     415 </span>            : </a>
+<span class="lineNum">     416 </span>            : static void
+<span class="lineNum">     417 </span><span class="lineNoCov">          0 : xmlNanoHTTPFreeCtxt(xmlNanoHTTPCtxtPtr ctxt) {</span>
+<span class="lineNum">     418 </span><span class="lineNoCov">          0 :     if (ctxt == NULL) return;</span>
+<span class="lineNum">     419 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;hostname != NULL) xmlFree(ctxt-&gt;hostname);</span>
+<span class="lineNum">     420 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;protocol != NULL) xmlFree(ctxt-&gt;protocol);</span>
+<span class="lineNum">     421 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;path != NULL) xmlFree(ctxt-&gt;path);</span>
+<span class="lineNum">     422 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;query != NULL) xmlFree(ctxt-&gt;query);</span>
+<span class="lineNum">     423 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;out != NULL) xmlFree(ctxt-&gt;out);</span>
+<span class="lineNum">     424 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;in != NULL) xmlFree(ctxt-&gt;in);</span>
+<span class="lineNum">     425 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;contentType != NULL) xmlFree(ctxt-&gt;contentType);</span>
+<span class="lineNum">     426 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;encoding != NULL) xmlFree(ctxt-&gt;encoding);</span>
+<span class="lineNum">     427 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;mimeType != NULL) xmlFree(ctxt-&gt;mimeType);</span>
+<span class="lineNum">     428 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;location != NULL) xmlFree(ctxt-&gt;location);</span>
+<span class="lineNum">     429 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;authHeader != NULL) xmlFree(ctxt-&gt;authHeader);</span>
+<span class="lineNum">     430 </span>            : #ifdef HAVE_ZLIB_H
+<span class="lineNum">     431 </span>            :     if (ctxt-&gt;strm != NULL) {
+<span class="lineNum">     432 </span>            :         inflateEnd(ctxt-&gt;strm);
+<span class="lineNum">     433 </span>            :         xmlFree(ctxt-&gt;strm);
+<span class="lineNum">     434 </span>            :     }
+<span class="lineNum">     435 </span>            : #endif
+<span class="lineNum">     436 </span>            : 
+<span class="lineNum">     437 </span><span class="lineNoCov">          0 :     ctxt-&gt;state = XML_NANO_HTTP_NONE;</span>
+<span class="lineNum">     438 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;fd != INVALID_SOCKET) closesocket(ctxt-&gt;fd);</span>
+<span class="lineNum">     439 </span><span class="lineNoCov">          0 :     ctxt-&gt;fd = INVALID_SOCKET;</span>
+<span class="lineNum">     440 </span><span class="lineNoCov">          0 :     xmlFree(ctxt);</span>
+<span class="lineNum">     441 </span>            : }
+<span class="lineNum">     442 </span>            : 
+<span class="lineNum">     443 </span>            : /**
+<span class="lineNum">     444 </span>            :  * xmlNanoHTTPSend:
+<span class="lineNum">     445 </span>            :  * @ctxt:  an HTTP context
+<span class="lineNum">     446 </span>            :  *
+<span class="lineNum">     447 </span>            :  * Send the input needed to initiate the processing on the server side
+<span class="lineNum">     448 </span>            :  * Returns number of bytes sent or -1 on error.
+<span class="lineNum">     449 </span>            :  */
+<span class="lineNum">     450 </span>            : 
+<span class="lineNum">     451 </span>            : static int
+<span class="lineNum">     452 </span><span class="lineNoCov">          0 : xmlNanoHTTPSend(xmlNanoHTTPCtxtPtr ctxt, const char *xmt_ptr, int outlen)</span>
+<span class="lineNum">     453 </span>            : {
+<span class="lineNum">     454 </span><span class="lineNoCov">          0 :     int total_sent = 0;</span>
+<span class="lineNum">     455 </span>            : #ifdef HAVE_POLL_H
+<span class="lineNum">     456 </span>            :     struct pollfd p;
+<span class="lineNum">     457 </span>            : #else
+<span class="lineNum">     458 </span>            :     struct timeval tv;
+<span class="lineNum">     459 </span>            :     fd_set wfd;
+<span class="lineNum">     460 </span>            : #endif
+<span class="lineNum">     461 </span>            : 
+<span class="lineNum">     462 </span><span class="lineNoCov">          0 :     if ((ctxt-&gt;state &amp; XML_NANO_HTTP_WRITE) &amp;&amp; (xmt_ptr != NULL)) {</span>
+<span class="lineNum">     463 </span><span class="lineNoCov">          0 :         while (total_sent &lt; outlen) {</span>
+<span class="lineNum">     464 </span><span class="lineNoCov">          0 :             int nsent = send(ctxt-&gt;fd, SEND_ARG2_CAST (xmt_ptr + total_sent),</span>
+<span class="lineNum">     465 </span><span class="lineNoCov">          0 :                              outlen - total_sent, 0);</span>
+<span class="lineNum">     466 </span>            : 
+<span class="lineNum">     467 </span><span class="lineNoCov">          0 :             if (nsent &gt; 0)</span>
+<span class="lineNum">     468 </span><span class="lineNoCov">          0 :                 total_sent += nsent;</span>
+<span class="lineNum">     469 </span><span class="lineNoCov">          0 :             else if ((nsent == -1) &amp;&amp;</span>
+<span class="lineNum">     470 </span>            : #if defined(EAGAIN) &amp;&amp; EAGAIN != EWOULDBLOCK
+<span class="lineNum">     471 </span>            :                      (socket_errno() != EAGAIN) &amp;&amp;
+<span class="lineNum">     472 </span>            : #endif
+<span class="lineNum">     473 </span>            :                      (socket_errno() != EWOULDBLOCK)) {
+<span class="lineNum">     474 </span><span class="lineNoCov">          0 :                 __xmlIOErr(XML_FROM_HTTP, 0, &quot;send failed\n&quot;);</span>
+<span class="lineNum">     475 </span><span class="lineNoCov">          0 :                 if (total_sent == 0)</span>
+<span class="lineNum">     476 </span><span class="lineNoCov">          0 :                     total_sent = -1;</span>
+<span class="lineNum">     477 </span>            :                 break;
+<span class="lineNum">     478 </span>            :             } else {
+<span class="lineNum">     479 </span>            :                 /*
+<span class="lineNum">     480 </span>            :                  * No data sent
+<span class="lineNum">     481 </span>            :                  * Since non-blocking sockets are used, wait for
+<span class="lineNum">     482 </span>            :                  * socket to be writable or default timeout prior
+<span class="lineNum">     483 </span>            :                  * to retrying.
+<span class="lineNum">     484 </span>            :                  */
+<span class="lineNum">     485 </span>            : #ifndef HAVE_POLL_H
+<span class="lineNum">     486 </span>            : #ifndef _WINSOCKAPI_
+<span class="lineNum">     487 </span>            :                 if (ctxt-&gt;fd &gt; FD_SETSIZE)
+<span class="lineNum">     488 </span>            :                     return -1;
+<span class="lineNum">     489 </span>            : #endif
+<span class="lineNum">     490 </span>            : 
+<span class="lineNum">     491 </span>            :                 tv.tv_sec = timeout;
+<span class="lineNum">     492 </span>            :                 tv.tv_usec = 0;
+<span class="lineNum">     493 </span>            :                 FD_ZERO(&amp;wfd);
+<span class="lineNum">     494 </span>            : #ifdef _MSC_VER
+<span class="lineNum">     495 </span>            : #pragma warning(push)
+<span class="lineNum">     496 </span>            : #pragma warning(disable: 4018)
+<span class="lineNum">     497 </span>            : #endif
+<span class="lineNum">     498 </span>            :                 FD_SET(ctxt-&gt;fd, &amp;wfd);
+<span class="lineNum">     499 </span>            : #ifdef _MSC_VER
+<span class="lineNum">     500 </span>            : #pragma warning(pop)
+<span class="lineNum">     501 </span>            : #endif
+<span class="lineNum">     502 </span>            :                 (void) select(ctxt-&gt;fd + 1, NULL, &amp;wfd, NULL, &amp;tv);
+<span class="lineNum">     503 </span>            : #else
+<span class="lineNum">     504 </span><span class="lineNoCov">          0 :                 p.fd = ctxt-&gt;fd;</span>
+<span class="lineNum">     505 </span><span class="lineNoCov">          0 :                 p.events = POLLOUT;</span>
+<span class="lineNum">     506 </span><span class="lineNoCov">          0 :                 (void) poll(&amp;p, 1, timeout * 1000);</span>
+<span class="lineNum">     507 </span>            : #endif /* !HAVE_POLL_H */
+<span class="lineNum">     508 </span>            :             }
+<span class="lineNum">     509 </span>            :         }
+<span class="lineNum">     510 </span>            :     }
+<span class="lineNum">     511 </span>            : 
+<span class="lineNum">     512 </span><span class="lineNoCov">          0 :     return total_sent;</span>
+<span class="lineNum">     513 </span>            : }
+<span class="lineNum">     514 </span>            : 
+<span class="lineNum">     515 </span>            : /**
+<span class="lineNum">     516 </span>            :  * xmlNanoHTTPRecv:
+<span class="lineNum">     517 </span>            :  * @ctxt:  an HTTP context
+<span class="lineNum">     518 </span>            :  *
+<span class="lineNum">     519 </span>            :  * Read information coming from the HTTP connection.
+<span class="lineNum">     520 </span>            :  * This is a blocking call (but it blocks in select(), not read()).
+<span class="lineNum">     521 </span>            :  *
+<span class="lineNum">     522 </span>            :  * Returns the number of byte read or -1 in case of error.
+<span class="lineNum">     523 </span>            :  */
+<span class="lineNum">     524 </span>            : 
+<span class="lineNum">     525 </span>            : static int
+<span class="lineNum">     526 </span><span class="lineNoCov">          0 : xmlNanoHTTPRecv(xmlNanoHTTPCtxtPtr ctxt)</span>
+<span class="lineNum">     527 </span>            : {
+<span class="lineNum">     528 </span>            : #ifdef HAVE_POLL_H
+<span class="lineNum">     529 </span>            :     struct pollfd p;
+<span class="lineNum">     530 </span>            : #else
+<span class="lineNum">     531 </span>            :     fd_set rfd;
+<span class="lineNum">     532 </span>            :     struct timeval tv;
+<span class="lineNum">     533 </span>            : #endif
+<span class="lineNum">     534 </span>            : 
+<span class="lineNum">     535 </span>            : 
+<span class="lineNum">     536 </span><span class="lineNoCov">          0 :     while (ctxt-&gt;state &amp; XML_NANO_HTTP_READ) {</span>
+<span class="lineNum">     537 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;in == NULL) {</span>
+<span class="lineNum">     538 </span><span class="lineNoCov">          0 :             ctxt-&gt;in = (char *) xmlMallocAtomic(65000 * sizeof(char));</span>
+<span class="lineNum">     539 </span><span class="lineNoCov">          0 :             if (ctxt-&gt;in == NULL) {</span>
+<span class="lineNum">     540 </span>            :                 xmlHTTPErrMemory(&quot;allocating input&quot;);
+<span class="lineNum">     541 </span><span class="lineNoCov">          0 :                 ctxt-&gt;last = -1;</span>
+<span class="lineNum">     542 </span><span class="lineNoCov">          0 :                 return (-1);</span>
+<span class="lineNum">     543 </span>            :             }
+<span class="lineNum">     544 </span><span class="lineNoCov">          0 :             ctxt-&gt;inlen = 65000;</span>
+<span class="lineNum">     545 </span><span class="lineNoCov">          0 :             ctxt-&gt;inptr = ctxt-&gt;content = ctxt-&gt;inrptr = ctxt-&gt;in;</span>
+<span class="lineNum">     546 </span>            :         }
+<span class="lineNum">     547 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;inrptr &gt; ctxt-&gt;in + XML_NANO_HTTP_CHUNK) {</span>
+<span class="lineNum">     548 </span><span class="lineNoCov">          0 :             int delta = ctxt-&gt;inrptr - ctxt-&gt;in;</span>
+<span class="lineNum">     549 </span><span class="lineNoCov">          0 :             int len = ctxt-&gt;inptr - ctxt-&gt;inrptr;</span>
+<span class="lineNum">     550 </span>            : 
+<span class="lineNum">     551 </span><span class="lineNoCov">          0 :             memmove(ctxt-&gt;in, ctxt-&gt;inrptr, len);</span>
+<span class="lineNum">     552 </span><span class="lineNoCov">          0 :             ctxt-&gt;inrptr -= delta;</span>
+<span class="lineNum">     553 </span><span class="lineNoCov">          0 :             ctxt-&gt;content -= delta;</span>
+<span class="lineNum">     554 </span><span class="lineNoCov">          0 :             ctxt-&gt;inptr -= delta;</span>
+<span class="lineNum">     555 </span>            :         }
+<span class="lineNum">     556 </span><span class="lineNoCov">          0 :         if ((ctxt-&gt;in + ctxt-&gt;inlen) &lt; (ctxt-&gt;inptr + XML_NANO_HTTP_CHUNK)) {</span>
+<span class="lineNum">     557 </span><span class="lineNoCov">          0 :             int d_inptr = ctxt-&gt;inptr - ctxt-&gt;in;</span>
+<span class="lineNum">     558 </span><span class="lineNoCov">          0 :             int d_content = ctxt-&gt;content - ctxt-&gt;in;</span>
+<span class="lineNum">     559 </span><span class="lineNoCov">          0 :             int d_inrptr = ctxt-&gt;inrptr - ctxt-&gt;in;</span>
+<span class="lineNum">     560 </span><span class="lineNoCov">          0 :             char *tmp_ptr = ctxt-&gt;in;</span>
+<span class="lineNum">     561 </span>            : 
+<span class="lineNum">     562 </span><span class="lineNoCov">          0 :             ctxt-&gt;inlen *= 2;</span>
+<span class="lineNum">     563 </span><span class="lineNoCov">          0 :             ctxt-&gt;in = (char *) xmlRealloc(tmp_ptr, ctxt-&gt;inlen);</span>
+<span class="lineNum">     564 </span><span class="lineNoCov">          0 :             if (ctxt-&gt;in == NULL) {</span>
+<span class="lineNum">     565 </span>            :                 xmlHTTPErrMemory(&quot;allocating input buffer&quot;);
+<span class="lineNum">     566 </span><span class="lineNoCov">          0 :                 xmlFree(tmp_ptr);</span>
+<span class="lineNum">     567 </span><span class="lineNoCov">          0 :                 ctxt-&gt;last = -1;</span>
+<span class="lineNum">     568 </span><span class="lineNoCov">          0 :                 return (-1);</span>
+<span class="lineNum">     569 </span>            :             }
+<span class="lineNum">     570 </span><span class="lineNoCov">          0 :             ctxt-&gt;inptr = ctxt-&gt;in + d_inptr;</span>
+<span class="lineNum">     571 </span><span class="lineNoCov">          0 :             ctxt-&gt;content = ctxt-&gt;in + d_content;</span>
+<span class="lineNum">     572 </span><span class="lineNoCov">          0 :             ctxt-&gt;inrptr = ctxt-&gt;in + d_inrptr;</span>
+<span class="lineNum">     573 </span>            :         }
+<span class="lineNum">     574 </span><span class="lineNoCov">          0 :         ctxt-&gt;last = recv(ctxt-&gt;fd, ctxt-&gt;inptr, XML_NANO_HTTP_CHUNK, 0);</span>
+<span class="lineNum">     575 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;last &gt; 0) {</span>
+<span class="lineNum">     576 </span><span class="lineNoCov">          0 :             ctxt-&gt;inptr += ctxt-&gt;last;</span>
+<span class="lineNum">     577 </span><span class="lineNoCov">          0 :             return (ctxt-&gt;last);</span>
+<span class="lineNum">     578 </span>            :         }
+<span class="lineNum">     579 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;last == 0) {</span>
+<span class="lineNum">     580 </span>            :             return (0);
+<span class="lineNum">     581 </span>            :         }
+<span class="lineNum">     582 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;last == -1) {</span>
+<span class="lineNum">     583 </span><span class="lineNoCov">          0 :             switch (socket_errno()) {</span>
+<span class="lineNum">     584 </span>            :                 case EINPROGRESS:
+<span class="lineNum">     585 </span>            :                 case EWOULDBLOCK:
+<span class="lineNum">     586 </span>            : #if defined(EAGAIN) &amp;&amp; EAGAIN != EWOULDBLOCK
+<span class="lineNum">     587 </span>            :                 case EAGAIN:
+<span class="lineNum">     588 </span>            : #endif
+<span class="lineNum">     589 </span>            :                     break;
+<span class="lineNum">     590 </span>            : 
+<span class="lineNum">     591 </span>            :                 case ECONNRESET:
+<span class="lineNum">     592 </span>            :                 case ESHUTDOWN:
+<span class="lineNum">     593 </span>            :                     return (0);
+<span class="lineNum">     594 </span>            : 
+<span class="lineNum">     595 </span>            :                 default:
+<span class="lineNum">     596 </span><span class="lineNoCov">          0 :                     __xmlIOErr(XML_FROM_HTTP, 0, &quot;recv failed\n&quot;);</span>
+<span class="lineNum">     597 </span><span class="lineNoCov">          0 :                     return (-1);</span>
+<span class="lineNum">     598 </span>            :             }
+<span class="lineNum">     599 </span>            :         }
+<span class="lineNum">     600 </span>            : #ifdef HAVE_POLL_H
+<span class="lineNum">     601 </span><span class="lineNoCov">          0 :         p.fd = ctxt-&gt;fd;</span>
+<span class="lineNum">     602 </span><span class="lineNoCov">          0 :         p.events = POLLIN;</span>
+<span class="lineNum">     603 </span><span class="lineNoCov">          0 :         if ((poll(&amp;p, 1, timeout * 1000) &lt; 1)</span>
+<span class="lineNum">     604 </span>            : #if defined(EINTR)
+<span class="lineNum">     605 </span><span class="lineNoCov">          0 :             &amp;&amp; (errno != EINTR)</span>
+<span class="lineNum">     606 </span>            : #endif
+<span class="lineNum">     607 </span>            :             )
+<span class="lineNum">     608 </span>            :             return (0);
+<span class="lineNum">     609 </span>            : #else /* !HAVE_POLL_H */
+<span class="lineNum">     610 </span>            : #ifndef _WINSOCKAPI_
+<span class="lineNum">     611 </span>            :         if (ctxt-&gt;fd &gt; FD_SETSIZE)
+<span class="lineNum">     612 </span>            :             return 0;
+<span class="lineNum">     613 </span>            : #endif
+<span class="lineNum">     614 </span>            : 
+<span class="lineNum">     615 </span>            :         tv.tv_sec = timeout;
+<span class="lineNum">     616 </span>            :         tv.tv_usec = 0;
+<span class="lineNum">     617 </span>            :         FD_ZERO(&amp;rfd);
+<span class="lineNum">     618 </span>            : 
+<span class="lineNum">     619 </span>            : #ifdef _MSC_VER
+<span class="lineNum">     620 </span>            : #pragma warning(push)
+<span class="lineNum">     621 </span>            : #pragma warning(disable: 4018)
+<span class="lineNum">     622 </span>            : #endif
+<span class="lineNum">     623 </span>            : 
+<span class="lineNum">     624 </span>            :         FD_SET(ctxt-&gt;fd, &amp;rfd);
+<span class="lineNum">     625 </span>            : 
+<span class="lineNum">     626 </span>            : #ifdef _MSC_VER
+<span class="lineNum">     627 </span>            : #pragma warning(pop)
+<span class="lineNum">     628 </span>            : #endif
+<span class="lineNum">     629 </span>            : 
+<span class="lineNum">     630 </span>            :         if ((select(ctxt-&gt;fd + 1, &amp;rfd, NULL, NULL, &amp;tv) &lt; 1)
+<span class="lineNum">     631 </span>            : #if defined(EINTR)
+<span class="lineNum">     632 </span>            :             &amp;&amp; (errno != EINTR)
+<span class="lineNum">     633 </span>            : #endif
+<span class="lineNum">     634 </span>            :             )
+<span class="lineNum">     635 </span>            :             return (0);
+<span class="lineNum">     636 </span>            : #endif /* !HAVE_POLL_H */
+<span class="lineNum">     637 </span>            :     }
+<span class="lineNum">     638 </span>            :     return (0);
+<span class="lineNum">     639 </span>            : }
+<span class="lineNum">     640 </span>            : 
+<span class="lineNum">     641 </span>            : /**
+<span class="lineNum">     642 </span>            :  * xmlNanoHTTPReadLine:
+<span class="lineNum">     643 </span>            :  * @ctxt:  an HTTP context
+<span class="lineNum">     644 </span>            :  *
+<span class="lineNum">     645 </span>            :  * Read one line in the HTTP server output, usually for extracting
+<span class="lineNum">     646 </span>            :  * the HTTP protocol informations from the answer header.
+<span class="lineNum">     647 </span>            :  *
+<span class="lineNum">     648 </span>            :  * Returns a newly allocated string with a copy of the line, or NULL
+<span class="lineNum">     649 </span>            :  *         which indicate the end of the input.
+<span class="lineNum">     650 </span>            :  */
+<a name="651"><span class="lineNum">     651 </span>            : </a>
+<span class="lineNum">     652 </span>            : static char *
+<span class="lineNum">     653 </span><span class="lineNoCov">          0 : xmlNanoHTTPReadLine(xmlNanoHTTPCtxtPtr ctxt) {</span>
+<span class="lineNum">     654 </span>            :     char buf[4096];
+<span class="lineNum">     655 </span><span class="lineNoCov">          0 :     char *bp = buf;</span>
+<span class="lineNum">     656 </span>            :     int rc;
+<span class="lineNum">     657 </span>            : 
+<span class="lineNum">     658 </span><span class="lineNoCov">          0 :     while (bp - buf &lt; 4095) {</span>
+<span class="lineNum">     659 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;inrptr == ctxt-&gt;inptr) {</span>
+<span class="lineNum">     660 </span><span class="lineNoCov">          0 :             if ( (rc = xmlNanoHTTPRecv(ctxt)) == 0) {</span>
+<span class="lineNum">     661 </span><span class="lineNoCov">          0 :                 if (bp == buf)</span>
+<span class="lineNum">     662 </span>            :                     return(NULL);
+<span class="lineNum">     663 </span>            :                 else
+<span class="lineNum">     664 </span><span class="lineNoCov">          0 :                     *bp = 0;</span>
+<span class="lineNum">     665 </span><span class="lineNoCov">          0 :                 return(xmlMemStrdup(buf));</span>
+<span class="lineNum">     666 </span>            :             }
+<span class="lineNum">     667 </span><span class="lineNoCov">          0 :             else if ( rc == -1 ) {</span>
+<span class="lineNum">     668 </span>            :                 return ( NULL );
+<span class="lineNum">     669 </span>            :             }
+<span class="lineNum">     670 </span>            :         }
+<span class="lineNum">     671 </span><span class="lineNoCov">          0 :         *bp = *ctxt-&gt;inrptr++;</span>
+<span class="lineNum">     672 </span><span class="lineNoCov">          0 :         if (*bp == '\n') {</span>
+<span class="lineNum">     673 </span><span class="lineNoCov">          0 :             *bp = 0;</span>
+<span class="lineNum">     674 </span><span class="lineNoCov">          0 :             return(xmlMemStrdup(buf));</span>
+<span class="lineNum">     675 </span>            :         }
+<span class="lineNum">     676 </span><span class="lineNoCov">          0 :         if (*bp != '\r')</span>
+<span class="lineNum">     677 </span><span class="lineNoCov">          0 :             bp++;</span>
+<span class="lineNum">     678 </span>            :     }
+<span class="lineNum">     679 </span><span class="lineNoCov">          0 :     buf[4095] = 0;</span>
+<span class="lineNum">     680 </span><span class="lineNoCov">          0 :     return(xmlMemStrdup(buf));</span>
+<span class="lineNum">     681 </span>            : }
+<span class="lineNum">     682 </span>            : 
+<span class="lineNum">     683 </span>            : 
+<span class="lineNum">     684 </span>            : /**
+<span class="lineNum">     685 </span>            :  * xmlNanoHTTPScanAnswer:
+<span class="lineNum">     686 </span>            :  * @ctxt:  an HTTP context
+<span class="lineNum">     687 </span>            :  * @line:  an HTTP header line
+<span class="lineNum">     688 </span>            :  *
+<span class="lineNum">     689 </span>            :  * Try to extract useful informations from the server answer.
+<span class="lineNum">     690 </span>            :  * We currently parse and process:
+<span class="lineNum">     691 </span>            :  *  - The HTTP revision/ return code
+<span class="lineNum">     692 </span>            :  *  - The Content-Type, Mime-Type and charset used
+<span class="lineNum">     693 </span>            :  *  - The Location for redirect processing.
+<span class="lineNum">     694 </span>            :  *
+<span class="lineNum">     695 </span>            :  * Returns -1 in case of failure, the file descriptor number otherwise
+<span class="lineNum">     696 </span>            :  */
+<a name="697"><span class="lineNum">     697 </span>            : </a>
+<span class="lineNum">     698 </span>            : static void
+<span class="lineNum">     699 </span><span class="lineNoCov">          0 : xmlNanoHTTPScanAnswer(xmlNanoHTTPCtxtPtr ctxt, const char *line) {</span>
+<span class="lineNum">     700 </span><span class="lineNoCov">          0 :     const char *cur = line;</span>
+<span class="lineNum">     701 </span>            : 
+<span class="lineNum">     702 </span><span class="lineNoCov">          0 :     if (line == NULL) return;</span>
+<span class="lineNum">     703 </span>            : 
+<span class="lineNum">     704 </span><span class="lineNoCov">          0 :     if (!strncmp(line, &quot;HTTP/&quot;, 5)) {</span>
+<span class="lineNum">     705 </span><span class="lineNoCov">          0 :         int version = 0;</span>
+<span class="lineNum">     706 </span><span class="lineNoCov">          0 :         int ret = 0;</span>
+<span class="lineNum">     707 </span>            : 
+<span class="lineNum">     708 </span><span class="lineNoCov">          0 :         cur += 5;</span>
+<span class="lineNum">     709 </span><span class="lineNoCov">          0 :         while ((*cur &gt;= '0') &amp;&amp; (*cur &lt;= '9')) {</span>
+<span class="lineNum">     710 </span><span class="lineNoCov">          0 :             version *= 10;</span>
+<span class="lineNum">     711 </span><span class="lineNoCov">          0 :             version += *cur - '0';</span>
+<span class="lineNum">     712 </span><span class="lineNoCov">          0 :             cur++;</span>
+<span class="lineNum">     713 </span>            :         }
+<span class="lineNum">     714 </span><span class="lineNoCov">          0 :         if (*cur == '.') {</span>
+<span class="lineNum">     715 </span><span class="lineNoCov">          0 :             cur++;</span>
+<span class="lineNum">     716 </span><span class="lineNoCov">          0 :             if ((*cur &gt;= '0') &amp;&amp; (*cur &lt;= '9')) {</span>
+<span class="lineNum">     717 </span><span class="lineNoCov">          0 :                 version *= 10;</span>
+<span class="lineNum">     718 </span><span class="lineNoCov">          0 :                 version += *cur - '0';</span>
+<span class="lineNum">     719 </span><span class="lineNoCov">          0 :                 cur++;</span>
+<span class="lineNum">     720 </span>            :             }
+<span class="lineNum">     721 </span><span class="lineNoCov">          0 :             while ((*cur &gt;= '0') &amp;&amp; (*cur &lt;= '9'))</span>
+<span class="lineNum">     722 </span><span class="lineNoCov">          0 :                 cur++;</span>
+<span class="lineNum">     723 </span>            :         } else
+<span class="lineNum">     724 </span><span class="lineNoCov">          0 :             version *= 10;</span>
+<span class="lineNum">     725 </span><span class="lineNoCov">          0 :         if ((*cur != ' ') &amp;&amp; (*cur != '\t')) return;</span>
+<span class="lineNum">     726 </span><span class="lineNoCov">          0 :         while ((*cur == ' ') || (*cur == '\t')) cur++;</span>
+<span class="lineNum">     727 </span><span class="lineNoCov">          0 :         if ((*cur &lt; '0') || (*cur &gt; '9')) return;</span>
+<span class="lineNum">     728 </span><span class="lineNoCov">          0 :         while ((*cur &gt;= '0') &amp;&amp; (*cur &lt;= '9')) {</span>
+<span class="lineNum">     729 </span><span class="lineNoCov">          0 :             ret *= 10;</span>
+<span class="lineNum">     730 </span><span class="lineNoCov">          0 :             ret += *cur - '0';</span>
+<span class="lineNum">     731 </span><span class="lineNoCov">          0 :             cur++;</span>
+<span class="lineNum">     732 </span>            :         }
+<span class="lineNum">     733 </span><span class="lineNoCov">          0 :         if ((*cur != 0) &amp;&amp; (*cur != ' ') &amp;&amp; (*cur != '\t')) return;</span>
+<span class="lineNum">     734 </span><span class="lineNoCov">          0 :         ctxt-&gt;returnValue = ret;</span>
+<span class="lineNum">     735 </span><span class="lineNoCov">          0 :         ctxt-&gt;version = version;</span>
+<span class="lineNum">     736 </span><span class="lineNoCov">          0 :     } else if (!xmlStrncasecmp(BAD_CAST line, BAD_CAST&quot;Content-Type:&quot;, 13)) {</span>
+<span class="lineNum">     737 </span>            :         const xmlChar *charset, *last, *mime;
+<span class="lineNum">     738 </span><span class="lineNoCov">          0 :         cur += 13;</span>
+<span class="lineNum">     739 </span><span class="lineNoCov">          0 :         while ((*cur == ' ') || (*cur == '\t')) cur++;</span>
+<span class="lineNum">     740 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;contentType != NULL)</span>
+<span class="lineNum">     741 </span><span class="lineNoCov">          0 :             xmlFree(ctxt-&gt;contentType);</span>
+<span class="lineNum">     742 </span><span class="lineNoCov">          0 :         ctxt-&gt;contentType = xmlMemStrdup(cur);</span>
+<span class="lineNum">     743 </span><span class="lineNoCov">          0 :         mime = (const xmlChar *) cur;</span>
+<span class="lineNum">     744 </span><span class="lineNoCov">          0 :         last = mime;</span>
+<span class="lineNum">     745 </span><span class="lineNoCov">          0 :         while ((*last != 0) &amp;&amp; (*last != ' ') &amp;&amp; (*last != '\t') &amp;&amp;</span>
+<span class="lineNum">     746 </span><span class="lineNoCov">          0 :                (*last != ';') &amp;&amp; (*last != ','))</span>
+<span class="lineNum">     747 </span><span class="lineNoCov">          0 :             last++;</span>
+<span class="lineNum">     748 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;mimeType != NULL)</span>
+<span class="lineNum">     749 </span><span class="lineNoCov">          0 :             xmlFree(ctxt-&gt;mimeType);</span>
+<span class="lineNum">     750 </span><span class="lineNoCov">          0 :         ctxt-&gt;mimeType = (char *) xmlStrndup(mime, last - mime);</span>
+<span class="lineNum">     751 </span><span class="lineNoCov">          0 :         charset = xmlStrstr(BAD_CAST ctxt-&gt;contentType, BAD_CAST &quot;charset=&quot;);</span>
+<span class="lineNum">     752 </span><span class="lineNoCov">          0 :         if (charset != NULL) {</span>
+<span class="lineNum">     753 </span><span class="lineNoCov">          0 :             charset += 8;</span>
+<span class="lineNum">     754 </span><span class="lineNoCov">          0 :             last = charset;</span>
+<span class="lineNum">     755 </span><span class="lineNoCov">          0 :             while ((*last != 0) &amp;&amp; (*last != ' ') &amp;&amp; (*last != '\t') &amp;&amp;</span>
+<span class="lineNum">     756 </span><span class="lineNoCov">          0 :                    (*last != ';') &amp;&amp; (*last != ','))</span>
+<span class="lineNum">     757 </span><span class="lineNoCov">          0 :                 last++;</span>
+<span class="lineNum">     758 </span><span class="lineNoCov">          0 :             if (ctxt-&gt;encoding != NULL)</span>
+<span class="lineNum">     759 </span><span class="lineNoCov">          0 :                 xmlFree(ctxt-&gt;encoding);</span>
+<span class="lineNum">     760 </span><span class="lineNoCov">          0 :             ctxt-&gt;encoding = (char *) xmlStrndup(charset, last - charset);</span>
+<span class="lineNum">     761 </span>            :         }
+<span class="lineNum">     762 </span><span class="lineNoCov">          0 :     } else if (!xmlStrncasecmp(BAD_CAST line, BAD_CAST&quot;ContentType:&quot;, 12)) {</span>
+<span class="lineNum">     763 </span>            :         const xmlChar *charset, *last, *mime;
+<span class="lineNum">     764 </span><span class="lineNoCov">          0 :         cur += 12;</span>
+<span class="lineNum">     765 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;contentType != NULL) return;</span>
+<span class="lineNum">     766 </span><span class="lineNoCov">          0 :         while ((*cur == ' ') || (*cur == '\t')) cur++;</span>
+<span class="lineNum">     767 </span><span class="lineNoCov">          0 :         ctxt-&gt;contentType = xmlMemStrdup(cur);</span>
+<span class="lineNum">     768 </span><span class="lineNoCov">          0 :         mime = (const xmlChar *) cur;</span>
+<span class="lineNum">     769 </span><span class="lineNoCov">          0 :         last = mime;</span>
+<span class="lineNum">     770 </span><span class="lineNoCov">          0 :         while ((*last != 0) &amp;&amp; (*last != ' ') &amp;&amp; (*last != '\t') &amp;&amp;</span>
+<span class="lineNum">     771 </span><span class="lineNoCov">          0 :                (*last != ';') &amp;&amp; (*last != ','))</span>
+<span class="lineNum">     772 </span><span class="lineNoCov">          0 :             last++;</span>
+<span class="lineNum">     773 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;mimeType != NULL)</span>
+<span class="lineNum">     774 </span><span class="lineNoCov">          0 :             xmlFree(ctxt-&gt;mimeType);</span>
+<span class="lineNum">     775 </span><span class="lineNoCov">          0 :         ctxt-&gt;mimeType = (char *) xmlStrndup(mime, last - mime);</span>
+<span class="lineNum">     776 </span><span class="lineNoCov">          0 :         charset = xmlStrstr(BAD_CAST ctxt-&gt;contentType, BAD_CAST &quot;charset=&quot;);</span>
+<span class="lineNum">     777 </span><span class="lineNoCov">          0 :         if (charset != NULL) {</span>
+<span class="lineNum">     778 </span><span class="lineNoCov">          0 :             charset += 8;</span>
+<span class="lineNum">     779 </span><span class="lineNoCov">          0 :             last = charset;</span>
+<span class="lineNum">     780 </span><span class="lineNoCov">          0 :             while ((*last != 0) &amp;&amp; (*last != ' ') &amp;&amp; (*last != '\t') &amp;&amp;</span>
+<span class="lineNum">     781 </span><span class="lineNoCov">          0 :                    (*last != ';') &amp;&amp; (*last != ','))</span>
+<span class="lineNum">     782 </span><span class="lineNoCov">          0 :                 last++;</span>
+<span class="lineNum">     783 </span><span class="lineNoCov">          0 :             if (ctxt-&gt;encoding != NULL)</span>
+<span class="lineNum">     784 </span><span class="lineNoCov">          0 :                 xmlFree(ctxt-&gt;encoding);</span>
+<span class="lineNum">     785 </span><span class="lineNoCov">          0 :             ctxt-&gt;encoding = (char *) xmlStrndup(charset, last - charset);</span>
+<span class="lineNum">     786 </span>            :         }
+<span class="lineNum">     787 </span><span class="lineNoCov">          0 :     } else if (!xmlStrncasecmp(BAD_CAST line, BAD_CAST&quot;Location:&quot;, 9)) {</span>
+<span class="lineNum">     788 </span><span class="lineNoCov">          0 :         cur += 9;</span>
+<span class="lineNum">     789 </span><span class="lineNoCov">          0 :         while ((*cur == ' ') || (*cur == '\t')) cur++;</span>
+<span class="lineNum">     790 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;location != NULL)</span>
+<span class="lineNum">     791 </span><span class="lineNoCov">          0 :             xmlFree(ctxt-&gt;location);</span>
+<span class="lineNum">     792 </span><span class="lineNoCov">          0 :         if (*cur == '/') {</span>
+<span class="lineNum">     793 </span><span class="lineNoCov">          0 :             xmlChar *tmp_http = xmlStrdup(BAD_CAST &quot;http://&quot;);</span>
+<span class="lineNum">     794 </span><span class="lineNoCov">          0 :             xmlChar *tmp_loc =</span>
+<span class="lineNum">     795 </span><span class="lineNoCov">          0 :                 xmlStrcat(tmp_http, (const xmlChar *) ctxt-&gt;hostname);</span>
+<span class="lineNum">     796 </span><span class="lineNoCov">          0 :             ctxt-&gt;location =</span>
+<span class="lineNum">     797 </span><span class="lineNoCov">          0 :                 (char *) xmlStrcat (tmp_loc, (const xmlChar *) cur);</span>
+<span class="lineNum">     798 </span>            :         } else {
+<span class="lineNum">     799 </span><span class="lineNoCov">          0 :             ctxt-&gt;location = xmlMemStrdup(cur);</span>
+<span class="lineNum">     800 </span>            :         }
+<span class="lineNum">     801 </span><span class="lineNoCov">          0 :     } else if (!xmlStrncasecmp(BAD_CAST line, BAD_CAST&quot;WWW-Authenticate:&quot;, 17)) {</span>
+<span class="lineNum">     802 </span><span class="lineNoCov">          0 :         cur += 17;</span>
+<span class="lineNum">     803 </span><span class="lineNoCov">          0 :         while ((*cur == ' ') || (*cur == '\t')) cur++;</span>
+<span class="lineNum">     804 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;authHeader != NULL)</span>
+<span class="lineNum">     805 </span><span class="lineNoCov">          0 :             xmlFree(ctxt-&gt;authHeader);</span>
+<span class="lineNum">     806 </span><span class="lineNoCov">          0 :         ctxt-&gt;authHeader = xmlMemStrdup(cur);</span>
+<span class="lineNum">     807 </span><span class="lineNoCov">          0 :     } else if (!xmlStrncasecmp(BAD_CAST line, BAD_CAST&quot;Proxy-Authenticate:&quot;, 19)) {</span>
+<span class="lineNum">     808 </span><span class="lineNoCov">          0 :         cur += 19;</span>
+<span class="lineNum">     809 </span><span class="lineNoCov">          0 :         while ((*cur == ' ') || (*cur == '\t')) cur++;</span>
+<span class="lineNum">     810 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;authHeader != NULL)</span>
+<span class="lineNum">     811 </span><span class="lineNoCov">          0 :             xmlFree(ctxt-&gt;authHeader);</span>
+<span class="lineNum">     812 </span><span class="lineNoCov">          0 :         ctxt-&gt;authHeader = xmlMemStrdup(cur);</span>
+<span class="lineNum">     813 </span>            : #ifdef HAVE_ZLIB_H
+<span class="lineNum">     814 </span>            :     } else if ( !xmlStrncasecmp( BAD_CAST line, BAD_CAST&quot;Content-Encoding:&quot;, 17) ) {
+<span class="lineNum">     815 </span>            :         cur += 17;
+<span class="lineNum">     816 </span>            :         while ((*cur == ' ') || (*cur == '\t')) cur++;
+<span class="lineNum">     817 </span>            :         if ( !xmlStrncasecmp( BAD_CAST cur, BAD_CAST&quot;gzip&quot;, 4) ) {
+<span class="lineNum">     818 </span>            :             ctxt-&gt;usesGzip = 1;
+<span class="lineNum">     819 </span>            : 
+<span class="lineNum">     820 </span>            :             ctxt-&gt;strm = xmlMalloc(sizeof(z_stream));
+<span class="lineNum">     821 </span>            : 
+<span class="lineNum">     822 </span>            :             if (ctxt-&gt;strm != NULL) {
+<span class="lineNum">     823 </span>            :                 ctxt-&gt;strm-&gt;zalloc = Z_NULL;
+<span class="lineNum">     824 </span>            :                 ctxt-&gt;strm-&gt;zfree = Z_NULL;
+<span class="lineNum">     825 </span>            :                 ctxt-&gt;strm-&gt;opaque = Z_NULL;
+<span class="lineNum">     826 </span>            :                 ctxt-&gt;strm-&gt;avail_in = 0;
+<span class="lineNum">     827 </span>            :                 ctxt-&gt;strm-&gt;next_in = Z_NULL;
+<span class="lineNum">     828 </span>            : 
+<span class="lineNum">     829 </span>            :                 inflateInit2( ctxt-&gt;strm, 31 );
+<span class="lineNum">     830 </span>            :             }
+<span class="lineNum">     831 </span>            :         }
+<span class="lineNum">     832 </span>            : #endif
+<span class="lineNum">     833 </span><span class="lineNoCov">          0 :     } else if ( !xmlStrncasecmp( BAD_CAST line, BAD_CAST&quot;Content-Length:&quot;, 15) ) {</span>
+<span class="lineNum">     834 </span><span class="lineNoCov">          0 :         cur += 15;</span>
+<span class="lineNum">     835 </span><span class="lineNoCov">          0 :         ctxt-&gt;ContentLength = strtol( cur, NULL, 10 );</span>
+<span class="lineNum">     836 </span>            :     }
+<span class="lineNum">     837 </span>            : }
+<span class="lineNum">     838 </span>            : 
+<span class="lineNum">     839 </span>            : /**
+<span class="lineNum">     840 </span>            :  * xmlNanoHTTPConnectAttempt:
+<span class="lineNum">     841 </span>            :  * @addr:  a socket address structure
+<span class="lineNum">     842 </span>            :  *
+<span class="lineNum">     843 </span>            :  * Attempt a connection to the given IP:port endpoint. It forces
+<span class="lineNum">     844 </span>            :  * non-blocking semantic on the socket, and allow 60 seconds for
+<span class="lineNum">     845 </span>            :  * the host to answer.
+<span class="lineNum">     846 </span>            :  *
+<span class="lineNum">     847 </span>            :  * Returns -1 in case of failure, the file descriptor number otherwise
+<span class="lineNum">     848 </span>            :  */
+<span class="lineNum">     849 </span>            : 
+<span class="lineNum">     850 </span>            : static SOCKET
+<span class="lineNum">     851 </span><span class="lineNoCov">          0 : xmlNanoHTTPConnectAttempt(struct sockaddr *addr)</span>
+<span class="lineNum">     852 </span>            : {
+<span class="lineNum">     853 </span>            : #ifndef HAVE_POLL_H
+<span class="lineNum">     854 </span>            :     fd_set wfd;
+<span class="lineNum">     855 </span>            : #ifdef _WINSOCKAPI_
+<span class="lineNum">     856 </span>            :     fd_set xfd;
+<span class="lineNum">     857 </span>            : #endif
+<span class="lineNum">     858 </span>            :     struct timeval tv;
+<span class="lineNum">     859 </span>            : #else /* !HAVE_POLL_H */
+<span class="lineNum">     860 </span>            :     struct pollfd p;
+<span class="lineNum">     861 </span>            : #endif /* !HAVE_POLL_H */
+<span class="lineNum">     862 </span>            :     int status;
+<span class="lineNum">     863 </span>            : 
+<span class="lineNum">     864 </span>            :     int addrlen;
+<span class="lineNum">     865 </span>            : 
+<span class="lineNum">     866 </span>            :     SOCKET s;
+<span class="lineNum">     867 </span>            : 
+<span class="lineNum">     868 </span>            : #ifdef SUPPORT_IP6
+<span class="lineNum">     869 </span><span class="lineNoCov">          0 :     if (addr-&gt;sa_family == AF_INET6) {</span>
+<span class="lineNum">     870 </span><span class="lineNoCov">          0 :         s = socket(PF_INET6, SOCK_STREAM, IPPROTO_TCP);</span>
+<span class="lineNum">     871 </span><span class="lineNoCov">          0 :         addrlen = sizeof(struct sockaddr_in6);</span>
+<span class="lineNum">     872 </span>            :     } else
+<span class="lineNum">     873 </span>            : #endif
+<span class="lineNum">     874 </span>            :     {
+<span class="lineNum">     875 </span><span class="lineNoCov">          0 :         s = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);</span>
+<span class="lineNum">     876 </span><span class="lineNoCov">          0 :         addrlen = sizeof(struct sockaddr_in);</span>
+<span class="lineNum">     877 </span>            :     }
+<span class="lineNum">     878 </span><span class="lineNoCov">          0 :     if (s == INVALID_SOCKET) {</span>
+<span class="lineNum">     879 </span>            : #ifdef DEBUG_HTTP
+<span class="lineNum">     880 </span>            :         perror(&quot;socket&quot;);
+<span class="lineNum">     881 </span>            : #endif
+<span class="lineNum">     882 </span><span class="lineNoCov">          0 :         __xmlIOErr(XML_FROM_HTTP, 0, &quot;socket failed\n&quot;);</span>
+<span class="lineNum">     883 </span><span class="lineNoCov">          0 :         return INVALID_SOCKET;</span>
+<span class="lineNum">     884 </span>            :     }
+<span class="lineNum">     885 </span>            : #ifdef _WINSOCKAPI_
+<span class="lineNum">     886 </span>            :     {
+<span class="lineNum">     887 </span>            :         u_long one = 1;
+<span class="lineNum">     888 </span>            : 
+<span class="lineNum">     889 </span>            :         status = ioctlsocket(s, FIONBIO, &amp;one) == SOCKET_ERROR ? -1 : 0;
+<span class="lineNum">     890 </span>            :     }
+<span class="lineNum">     891 </span>            : #else /* _WINSOCKAPI_ */
+<span class="lineNum">     892 </span>            : #if defined(VMS)
+<span class="lineNum">     893 </span>            :     {
+<span class="lineNum">     894 </span>            :         int enable = 1;
+<span class="lineNum">     895 </span>            : 
+<span class="lineNum">     896 </span>            :         status = ioctl(s, FIONBIO, &amp;enable);
+<span class="lineNum">     897 </span>            :     }
+<span class="lineNum">     898 </span>            : #else /* VMS */
+<span class="lineNum">     899 </span>            : #if defined(__BEOS__) &amp;&amp; !defined(__HAIKU__)
+<span class="lineNum">     900 </span>            :     {
+<span class="lineNum">     901 </span>            :         bool noblock = true;
+<span class="lineNum">     902 </span>            : 
+<span class="lineNum">     903 </span>            :         status =
+<span class="lineNum">     904 </span>            :             setsockopt(s, SOL_SOCKET, SO_NONBLOCK, &amp;noblock,
+<span class="lineNum">     905 </span>            :                        sizeof(noblock));
+<span class="lineNum">     906 </span>            :     }
+<span class="lineNum">     907 </span>            : #else /* __BEOS__ */
+<span class="lineNum">     908 </span><span class="lineNoCov">          0 :     if ((status = fcntl(s, F_GETFL, 0)) != -1) {</span>
+<span class="lineNum">     909 </span>            : #ifdef O_NONBLOCK
+<span class="lineNum">     910 </span><span class="lineNoCov">          0 :         status |= O_NONBLOCK;</span>
+<span class="lineNum">     911 </span>            : #else /* O_NONBLOCK */
+<span class="lineNum">     912 </span>            : #ifdef F_NDELAY
+<span class="lineNum">     913 </span>            :         status |= F_NDELAY;
+<span class="lineNum">     914 </span>            : #endif /* F_NDELAY */
+<span class="lineNum">     915 </span>            : #endif /* !O_NONBLOCK */
+<span class="lineNum">     916 </span><span class="lineNoCov">          0 :         status = fcntl(s, F_SETFL, status);</span>
+<span class="lineNum">     917 </span>            :     }
+<span class="lineNum">     918 </span><span class="lineNoCov">          0 :     if (status &lt; 0) {</span>
+<span class="lineNum">     919 </span>            : #ifdef DEBUG_HTTP
+<span class="lineNum">     920 </span>            :         perror(&quot;nonblocking&quot;);
+<span class="lineNum">     921 </span>            : #endif
+<span class="lineNum">     922 </span><span class="lineNoCov">          0 :         __xmlIOErr(XML_FROM_HTTP, 0, &quot;error setting non-blocking IO\n&quot;);</span>
+<span class="lineNum">     923 </span><span class="lineNoCov">          0 :         closesocket(s);</span>
+<span class="lineNum">     924 </span><span class="lineNoCov">          0 :         return INVALID_SOCKET;</span>
+<span class="lineNum">     925 </span>            :     }
+<span class="lineNum">     926 </span>            : #endif /* !__BEOS__ */
+<span class="lineNum">     927 </span>            : #endif /* !VMS */
+<span class="lineNum">     928 </span>            : #endif /* !_WINSOCKAPI_ */
+<span class="lineNum">     929 </span>            : 
+<span class="lineNum">     930 </span><span class="lineNoCov">          0 :     if (connect(s, addr, addrlen) == -1) {</span>
+<span class="lineNum">     931 </span><span class="lineNoCov">          0 :         switch (socket_errno()) {</span>
+<span class="lineNum">     932 </span>            :             case EINPROGRESS:
+<span class="lineNum">     933 </span>            :             case EWOULDBLOCK:
+<span class="lineNum">     934 </span>            :                 break;
+<span class="lineNum">     935 </span>            :             default:
+<span class="lineNum">     936 </span><span class="lineNoCov">          0 :                 __xmlIOErr(XML_FROM_HTTP, 0,</span>
+<span class="lineNum">     937 </span>            :                            &quot;error connecting to HTTP server&quot;);
+<span class="lineNum">     938 </span><span class="lineNoCov">          0 :                 closesocket(s);</span>
+<span class="lineNum">     939 </span><span class="lineNoCov">          0 :                 return INVALID_SOCKET;</span>
+<span class="lineNum">     940 </span>            :         }
+<span class="lineNum">     941 </span>            :     }
+<span class="lineNum">     942 </span>            : #ifndef HAVE_POLL_H
+<span class="lineNum">     943 </span>            :     tv.tv_sec = timeout;
+<span class="lineNum">     944 </span>            :     tv.tv_usec = 0;
+<span class="lineNum">     945 </span>            : 
+<span class="lineNum">     946 </span>            : #ifdef _MSC_VER
+<span class="lineNum">     947 </span>            : #pragma warning(push)
+<span class="lineNum">     948 </span>            : #pragma warning(disable: 4018)
+<span class="lineNum">     949 </span>            : #endif
+<span class="lineNum">     950 </span>            : #ifndef _WINSOCKAPI_
+<span class="lineNum">     951 </span>            :     if (s &gt; FD_SETSIZE)
+<span class="lineNum">     952 </span>            :         return INVALID_SOCKET;
+<span class="lineNum">     953 </span>            : #endif
+<span class="lineNum">     954 </span>            :     FD_ZERO(&amp;wfd);
+<span class="lineNum">     955 </span>            :     FD_SET(s, &amp;wfd);
+<span class="lineNum">     956 </span>            : 
+<span class="lineNum">     957 </span>            : #ifdef _WINSOCKAPI_
+<span class="lineNum">     958 </span>            :     FD_ZERO(&amp;xfd);
+<span class="lineNum">     959 </span>            :     FD_SET(s, &amp;xfd);
+<span class="lineNum">     960 </span>            : 
+<span class="lineNum">     961 </span>            :     switch (select(s + 1, NULL, &amp;wfd, &amp;xfd, &amp;tv))
+<span class="lineNum">     962 </span>            : #else
+<span class="lineNum">     963 </span>            :     switch (select(s + 1, NULL, &amp;wfd, NULL, &amp;tv))
+<span class="lineNum">     964 </span>            : #endif
+<span class="lineNum">     965 </span>            : #ifdef _MSC_VER
+<span class="lineNum">     966 </span>            : #pragma warning(pop)
+<span class="lineNum">     967 </span>            : #endif
+<span class="lineNum">     968 </span>            : 
+<span class="lineNum">     969 </span>            : #else /* !HAVE_POLL_H */
+<span class="lineNum">     970 </span><span class="lineNoCov">          0 :     p.fd = s;</span>
+<span class="lineNum">     971 </span><span class="lineNoCov">          0 :     p.events = POLLOUT;</span>
+<span class="lineNum">     972 </span><span class="lineNoCov">          0 :     switch (poll(&amp;p, 1, timeout * 1000))</span>
+<span class="lineNum">     973 </span>            : #endif /* !HAVE_POLL_H */
+<span class="lineNum">     974 </span>            : 
+<span class="lineNum">     975 </span>            :     {
+<span class="lineNum">     976 </span>            :         case 0:
+<span class="lineNum">     977 </span>            :             /* Time out */
+<span class="lineNum">     978 </span><span class="lineNoCov">          0 :             __xmlIOErr(XML_FROM_HTTP, 0, &quot;Connect attempt timed out&quot;);</span>
+<span class="lineNum">     979 </span><span class="lineNoCov">          0 :             closesocket(s);</span>
+<span class="lineNum">     980 </span><span class="lineNoCov">          0 :             return INVALID_SOCKET;</span>
+<span class="lineNum">     981 </span>            :         case -1:
+<span class="lineNum">     982 </span>            :             /* Ermm.. ?? */
+<span class="lineNum">     983 </span><span class="lineNoCov">          0 :             __xmlIOErr(XML_FROM_HTTP, 0, &quot;Connect failed&quot;);</span>
+<span class="lineNum">     984 </span><span class="lineNoCov">          0 :             closesocket(s);</span>
+<span class="lineNum">     985 </span><span class="lineNoCov">          0 :             return INVALID_SOCKET;</span>
+<span class="lineNum">     986 </span>            :     }
+<span class="lineNum">     987 </span>            : 
+<span class="lineNum">     988 </span>            : #ifndef HAVE_POLL_H
+<span class="lineNum">     989 </span>            :     if (FD_ISSET(s, &amp;wfd)
+<span class="lineNum">     990 </span>            : #ifdef _WINSOCKAPI_
+<span class="lineNum">     991 </span>            :         || FD_ISSET(s, &amp;xfd)
+<span class="lineNum">     992 </span>            : #endif
+<span class="lineNum">     993 </span>            :         )
+<span class="lineNum">     994 </span>            : #else /* !HAVE_POLL_H */
+<span class="lineNum">     995 </span><span class="lineNoCov">          0 :     if (p.revents == POLLOUT)</span>
+<span class="lineNum">     996 </span>            : #endif /* !HAVE_POLL_H */
+<span class="lineNum">     997 </span>            :     {
+<span class="lineNum">     998 </span>            :         XML_SOCKLEN_T len;
+<span class="lineNum">     999 </span>            : 
+<span class="lineNum">    1000 </span><span class="lineNoCov">          0 :         len = sizeof(status);</span>
+<span class="lineNum">    1001 </span>            : #ifdef SO_ERROR
+<span class="lineNum">    1002 </span><span class="lineNoCov">          0 :         if (getsockopt(s, SOL_SOCKET, SO_ERROR, (char *) &amp;status, &amp;len) &lt;</span>
+<span class="lineNum">    1003 </span>            :             0) {
+<span class="lineNum">    1004 </span>            :             /* Solaris error code */
+<span class="lineNum">    1005 </span><span class="lineNoCov">          0 :             __xmlIOErr(XML_FROM_HTTP, 0, &quot;getsockopt failed\n&quot;);</span>
+<span class="lineNum">    1006 </span><span class="lineNoCov">          0 :             closesocket(s);</span>
+<span class="lineNum">    1007 </span><span class="lineNoCov">          0 :             return INVALID_SOCKET;</span>
+<span class="lineNum">    1008 </span>            :         }
+<span class="lineNum">    1009 </span>            : #endif
+<span class="lineNum">    1010 </span><span class="lineNoCov">          0 :         if (status) {</span>
+<span class="lineNum">    1011 </span><span class="lineNoCov">          0 :             __xmlIOErr(XML_FROM_HTTP, 0,</span>
+<span class="lineNum">    1012 </span>            :                        &quot;Error connecting to remote host&quot;);
+<span class="lineNum">    1013 </span><span class="lineNoCov">          0 :             closesocket(s);</span>
+<span class="lineNum">    1014 </span><span class="lineNoCov">          0 :             errno = status;</span>
+<span class="lineNum">    1015 </span><span class="lineNoCov">          0 :             return INVALID_SOCKET;</span>
+<span class="lineNum">    1016 </span>            :         }
+<span class="lineNum">    1017 </span>            :     } else {
+<span class="lineNum">    1018 </span>            :         /* pbm */
+<span class="lineNum">    1019 </span><span class="lineNoCov">          0 :         __xmlIOErr(XML_FROM_HTTP, 0, &quot;select failed\n&quot;);</span>
+<span class="lineNum">    1020 </span><span class="lineNoCov">          0 :         closesocket(s);</span>
+<span class="lineNum">    1021 </span><span class="lineNoCov">          0 :         return INVALID_SOCKET;</span>
+<span class="lineNum">    1022 </span>            :     }
+<span class="lineNum">    1023 </span>            : 
+<span class="lineNum">    1024 </span><span class="lineNoCov">          0 :     return (s);</span>
+<span class="lineNum">    1025 </span>            : }
+<span class="lineNum">    1026 </span>            : 
+<span class="lineNum">    1027 </span>            : /**
+<span class="lineNum">    1028 </span>            :  * xmlNanoHTTPConnectHost:
+<span class="lineNum">    1029 </span>            :  * @host:  the host name
+<span class="lineNum">    1030 </span>            :  * @port:  the port number
+<span class="lineNum">    1031 </span>            :  *
+<span class="lineNum">    1032 </span>            :  * Attempt a connection to the given host:port endpoint. It tries
+<span class="lineNum">    1033 </span>            :  * the multiple IP provided by the DNS if available.
+<span class="lineNum">    1034 </span>            :  *
+<span class="lineNum">    1035 </span>            :  * Returns -1 in case of failure, the file descriptor number otherwise
+<span class="lineNum">    1036 </span>            :  */
+<a name="1037"><span class="lineNum">    1037 </span>            : </a>
+<span class="lineNum">    1038 </span>            : static SOCKET
+<span class="lineNum">    1039 </span><span class="lineNoCov">          0 : xmlNanoHTTPConnectHost(const char *host, int port)</span>
+<span class="lineNum">    1040 </span>            : {
+<span class="lineNum">    1041 </span>            :     struct hostent *h;
+<span class="lineNum">    1042 </span><span class="lineNoCov">          0 :     struct sockaddr *addr = NULL;</span>
+<span class="lineNum">    1043 </span>            :     struct in_addr ia;
+<span class="lineNum">    1044 </span>            :     struct sockaddr_in sockin;
+<span class="lineNum">    1045 </span>            : 
+<span class="lineNum">    1046 </span>            : #ifdef SUPPORT_IP6
+<span class="lineNum">    1047 </span>            :     struct in6_addr ia6;
+<span class="lineNum">    1048 </span>            :     struct sockaddr_in6 sockin6;
+<span class="lineNum">    1049 </span>            : #endif
+<span class="lineNum">    1050 </span>            :     int i;
+<span class="lineNum">    1051 </span>            :     SOCKET s;
+<span class="lineNum">    1052 </span>            : 
+<span class="lineNum">    1053 </span>            :     memset (&amp;sockin, 0, sizeof(sockin));
+<span class="lineNum">    1054 </span>            : #ifdef SUPPORT_IP6
+<span class="lineNum">    1055 </span>            :     memset (&amp;sockin6, 0, sizeof(sockin6));
+<span class="lineNum">    1056 </span>            : #endif
+<span class="lineNum">    1057 </span>            : 
+<span class="lineNum">    1058 </span>            : #if !defined(HAVE_GETADDRINFO) &amp;&amp; defined(SUPPORT_IP6) &amp;&amp; defined(RES_USE_INET6)
+<span class="lineNum">    1059 </span>            :     if (have_ipv6 ())
+<span class="lineNum">    1060 </span>            :     {
+<span class="lineNum">    1061 </span>            :         if (!(_res.options &amp; RES_INIT))
+<span class="lineNum">    1062 </span>            :             res_init();
+<span class="lineNum">    1063 </span>            :         _res.options |= RES_USE_INET6;
+<span class="lineNum">    1064 </span>            :     }
+<span class="lineNum">    1065 </span>            : #endif
+<span class="lineNum">    1066 </span>            : 
+<span class="lineNum">    1067 </span>            : #if defined(HAVE_GETADDRINFO) &amp;&amp; defined(SUPPORT_IP6) &amp;&amp; !defined(_WIN32)
+<span class="lineNum">    1068 </span><span class="lineNoCov">          0 :     if (have_ipv6 ())</span>
+<span class="lineNum">    1069 </span>            : #endif
+<span class="lineNum">    1070 </span>            : #if defined(HAVE_GETADDRINFO) &amp;&amp; (defined(SUPPORT_IP6) || defined(_WIN32))
+<span class="lineNum">    1071 </span>            :     {
+<span class="lineNum">    1072 </span>            :         int status;
+<span class="lineNum">    1073 </span>            :         struct addrinfo hints, *res, *result;
+<span class="lineNum">    1074 </span>            : 
+<span class="lineNum">    1075 </span><span class="lineNoCov">          0 :         result = NULL;</span>
+<span class="lineNum">    1076 </span>            :         memset (&amp;hints, 0,sizeof(hints));
+<span class="lineNum">    1077 </span><span class="lineNoCov">          0 :         hints.ai_socktype = SOCK_STREAM;</span>
+<span class="lineNum">    1078 </span>            : 
+<span class="lineNum">    1079 </span><span class="lineNoCov">          0 :         status = getaddrinfo (host, NULL, &amp;hints, &amp;result);</span>
+<span class="lineNum">    1080 </span><span class="lineNoCov">          0 :         if (status) {</span>
+<span class="lineNum">    1081 </span><span class="lineNoCov">          0 :             __xmlIOErr(XML_FROM_HTTP, 0, &quot;getaddrinfo failed\n&quot;);</span>
+<span class="lineNum">    1082 </span><span class="lineNoCov">          0 :             return INVALID_SOCKET;</span>
+<span class="lineNum">    1083 </span>            :         }
+<span class="lineNum">    1084 </span>            : 
+<span class="lineNum">    1085 </span><span class="lineNoCov">          0 :         for (res = result; res; res = res-&gt;ai_next) {</span>
+<span class="lineNum">    1086 </span><span class="lineNoCov">          0 :             if (res-&gt;ai_family == AF_INET) {</span>
+<span class="lineNum">    1087 </span><span class="lineNoCov">          0 :                 if (res-&gt;ai_addrlen &gt; sizeof(sockin)) {</span>
+<span class="lineNum">    1088 </span><span class="lineNoCov">          0 :                     __xmlIOErr(XML_FROM_HTTP, 0, &quot;address size mismatch\n&quot;);</span>
+<span class="lineNum">    1089 </span><span class="lineNoCov">          0 :                     freeaddrinfo (result);</span>
+<span class="lineNum">    1090 </span><span class="lineNoCov">          0 :                     return INVALID_SOCKET;</span>
+<span class="lineNum">    1091 </span>            :                 }
+<span class="lineNum">    1092 </span><span class="lineNoCov">          0 :                 memcpy (&amp;sockin, res-&gt;ai_addr, res-&gt;ai_addrlen);</span>
+<span class="lineNum">    1093 </span><span class="lineNoCov">          0 :                 sockin.sin_port = htons (port);</span>
+<span class="lineNum">    1094 </span><span class="lineNoCov">          0 :                 addr = (struct sockaddr *)&amp;sockin;</span>
+<span class="lineNum">    1095 </span>            : #ifdef SUPPORT_IP6
+<span class="lineNum">    1096 </span><span class="lineNoCov">          0 :             } else if (have_ipv6 () &amp;&amp; (res-&gt;ai_family == AF_INET6)) {</span>
+<span class="lineNum">    1097 </span><span class="lineNoCov">          0 :                 if (res-&gt;ai_addrlen &gt; sizeof(sockin6)) {</span>
+<span class="lineNum">    1098 </span><span class="lineNoCov">          0 :                     __xmlIOErr(XML_FROM_HTTP, 0, &quot;address size mismatch\n&quot;);</span>
+<span class="lineNum">    1099 </span><span class="lineNoCov">          0 :                     freeaddrinfo (result);</span>
+<span class="lineNum">    1100 </span><span class="lineNoCov">          0 :                     return INVALID_SOCKET;</span>
+<span class="lineNum">    1101 </span>            :                 }
+<span class="lineNum">    1102 </span><span class="lineNoCov">          0 :                 memcpy (&amp;sockin6, res-&gt;ai_addr, res-&gt;ai_addrlen);</span>
+<span class="lineNum">    1103 </span><span class="lineNoCov">          0 :                 sockin6.sin6_port = htons (port);</span>
+<span class="lineNum">    1104 </span><span class="lineNoCov">          0 :                 addr = (struct sockaddr *)&amp;sockin6;</span>
+<span class="lineNum">    1105 </span>            : #endif
+<span class="lineNum">    1106 </span>            :             } else
+<span class="lineNum">    1107 </span><span class="lineNoCov">          0 :                 continue;              /* for */</span>
+<span class="lineNum">    1108 </span>            : 
+<span class="lineNum">    1109 </span><span class="lineNoCov">          0 :             s = xmlNanoHTTPConnectAttempt (addr);</span>
+<span class="lineNum">    1110 </span><span class="lineNoCov">          0 :             if (s != INVALID_SOCKET) {</span>
+<span class="lineNum">    1111 </span><span class="lineNoCov">          0 :                 freeaddrinfo (result);</span>
+<span class="lineNum">    1112 </span><span class="lineNoCov">          0 :                 return (s);</span>
+<span class="lineNum">    1113 </span>            :             }
+<span class="lineNum">    1114 </span>            :         }
+<span class="lineNum">    1115 </span>            : 
+<span class="lineNum">    1116 </span><span class="lineNoCov">          0 :         if (result)</span>
+<span class="lineNum">    1117 </span><span class="lineNoCov">          0 :             freeaddrinfo (result);</span>
+<span class="lineNum">    1118 </span>            :     }
+<span class="lineNum">    1119 </span>            : #endif
+<span class="lineNum">    1120 </span>            : #if defined(HAVE_GETADDRINFO) &amp;&amp; defined(SUPPORT_IP6) &amp;&amp; !defined(_WIN32)
+<span class="lineNum">    1121 </span>            :     else
+<span class="lineNum">    1122 </span>            : #endif
+<span class="lineNum">    1123 </span>            : #if !defined(HAVE_GETADDRINFO) || !defined(_WIN32)
+<span class="lineNum">    1124 </span>            :     {
+<span class="lineNum">    1125 </span><span class="lineNoCov">          0 :         h = gethostbyname (GETHOSTBYNAME_ARG_CAST host);</span>
+<span class="lineNum">    1126 </span><span class="lineNoCov">          0 :         if (h == NULL) {</span>
+<span class="lineNum">    1127 </span>            : 
+<span class="lineNum">    1128 </span>            : /*
+<span class="lineNum">    1129 </span>            :  * Okay, I got fed up by the non-portability of this error message
+<span class="lineNum">    1130 </span>            :  * extraction code. it work on Linux, if it work on your platform
+<span class="lineNum">    1131 </span>            :  * and one want to enable it, send me the defined(foobar) needed
+<span class="lineNum">    1132 </span>            :  */
+<span class="lineNum">    1133 </span>            : #if defined(HAVE_NETDB_H) &amp;&amp; defined(HOST_NOT_FOUND) &amp;&amp; defined(linux)
+<span class="lineNum">    1134 </span><span class="lineNoCov">          0 :             const char *h_err_txt = &quot;&quot;;</span>
+<span class="lineNum">    1135 </span>            : 
+<span class="lineNum">    1136 </span><span class="lineNoCov">          0 :             switch (h_errno) {</span>
+<span class="lineNum">    1137 </span>            :                 case HOST_NOT_FOUND:
+<span class="lineNum">    1138 </span>            :                     h_err_txt = &quot;Authoritive host not found&quot;;
+<span class="lineNum">    1139 </span>            :                     break;
+<span class="lineNum">    1140 </span>            : 
+<span class="lineNum">    1141 </span>            :                 case TRY_AGAIN:
+<span class="lineNum">    1142 </span>            :                     h_err_txt =
+<span class="lineNum">    1143 </span>            :                         &quot;Non-authoritive host not found or server failure.&quot;;
+<span class="lineNum">    1144 </span>            :                     break;
+<span class="lineNum">    1145 </span>            : 
+<span class="lineNum">    1146 </span>            :                 case NO_RECOVERY:
+<span class="lineNum">    1147 </span>            :                     h_err_txt =
+<span class="lineNum">    1148 </span>            :                         &quot;Non-recoverable errors:  FORMERR, REFUSED, or NOTIMP.&quot;;
+<span class="lineNum">    1149 </span>            :                     break;
+<span class="lineNum">    1150 </span>            : 
+<span class="lineNum">    1151 </span>            : #ifdef NO_ADDRESS
+<span class="lineNum">    1152 </span>            :                 case NO_ADDRESS:
+<span class="lineNum">    1153 </span>            :                     h_err_txt =
+<span class="lineNum">    1154 </span>            :                         &quot;Valid name, no data record of requested type.&quot;;
+<span class="lineNum">    1155 </span>            :                     break;
+<span class="lineNum">    1156 </span>            : #endif
+<span class="lineNum">    1157 </span>            : 
+<span class="lineNum">    1158 </span>            :                 default:
+<span class="lineNum">    1159 </span>            :                     h_err_txt = &quot;No error text defined.&quot;;
+<span class="lineNum">    1160 </span>            :                     break;
+<span class="lineNum">    1161 </span>            :             }
+<span class="lineNum">    1162 </span><span class="lineNoCov">          0 :             __xmlIOErr(XML_FROM_HTTP, 0, h_err_txt);</span>
+<span class="lineNum">    1163 </span>            : #else
+<span class="lineNum">    1164 </span>            :             __xmlIOErr(XML_FROM_HTTP, 0, &quot;Failed to resolve host&quot;);
+<span class="lineNum">    1165 </span>            : #endif
+<span class="lineNum">    1166 </span><span class="lineNoCov">          0 :             return INVALID_SOCKET;</span>
+<span class="lineNum">    1167 </span>            :         }
+<span class="lineNum">    1168 </span>            : 
+<span class="lineNum">    1169 </span><span class="lineNoCov">          0 :         for (i = 0; h-&gt;h_addr_list[i]; i++) {</span>
+<span class="lineNum">    1170 </span><span class="lineNoCov">          0 :             if (h-&gt;h_addrtype == AF_INET) {</span>
+<span class="lineNum">    1171 </span>            :                 /* A records (IPv4) */
+<span class="lineNum">    1172 </span><span class="lineNoCov">          0 :                 if ((unsigned int) h-&gt;h_length &gt; sizeof(ia)) {</span>
+<span class="lineNum">    1173 </span><span class="lineNoCov">          0 :                     __xmlIOErr(XML_FROM_HTTP, 0, &quot;address size mismatch\n&quot;);</span>
+<span class="lineNum">    1174 </span><span class="lineNoCov">          0 :                     return INVALID_SOCKET;</span>
+<span class="lineNum">    1175 </span>            :                 }
+<span class="lineNum">    1176 </span><span class="lineNoCov">          0 :                 memcpy (&amp;ia, h-&gt;h_addr_list[i], h-&gt;h_length);</span>
+<span class="lineNum">    1177 </span><span class="lineNoCov">          0 :                 sockin.sin_family = h-&gt;h_addrtype;</span>
+<span class="lineNum">    1178 </span><span class="lineNoCov">          0 :                 sockin.sin_addr = ia;</span>
+<span class="lineNum">    1179 </span><span class="lineNoCov">          0 :                 sockin.sin_port = (unsigned short)htons ((unsigned short)port);</span>
+<span class="lineNum">    1180 </span><span class="lineNoCov">          0 :                 addr = (struct sockaddr *) &amp;sockin;</span>
+<span class="lineNum">    1181 </span>            : #ifdef SUPPORT_IP6
+<span class="lineNum">    1182 </span><span class="lineNoCov">          0 :             } else if (have_ipv6 () &amp;&amp; (h-&gt;h_addrtype == AF_INET6)) {</span>
+<span class="lineNum">    1183 </span>            :                 /* AAAA records (IPv6) */
+<span class="lineNum">    1184 </span><span class="lineNoCov">          0 :                 if ((unsigned int) h-&gt;h_length &gt; sizeof(ia6)) {</span>
+<span class="lineNum">    1185 </span><span class="lineNoCov">          0 :                     __xmlIOErr(XML_FROM_HTTP, 0, &quot;address size mismatch\n&quot;);</span>
+<span class="lineNum">    1186 </span><span class="lineNoCov">          0 :                     return INVALID_SOCKET;</span>
+<span class="lineNum">    1187 </span>            :                 }
+<span class="lineNum">    1188 </span><span class="lineNoCov">          0 :                 memcpy (&amp;ia6, h-&gt;h_addr_list[i], h-&gt;h_length);</span>
+<span class="lineNum">    1189 </span><span class="lineNoCov">          0 :                 sockin6.sin6_family = h-&gt;h_addrtype;</span>
+<span class="lineNum">    1190 </span><span class="lineNoCov">          0 :                 sockin6.sin6_addr = ia6;</span>
+<span class="lineNum">    1191 </span><span class="lineNoCov">          0 :                 sockin6.sin6_port = htons (port);</span>
+<span class="lineNum">    1192 </span><span class="lineNoCov">          0 :                 addr = (struct sockaddr *) &amp;sockin6;</span>
+<span class="lineNum">    1193 </span>            : #endif
+<span class="lineNum">    1194 </span>            :             } else
+<span class="lineNum">    1195 </span>            :                 break;              /* for */
+<span class="lineNum">    1196 </span>            : 
+<span class="lineNum">    1197 </span><span class="lineNoCov">          0 :             s = xmlNanoHTTPConnectAttempt (addr);</span>
+<span class="lineNum">    1198 </span><span class="lineNoCov">          0 :             if (s != INVALID_SOCKET)</span>
+<span class="lineNum">    1199 </span>            :                 return (s);
+<span class="lineNum">    1200 </span>            :         }
+<span class="lineNum">    1201 </span>            :     }
+<span class="lineNum">    1202 </span>            : #endif
+<span class="lineNum">    1203 </span>            : 
+<span class="lineNum">    1204 </span>            : #ifdef DEBUG_HTTP
+<span class="lineNum">    1205 </span>            :     xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">    1206 </span>            :                     &quot;xmlNanoHTTPConnectHost:  unable to connect to '%s'.\n&quot;,
+<span class="lineNum">    1207 </span>            :                     host);
+<span class="lineNum">    1208 </span>            : #endif
+<span class="lineNum">    1209 </span>            :     return INVALID_SOCKET;
+<span class="lineNum">    1210 </span>            : }
+<span class="lineNum">    1211 </span>            : 
+<span class="lineNum">    1212 </span>            : 
+<span class="lineNum">    1213 </span>            : /**
+<span class="lineNum">    1214 </span>            :  * xmlNanoHTTPOpen:
+<span class="lineNum">    1215 </span>            :  * @URL:  The URL to load
+<span class="lineNum">    1216 </span>            :  * @contentType:  if available the Content-Type information will be
+<span class="lineNum">    1217 </span>            :  *                returned at that location
+<span class="lineNum">    1218 </span>            :  *
+<span class="lineNum">    1219 </span>            :  * This function try to open a connection to the indicated resource
+<span class="lineNum">    1220 </span>            :  * via HTTP GET.
+<span class="lineNum">    1221 </span>            :  *
+<span class="lineNum">    1222 </span>            :  * Returns NULL in case of failure, otherwise a request handler.
+<span class="lineNum">    1223 </span>            :  *     The contentType, if provided must be freed by the caller
+<span class="lineNum">    1224 </span>            :  */
+<a name="1225"><span class="lineNum">    1225 </span>            : </a>
+<span class="lineNum">    1226 </span>            : void*
+<span class="lineNum">    1227 </span><span class="lineNoCov">          0 : xmlNanoHTTPOpen(const char *URL, char **contentType) {</span>
+<span class="lineNum">    1228 </span><span class="lineNoCov">          0 :     if (contentType != NULL) *contentType = NULL;</span>
+<span class="lineNum">    1229 </span><span class="lineNoCov">          0 :     return(xmlNanoHTTPMethod(URL, NULL, NULL, contentType, NULL, 0));</span>
+<span class="lineNum">    1230 </span>            : }
+<span class="lineNum">    1231 </span>            : 
+<span class="lineNum">    1232 </span>            : /**
+<span class="lineNum">    1233 </span>            :  * xmlNanoHTTPOpenRedir:
+<span class="lineNum">    1234 </span>            :  * @URL:  The URL to load
+<span class="lineNum">    1235 </span>            :  * @contentType:  if available the Content-Type information will be
+<span class="lineNum">    1236 </span>            :  *                returned at that location
+<span class="lineNum">    1237 </span>            :  * @redir: if available the redirected URL will be returned
+<span class="lineNum">    1238 </span>            :  *
+<span class="lineNum">    1239 </span>            :  * This function try to open a connection to the indicated resource
+<span class="lineNum">    1240 </span>            :  * via HTTP GET.
+<span class="lineNum">    1241 </span>            :  *
+<span class="lineNum">    1242 </span>            :  * Returns NULL in case of failure, otherwise a request handler.
+<span class="lineNum">    1243 </span>            :  *     The contentType, if provided must be freed by the caller
+<span class="lineNum">    1244 </span>            :  */
+<a name="1245"><span class="lineNum">    1245 </span>            : </a>
+<span class="lineNum">    1246 </span>            : void*
+<span class="lineNum">    1247 </span><span class="lineNoCov">          0 : xmlNanoHTTPOpenRedir(const char *URL, char **contentType, char **redir) {</span>
+<span class="lineNum">    1248 </span><span class="lineNoCov">          0 :     if (contentType != NULL) *contentType = NULL;</span>
+<span class="lineNum">    1249 </span><span class="lineNoCov">          0 :     if (redir != NULL) *redir = NULL;</span>
+<span class="lineNum">    1250 </span><span class="lineNoCov">          0 :     return(xmlNanoHTTPMethodRedir(URL, NULL, NULL, contentType, redir, NULL,0));</span>
+<span class="lineNum">    1251 </span>            : }
+<span class="lineNum">    1252 </span>            : 
+<span class="lineNum">    1253 </span>            : /**
+<span class="lineNum">    1254 </span>            :  * xmlNanoHTTPRead:
+<span class="lineNum">    1255 </span>            :  * @ctx:  the HTTP context
+<span class="lineNum">    1256 </span>            :  * @dest:  a buffer
+<span class="lineNum">    1257 </span>            :  * @len:  the buffer length
+<span class="lineNum">    1258 </span>            :  *
+<span class="lineNum">    1259 </span>            :  * This function tries to read @len bytes from the existing HTTP connection
+<span class="lineNum">    1260 </span>            :  * and saves them in @dest. This is a blocking call.
+<span class="lineNum">    1261 </span>            :  *
+<span class="lineNum">    1262 </span>            :  * Returns the number of byte read. 0 is an indication of an end of connection.
+<span class="lineNum">    1263 </span>            :  *         -1 indicates a parameter error.
+<a name="1264"><span class="lineNum">    1264 </span>            :  */</a>
+<span class="lineNum">    1265 </span>            : int
+<span class="lineNum">    1266 </span><span class="lineNoCov">          0 : xmlNanoHTTPRead(void *ctx, void *dest, int len) {</span>
+<span class="lineNum">    1267 </span><span class="lineNoCov">          0 :     xmlNanoHTTPCtxtPtr ctxt = (xmlNanoHTTPCtxtPtr) ctx;</span>
+<span class="lineNum">    1268 </span>            : #ifdef HAVE_ZLIB_H
+<span class="lineNum">    1269 </span>            :     int bytes_read = 0;
+<span class="lineNum">    1270 </span>            :     int orig_avail_in;
+<span class="lineNum">    1271 </span>            :     int z_ret;
+<span class="lineNum">    1272 </span>            : #endif
+<span class="lineNum">    1273 </span>            : 
+<span class="lineNum">    1274 </span><span class="lineNoCov">          0 :     if (ctx == NULL) return(-1);</span>
+<span class="lineNum">    1275 </span><span class="lineNoCov">          0 :     if (dest == NULL) return(-1);</span>
+<span class="lineNum">    1276 </span><span class="lineNoCov">          0 :     if (len &lt;= 0) return(0);</span>
+<span class="lineNum">    1277 </span>            : 
+<span class="lineNum">    1278 </span>            : #ifdef HAVE_ZLIB_H
+<span class="lineNum">    1279 </span>            :     if (ctxt-&gt;usesGzip == 1) {
+<span class="lineNum">    1280 </span>            :         if (ctxt-&gt;strm == NULL) return(0);
+<span class="lineNum">    1281 </span>            : 
+<span class="lineNum">    1282 </span>            :         ctxt-&gt;strm-&gt;next_out = dest;
+<span class="lineNum">    1283 </span>            :         ctxt-&gt;strm-&gt;avail_out = len;
+<span class="lineNum">    1284 </span>            :         ctxt-&gt;strm-&gt;avail_in = ctxt-&gt;inptr - ctxt-&gt;inrptr;
+<span class="lineNum">    1285 </span>            : 
+<span class="lineNum">    1286 </span>            :         while (ctxt-&gt;strm-&gt;avail_out &gt; 0 &amp;&amp;
+<span class="lineNum">    1287 </span>            :                (ctxt-&gt;strm-&gt;avail_in &gt; 0 || xmlNanoHTTPRecv(ctxt) &gt; 0)) {
+<span class="lineNum">    1288 </span>            :             orig_avail_in = ctxt-&gt;strm-&gt;avail_in =
+<span class="lineNum">    1289 </span>            :                             ctxt-&gt;inptr - ctxt-&gt;inrptr - bytes_read;
+<span class="lineNum">    1290 </span>            :             ctxt-&gt;strm-&gt;next_in = BAD_CAST (ctxt-&gt;inrptr + bytes_read);
+<span class="lineNum">    1291 </span>            : 
+<span class="lineNum">    1292 </span>            :             z_ret = inflate(ctxt-&gt;strm, Z_NO_FLUSH);
+<span class="lineNum">    1293 </span>            :             bytes_read += orig_avail_in - ctxt-&gt;strm-&gt;avail_in;
+<span class="lineNum">    1294 </span>            : 
+<span class="lineNum">    1295 </span>            :             if (z_ret != Z_OK) break;
+<span class="lineNum">    1296 </span>            :         }
+<span class="lineNum">    1297 </span>            : 
+<span class="lineNum">    1298 </span>            :         ctxt-&gt;inrptr += bytes_read;
+<span class="lineNum">    1299 </span>            :         return(len - ctxt-&gt;strm-&gt;avail_out);
+<span class="lineNum">    1300 </span>            :     }
+<span class="lineNum">    1301 </span>            : #endif
+<span class="lineNum">    1302 </span>            : 
+<span class="lineNum">    1303 </span><span class="lineNoCov">          0 :     while (ctxt-&gt;inptr - ctxt-&gt;inrptr &lt; len) {</span>
+<span class="lineNum">    1304 </span><span class="lineNoCov">          0 :         if (xmlNanoHTTPRecv(ctxt) &lt;= 0) break;</span>
+<span class="lineNum">    1305 </span>            :     }
+<span class="lineNum">    1306 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;inptr - ctxt-&gt;inrptr &lt; len)</span>
+<span class="lineNum">    1307 </span><span class="lineNoCov">          0 :         len = ctxt-&gt;inptr - ctxt-&gt;inrptr;</span>
+<span class="lineNum">    1308 </span><span class="lineNoCov">          0 :     memcpy(dest, ctxt-&gt;inrptr, len);</span>
+<span class="lineNum">    1309 </span><span class="lineNoCov">          0 :     ctxt-&gt;inrptr += len;</span>
+<span class="lineNum">    1310 </span><span class="lineNoCov">          0 :     return(len);</span>
+<span class="lineNum">    1311 </span>            : }
+<span class="lineNum">    1312 </span>            : 
+<span class="lineNum">    1313 </span>            : /**
+<span class="lineNum">    1314 </span>            :  * xmlNanoHTTPClose:
+<span class="lineNum">    1315 </span>            :  * @ctx:  the HTTP context
+<span class="lineNum">    1316 </span>            :  *
+<span class="lineNum">    1317 </span>            :  * This function closes an HTTP context, it ends up the connection and
+<span class="lineNum">    1318 </span>            :  * free all data related to it.
+<a name="1319"><span class="lineNum">    1319 </span>            :  */</a>
+<a name="1320"><span class="lineNum">    1320 </span>            : void</a>
+<span class="lineNum">    1321 </span><span class="lineNoCov">          0 : xmlNanoHTTPClose(void *ctx) {</span>
+<span class="lineNum">    1322 </span><span class="lineNoCov">          0 :     xmlNanoHTTPCtxtPtr ctxt = (xmlNanoHTTPCtxtPtr) ctx;</span>
+<span class="lineNum">    1323 </span>            : 
+<span class="lineNum">    1324 </span><span class="lineNoCov">          0 :     if (ctx == NULL) return;</span>
+<span class="lineNum">    1325 </span>            : 
+<span class="lineNum">    1326 </span><span class="lineNoCov">          0 :     xmlNanoHTTPFreeCtxt(ctxt);</span>
+<span class="lineNum">    1327 </span>            : }
+<span class="lineNum">    1328 </span>            : 
+<span class="lineNum">    1329 </span>            : /**
+<span class="lineNum">    1330 </span>            :  * xmlNanoHTTPMethodRedir:
+<span class="lineNum">    1331 </span>            :  * @URL:  The URL to load
+<span class="lineNum">    1332 </span>            :  * @method:  the HTTP method to use
+<span class="lineNum">    1333 </span>            :  * @input:  the input string if any
+<span class="lineNum">    1334 </span>            :  * @contentType:  the Content-Type information IN and OUT
+<span class="lineNum">    1335 </span>            :  * @redir:  the redirected URL OUT
+<span class="lineNum">    1336 </span>            :  * @headers:  the extra headers
+<span class="lineNum">    1337 </span>            :  * @ilen:  input length
+<span class="lineNum">    1338 </span>            :  *
+<span class="lineNum">    1339 </span>            :  * This function try to open a connection to the indicated resource
+<span class="lineNum">    1340 </span>            :  * via HTTP using the given @method, adding the given extra headers
+<span class="lineNum">    1341 </span>            :  * and the input buffer for the request content.
+<span class="lineNum">    1342 </span>            :  *
+<span class="lineNum">    1343 </span>            :  * Returns NULL in case of failure, otherwise a request handler.
+<span class="lineNum">    1344 </span>            :  *     The contentType, or redir, if provided must be freed by the caller
+<span class="lineNum">    1345 </span>            :  */
+<span class="lineNum">    1346 </span>            : 
+<span class="lineNum">    1347 </span>            : void*
+<span class="lineNum">    1348 </span><span class="lineNoCov">          0 : xmlNanoHTTPMethodRedir(const char *URL, const char *method, const char *input,</span>
+<span class="lineNum">    1349 </span>            :                   char **contentType, char **redir,
+<span class="lineNum">    1350 </span>            :                   const char *headers, int ilen ) {
+<span class="lineNum">    1351 </span><span class="lineNoCov">          0 :     xmlNanoHTTPCtxtPtr ctxt;</span>
+<span class="lineNum">    1352 </span>            :     char *bp, *p;
+<span class="lineNum">    1353 </span>            :     int blen;
+<span class="lineNum">    1354 </span>            :     SOCKET ret;
+<span class="lineNum">    1355 </span><span class="lineNoCov">          0 :     int nbRedirects = 0;</span>
+<span class="lineNum">    1356 </span><span class="lineNoCov">          0 :     char *redirURL = NULL;</span>
+<span class="lineNum">    1357 </span>            : #ifdef DEBUG_HTTP
+<span class="lineNum">    1358 </span>            :     int xmt_bytes;
+<span class="lineNum">    1359 </span>            : #endif
+<span class="lineNum">    1360 </span>            : 
+<span class="lineNum">    1361 </span><span class="lineNoCov">          0 :     if (URL == NULL) return(NULL);</span>
+<span class="lineNum">    1362 </span><span class="lineNoCov">          0 :     if (method == NULL) method = &quot;GET&quot;;</span>
+<span class="lineNum">    1363 </span><span class="lineNoCov">          0 :     xmlNanoHTTPInit();</span>
+<span class="lineNum">    1364 </span>            : 
+<span class="lineNum">    1365 </span>            : retry:
+<span class="lineNum">    1366 </span><span class="lineNoCov">          0 :     if (redirURL == NULL) {</span>
+<span class="lineNum">    1367 </span><span class="lineNoCov">          0 :         ctxt = xmlNanoHTTPNewCtxt(URL);</span>
+<span class="lineNum">    1368 </span><span class="lineNoCov">          0 :         if (ctxt == NULL)</span>
+<span class="lineNum">    1369 </span>            :             return(NULL);
+<span class="lineNum">    1370 </span>            :     } else {
+<span class="lineNum">    1371 </span><span class="lineNoCov">          0 :         ctxt = xmlNanoHTTPNewCtxt(redirURL);</span>
+<span class="lineNum">    1372 </span><span class="lineNoCov">          0 :         if (ctxt == NULL)</span>
+<span class="lineNum">    1373 </span>            :             return(NULL);
+<span class="lineNum">    1374 </span><span class="lineNoCov">          0 :         ctxt-&gt;location = xmlMemStrdup(redirURL);</span>
+<span class="lineNum">    1375 </span>            :     }
+<span class="lineNum">    1376 </span>            : 
+<span class="lineNum">    1377 </span><span class="lineNoCov">          0 :     if ((ctxt-&gt;protocol == NULL) || (strcmp(ctxt-&gt;protocol, &quot;http&quot;))) {</span>
+<span class="lineNum">    1378 </span><span class="lineNoCov">          0 :         __xmlIOErr(XML_FROM_HTTP, XML_HTTP_URL_SYNTAX, &quot;Not a valid HTTP URI&quot;);</span>
+<span class="lineNum">    1379 </span><span class="lineNoCov">          0 :         xmlNanoHTTPFreeCtxt(ctxt);</span>
+<span class="lineNum">    1380 </span><span class="lineNoCov">          0 :         if (redirURL != NULL) xmlFree(redirURL);</span>
+<span class="lineNum">    1381 </span>            :         return(NULL);
+<span class="lineNum">    1382 </span>            :     }
+<span class="lineNum">    1383 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;hostname == NULL) {</span>
+<span class="lineNum">    1384 </span><span class="lineNoCov">          0 :         __xmlIOErr(XML_FROM_HTTP, XML_HTTP_UNKNOWN_HOST,</span>
+<span class="lineNum">    1385 </span>            :                    &quot;Failed to identify host in URI&quot;);
+<span class="lineNum">    1386 </span><span class="lineNoCov">          0 :         xmlNanoHTTPFreeCtxt(ctxt);</span>
+<span class="lineNum">    1387 </span><span class="lineNoCov">          0 :         if (redirURL != NULL) xmlFree(redirURL);</span>
+<span class="lineNum">    1388 </span>            :         return(NULL);
+<span class="lineNum">    1389 </span>            :     }
+<span class="lineNum">    1390 </span><span class="lineNoCov">          0 :     if (proxy) {</span>
+<span class="lineNum">    1391 </span><span class="lineNoCov">          0 :         blen = strlen(ctxt-&gt;hostname) * 2 + 16;</span>
+<span class="lineNum">    1392 </span><span class="lineNoCov">          0 :         ret = xmlNanoHTTPConnectHost(proxy, proxyPort);</span>
+<span class="lineNum">    1393 </span>            :     }
+<span class="lineNum">    1394 </span>            :     else {
+<span class="lineNum">    1395 </span><span class="lineNoCov">          0 :         blen = strlen(ctxt-&gt;hostname);</span>
+<span class="lineNum">    1396 </span><span class="lineNoCov">          0 :         ret = xmlNanoHTTPConnectHost(ctxt-&gt;hostname, ctxt-&gt;port);</span>
+<span class="lineNum">    1397 </span>            :     }
+<span class="lineNum">    1398 </span><span class="lineNoCov">          0 :     if (ret == INVALID_SOCKET) {</span>
+<span class="lineNum">    1399 </span><span class="lineNoCov">          0 :         xmlNanoHTTPFreeCtxt(ctxt);</span>
+<span class="lineNum">    1400 </span><span class="lineNoCov">          0 :         if (redirURL != NULL) xmlFree(redirURL);</span>
+<span class="lineNum">    1401 </span>            :         return(NULL);
+<span class="lineNum">    1402 </span>            :     }
+<span class="lineNum">    1403 </span><span class="lineNoCov">          0 :     ctxt-&gt;fd = ret;</span>
+<span class="lineNum">    1404 </span>            : 
+<span class="lineNum">    1405 </span><span class="lineNoCov">          0 :     if (input == NULL)</span>
+<span class="lineNum">    1406 </span>            :         ilen = 0;
+<span class="lineNum">    1407 </span>            :     else
+<span class="lineNum">    1408 </span><span class="lineNoCov">          0 :         blen += 36;</span>
+<span class="lineNum">    1409 </span>            : 
+<span class="lineNum">    1410 </span><span class="lineNoCov">          0 :     if (headers != NULL)</span>
+<span class="lineNum">    1411 </span><span class="lineNoCov">          0 :         blen += strlen(headers) + 2;</span>
+<span class="lineNum">    1412 </span><span class="lineNoCov">          0 :     if (contentType &amp;&amp; *contentType)</span>
+<span class="lineNum">    1413 </span>            :         /* reserve for string plus 'Content-Type: \r\n&quot; */
+<span class="lineNum">    1414 </span><span class="lineNoCov">          0 :         blen += strlen(*contentType) + 16;</span>
+<span class="lineNum">    1415 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;query != NULL)</span>
+<span class="lineNum">    1416 </span>            :         /* 1 for '?' */
+<span class="lineNum">    1417 </span><span class="lineNoCov">          0 :         blen += strlen(ctxt-&gt;query) + 1;</span>
+<span class="lineNum">    1418 </span><span class="lineNoCov">          0 :     blen += strlen(method) + strlen(ctxt-&gt;path) + 24;</span>
+<span class="lineNum">    1419 </span>            : #ifdef HAVE_ZLIB_H
+<span class="lineNum">    1420 </span>            :     /* reserve for possible 'Accept-Encoding: gzip' string */
+<span class="lineNum">    1421 </span>            :     blen += 23;
+<span class="lineNum">    1422 </span>            : #endif
+<span class="lineNum">    1423 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;port != 80) {</span>
+<span class="lineNum">    1424 </span>            :         /* reserve space for ':xxxxx', incl. potential proxy */
+<span class="lineNum">    1425 </span><span class="lineNoCov">          0 :         if (proxy)</span>
+<span class="lineNum">    1426 </span><span class="lineNoCov">          0 :             blen += 12;</span>
+<span class="lineNum">    1427 </span>            :         else
+<span class="lineNum">    1428 </span><span class="lineNoCov">          0 :             blen += 6;</span>
+<span class="lineNum">    1429 </span>            :     }
+<span class="lineNum">    1430 </span><span class="lineNoCov">          0 :     bp = (char*)xmlMallocAtomic(blen);</span>
+<span class="lineNum">    1431 </span><span class="lineNoCov">          0 :     if ( bp == NULL ) {</span>
+<span class="lineNum">    1432 </span><span class="lineNoCov">          0 :         xmlNanoHTTPFreeCtxt( ctxt );</span>
+<span class="lineNum">    1433 </span>            :         xmlHTTPErrMemory(&quot;allocating header buffer&quot;);
+<span class="lineNum">    1434 </span><span class="lineNoCov">          0 :         return ( NULL );</span>
+<span class="lineNum">    1435 </span>            :     }
+<span class="lineNum">    1436 </span>            : 
+<span class="lineNum">    1437 </span><span class="lineNoCov">          0 :     p = bp;</span>
+<span class="lineNum">    1438 </span>            : 
+<span class="lineNum">    1439 </span><span class="lineNoCov">          0 :     if (proxy) {</span>
+<span class="lineNum">    1440 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;port != 80) {</span>
+<span class="lineNum">    1441 </span><span class="lineNoCov">          0 :             p += snprintf( p, blen - (p - bp), &quot;%s http://%s:%d%s&quot;,</span>
+<span class="lineNum">    1442 </span>            :                         method, ctxt-&gt;hostname,
+<span class="lineNum">    1443 </span>            :                         ctxt-&gt;port, ctxt-&gt;path );
+<span class="lineNum">    1444 </span>            :         }
+<span class="lineNum">    1445 </span>            :         else
+<span class="lineNum">    1446 </span><span class="lineNoCov">          0 :             p += snprintf( p, blen - (p - bp), &quot;%s http://%s%s&quot;, method,</span>
+<span class="lineNum">    1447 </span>            :                         ctxt-&gt;hostname, ctxt-&gt;path);
+<span class="lineNum">    1448 </span>            :     }
+<span class="lineNum">    1449 </span>            :     else
+<span class="lineNum">    1450 </span><span class="lineNoCov">          0 :         p += snprintf( p, blen - (p - bp), &quot;%s %s&quot;, method, ctxt-&gt;path);</span>
+<span class="lineNum">    1451 </span>            : 
+<span class="lineNum">    1452 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;query != NULL)</span>
+<span class="lineNum">    1453 </span><span class="lineNoCov">          0 :         p += snprintf( p, blen - (p - bp), &quot;?%s&quot;, ctxt-&gt;query);</span>
+<span class="lineNum">    1454 </span>            : 
+<span class="lineNum">    1455 </span><span class="lineNoCov">          0 :     if (ctxt-&gt;port == 80) {</span>
+<span class="lineNum">    1456 </span><span class="lineNoCov">          0 :         p += snprintf( p, blen - (p - bp), &quot; HTTP/1.0\r\nHost: %s\r\n&quot;,</span>
+<span class="lineNum">    1457 </span>            :                     ctxt-&gt;hostname);
+<span class="lineNum">    1458 </span>            :     } else {
+<span class="lineNum">    1459 </span><span class="lineNoCov">          0 :         p += snprintf( p, blen - (p - bp), &quot; HTTP/1.0\r\nHost: %s:%d\r\n&quot;,</span>
+<span class="lineNum">    1460 </span>            :                     ctxt-&gt;hostname, ctxt-&gt;port);
+<span class="lineNum">    1461 </span>            :     }
+<span class="lineNum">    1462 </span>            : 
+<span class="lineNum">    1463 </span>            : #ifdef HAVE_ZLIB_H
+<span class="lineNum">    1464 </span>            :     p += snprintf(p, blen - (p - bp), &quot;Accept-Encoding: gzip\r\n&quot;);
+<span class="lineNum">    1465 </span>            : #endif
+<span class="lineNum">    1466 </span>            : 
+<span class="lineNum">    1467 </span><span class="lineNoCov">          0 :     if (contentType != NULL &amp;&amp; *contentType)</span>
+<span class="lineNum">    1468 </span><span class="lineNoCov">          0 :         p += snprintf(p, blen - (p - bp), &quot;Content-Type: %s\r\n&quot;, *contentType);</span>
+<span class="lineNum">    1469 </span>            : 
+<span class="lineNum">    1470 </span><span class="lineNoCov">          0 :     if (headers != NULL)</span>
+<span class="lineNum">    1471 </span><span class="lineNoCov">          0 :         p += snprintf( p, blen - (p - bp), &quot;%s&quot;, headers );</span>
+<span class="lineNum">    1472 </span>            : 
+<span class="lineNum">    1473 </span><span class="lineNoCov">          0 :     if (input != NULL)</span>
+<span class="lineNum">    1474 </span><span class="lineNoCov">          0 :         snprintf(p, blen - (p - bp), &quot;Content-Length: %d\r\n\r\n&quot;, ilen );</span>
+<span class="lineNum">    1475 </span>            :     else
+<span class="lineNum">    1476 </span><span class="lineNoCov">          0 :         snprintf(p, blen - (p - bp), &quot;\r\n&quot;);</span>
+<span class="lineNum">    1477 </span>            : 
+<span class="lineNum">    1478 </span>            : #ifdef DEBUG_HTTP
+<span class="lineNum">    1479 </span>            :     xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">    1480 </span>            :             &quot;-&gt; %s%s&quot;, proxy? &quot;(Proxy) &quot; : &quot;&quot;, bp);
+<span class="lineNum">    1481 </span>            :     if ((blen -= strlen(bp)+1) &lt; 0)
+<span class="lineNum">    1482 </span>            :         xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">    1483 </span>            :                 &quot;ERROR: overflowed buffer by %d bytes\n&quot;, -blen);
+<span class="lineNum">    1484 </span>            : #endif
+<span class="lineNum">    1485 </span><span class="lineNoCov">          0 :     ctxt-&gt;outptr = ctxt-&gt;out = bp;</span>
+<span class="lineNum">    1486 </span><span class="lineNoCov">          0 :     ctxt-&gt;state = XML_NANO_HTTP_WRITE;</span>
+<span class="lineNum">    1487 </span><span class="lineNoCov">          0 :     blen = strlen( ctxt-&gt;out );</span>
+<span class="lineNum">    1488 </span>            : #ifdef DEBUG_HTTP
+<span class="lineNum">    1489 </span>            :     xmt_bytes = xmlNanoHTTPSend(ctxt, ctxt-&gt;out, blen );
+<span class="lineNum">    1490 </span>            :     if ( xmt_bytes != blen )
+<span class="lineNum">    1491 </span>            :         xmlGenericError( xmlGenericErrorContext,
+<span class="lineNum">    1492 </span>            :                         &quot;xmlNanoHTTPMethodRedir:  Only %d of %d %s %s\n&quot;,
+<span class="lineNum">    1493 </span>            :                         xmt_bytes, blen,
+<span class="lineNum">    1494 </span>            :                         &quot;bytes of HTTP headers sent to host&quot;,
+<span class="lineNum">    1495 </span>            :                         ctxt-&gt;hostname );
+<span class="lineNum">    1496 </span>            : #else
+<span class="lineNum">    1497 </span><span class="lineNoCov">          0 :     xmlNanoHTTPSend(ctxt, ctxt-&gt;out, blen );</span>
+<span class="lineNum">    1498 </span>            : #endif
+<span class="lineNum">    1499 </span>            : 
+<span class="lineNum">    1500 </span><span class="lineNoCov">          0 :     if ( input != NULL ) {</span>
+<span class="lineNum">    1501 </span>            : #ifdef DEBUG_HTTP
+<span class="lineNum">    1502 </span>            :         xmt_bytes = xmlNanoHTTPSend( ctxt, input, ilen );
+<span class="lineNum">    1503 </span>            : 
+<span class="lineNum">    1504 </span>            :         if ( xmt_bytes != ilen )
+<span class="lineNum">    1505 </span>            :             xmlGenericError( xmlGenericErrorContext,
+<span class="lineNum">    1506 </span>            :                         &quot;xmlNanoHTTPMethodRedir:  Only %d of %d %s %s\n&quot;,
+<span class="lineNum">    1507 </span>            :                         xmt_bytes, ilen,
+<span class="lineNum">    1508 </span>            :                         &quot;bytes of HTTP content sent to host&quot;,
+<span class="lineNum">    1509 </span>            :                         ctxt-&gt;hostname );
+<span class="lineNum">    1510 </span>            : #else
+<span class="lineNum">    1511 </span><span class="lineNoCov">          0 :         xmlNanoHTTPSend( ctxt, input, ilen );</span>
+<span class="lineNum">    1512 </span>            : #endif
+<span class="lineNum">    1513 </span>            :     }
+<span class="lineNum">    1514 </span>            : 
+<span class="lineNum">    1515 </span><span class="lineNoCov">          0 :     ctxt-&gt;state = XML_NANO_HTTP_READ;</span>
+<span class="lineNum">    1516 </span>            : 
+<span class="lineNum">    1517 </span><span class="lineNoCov">          0 :     while ((p = xmlNanoHTTPReadLine(ctxt)) != NULL) {</span>
+<span class="lineNum">    1518 </span><span class="lineNoCov">          0 :         if (*p == 0) {</span>
+<span class="lineNum">    1519 </span><span class="lineNoCov">          0 :             ctxt-&gt;content = ctxt-&gt;inrptr;</span>
+<span class="lineNum">    1520 </span><span class="lineNoCov">          0 :             xmlFree(p);</span>
+<span class="lineNum">    1521 </span><span class="lineNoCov">          0 :             break;</span>
+<span class="lineNum">    1522 </span>            :         }
+<span class="lineNum">    1523 </span><span class="lineNoCov">          0 :         xmlNanoHTTPScanAnswer(ctxt, p);</span>
+<span class="lineNum">    1524 </span>            : 
+<span class="lineNum">    1525 </span>            : #ifdef DEBUG_HTTP
+<span class="lineNum">    1526 </span>            :         xmlGenericError(xmlGenericErrorContext, &quot;&lt;- %s\n&quot;, p);
+<span class="lineNum">    1527 </span>            : #endif
+<span class="lineNum">    1528 </span><span class="lineNoCov">          0 :         xmlFree(p);</span>
+<span class="lineNum">    1529 </span>            :     }
+<span class="lineNum">    1530 </span>            : 
+<span class="lineNum">    1531 </span><span class="lineNoCov">          0 :     if ((ctxt-&gt;location != NULL) &amp;&amp; (ctxt-&gt;returnValue &gt;= 300) &amp;&amp;</span>
+<span class="lineNum">    1532 </span>            :         (ctxt-&gt;returnValue &lt; 400)) {
+<span class="lineNum">    1533 </span>            : #ifdef DEBUG_HTTP
+<span class="lineNum">    1534 </span>            :         xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">    1535 </span>            :                 &quot;\nRedirect to: %s\n&quot;, ctxt-&gt;location);
+<span class="lineNum">    1536 </span>            : #endif
+<span class="lineNum">    1537 </span><span class="lineNoCov">          0 :         while ( xmlNanoHTTPRecv(ctxt) &gt; 0 ) ;</span>
+<span class="lineNum">    1538 </span><span class="lineNoCov">          0 :         if (nbRedirects &lt; XML_NANO_HTTP_MAX_REDIR) {</span>
+<span class="lineNum">    1539 </span><span class="lineNoCov">          0 :             nbRedirects++;</span>
+<span class="lineNum">    1540 </span><span class="lineNoCov">          0 :             if (redirURL != NULL)</span>
+<span class="lineNum">    1541 </span><span class="lineNoCov">          0 :                 xmlFree(redirURL);</span>
+<span class="lineNum">    1542 </span><span class="lineNoCov">          0 :             redirURL = xmlMemStrdup(ctxt-&gt;location);</span>
+<span class="lineNum">    1543 </span><span class="lineNoCov">          0 :             xmlNanoHTTPFreeCtxt(ctxt);</span>
+<span class="lineNum">    1544 </span><span class="lineNoCov">          0 :             goto retry;</span>
+<span class="lineNum">    1545 </span>            :         }
+<span class="lineNum">    1546 </span><span class="lineNoCov">          0 :         xmlNanoHTTPFreeCtxt(ctxt);</span>
+<span class="lineNum">    1547 </span><span class="lineNoCov">          0 :         if (redirURL != NULL) xmlFree(redirURL);</span>
+<span class="lineNum">    1548 </span>            : #ifdef DEBUG_HTTP
+<span class="lineNum">    1549 </span>            :         xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">    1550 </span>            :                 &quot;xmlNanoHTTPMethodRedir: Too many redirects, aborting ...\n&quot;);
+<span class="lineNum">    1551 </span>            : #endif
+<span class="lineNum">    1552 </span>            :         return(NULL);
+<span class="lineNum">    1553 </span>            :     }
+<span class="lineNum">    1554 </span>            : 
+<span class="lineNum">    1555 </span><span class="lineNoCov">          0 :     if (contentType != NULL) {</span>
+<span class="lineNum">    1556 </span><span class="lineNoCov">          0 :         if (ctxt-&gt;contentType != NULL)</span>
+<span class="lineNum">    1557 </span><span class="lineNoCov">          0 :             *contentType = xmlMemStrdup(ctxt-&gt;contentType);</span>
+<span class="lineNum">    1558 </span>            :         else
+<span class="lineNum">    1559 </span><span class="lineNoCov">          0 :             *contentType = NULL;</span>
+<span class="lineNum">    1560 </span>            :     }
+<span class="lineNum">    1561 </span>            : 
+<span class="lineNum">    1562 </span><span class="lineNoCov">          0 :     if ((redir != NULL) &amp;&amp; (redirURL != NULL)) {</span>
+<span class="lineNum">    1563 </span><span class="lineNoCov">          0 :         *redir = redirURL;</span>
+<span class="lineNum">    1564 </span>            :     } else {
+<span class="lineNum">    1565 </span><span class="lineNoCov">          0 :         if (redirURL != NULL)</span>
+<span class="lineNum">    1566 </span><span class="lineNoCov">          0 :             xmlFree(redirURL);</span>
+<span class="lineNum">    1567 </span><span class="lineNoCov">          0 :         if (redir != NULL)</span>
+<span class="lineNum">    1568 </span><span class="lineNoCov">          0 :             *redir = NULL;</span>
+<span class="lineNum">    1569 </span>            :     }
+<span class="lineNum">    1570 </span>            : 
+<span class="lineNum">    1571 </span>            : #ifdef DEBUG_HTTP
+<span class="lineNum">    1572 </span>            :     if (ctxt-&gt;contentType != NULL)
+<span class="lineNum">    1573 </span>            :         xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">    1574 </span>            :                 &quot;\nCode %d, content-type '%s'\n\n&quot;,
+<span class="lineNum">    1575 </span>            :                ctxt-&gt;returnValue, ctxt-&gt;contentType);
+<span class="lineNum">    1576 </span>            :     else
+<span class="lineNum">    1577 </span>            :         xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">    1578 </span>            :                 &quot;\nCode %d, no content-type\n\n&quot;,
+<span class="lineNum">    1579 </span>            :                ctxt-&gt;returnValue);
+<span class="lineNum">    1580 </span>            : #endif
+<span class="lineNum">    1581 </span>            : 
+<span class="lineNum">    1582 </span><span class="lineNoCov">          0 :     return((void *) ctxt);</span>
+<span class="lineNum">    1583 </span>            : }
+<span class="lineNum">    1584 </span>            : 
+<span class="lineNum">    1585 </span>            : /**
+<span class="lineNum">    1586 </span>            :  * xmlNanoHTTPMethod:
+<span class="lineNum">    1587 </span>            :  * @URL:  The URL to load
+<span class="lineNum">    1588 </span>            :  * @method:  the HTTP method to use
+<span class="lineNum">    1589 </span>            :  * @input:  the input string if any
+<span class="lineNum">    1590 </span>            :  * @contentType:  the Content-Type information IN and OUT
+<span class="lineNum">    1591 </span>            :  * @headers:  the extra headers
+<span class="lineNum">    1592 </span>            :  * @ilen:  input length
+<span class="lineNum">    1593 </span>            :  *
+<span class="lineNum">    1594 </span>            :  * This function try to open a connection to the indicated resource
+<span class="lineNum">    1595 </span>            :  * via HTTP using the given @method, adding the given extra headers
+<span class="lineNum">    1596 </span>            :  * and the input buffer for the request content.
+<span class="lineNum">    1597 </span>            :  *
+<span class="lineNum">    1598 </span>            :  * Returns NULL in case of failure, otherwise a request handler.
+<span class="lineNum">    1599 </span>            :  *     The contentType, if provided must be freed by the caller
+<span class="lineNum">    1600 </span>            :  */
+<a name="1601"><span class="lineNum">    1601 </span>            : </a>
+<span class="lineNum">    1602 </span>            : void*
+<span class="lineNum">    1603 </span><span class="lineNoCov">          0 : xmlNanoHTTPMethod(const char *URL, const char *method, const char *input,</span>
+<span class="lineNum">    1604 </span>            :                   char **contentType, const char *headers, int ilen) {
+<span class="lineNum">    1605 </span><span class="lineNoCov">          0 :     return(xmlNanoHTTPMethodRedir(URL, method, input, contentType,</span>
+<span class="lineNum">    1606 </span>            :                                   NULL, headers, ilen));
+<span class="lineNum">    1607 </span>            : }
+<span class="lineNum">    1608 </span>            : 
+<span class="lineNum">    1609 </span>            : /**
+<span class="lineNum">    1610 </span>            :  * xmlNanoHTTPFetch:
+<span class="lineNum">    1611 </span>            :  * @URL:  The URL to load
+<span class="lineNum">    1612 </span>            :  * @filename:  the filename where the content should be saved
+<span class="lineNum">    1613 </span>            :  * @contentType:  if available the Content-Type information will be
+<span class="lineNum">    1614 </span>            :  *                returned at that location
+<span class="lineNum">    1615 </span>            :  *
+<span class="lineNum">    1616 </span>            :  * This function try to fetch the indicated resource via HTTP GET
+<span class="lineNum">    1617 </span>            :  * and save it's content in the file.
+<span class="lineNum">    1618 </span>            :  *
+<span class="lineNum">    1619 </span>            :  * Returns -1 in case of failure, 0 incase of success. The contentType,
+<span class="lineNum">    1620 </span>            :  *     if provided must be freed by the caller
+<span class="lineNum">    1621 </span>            :  */
+<span class="lineNum">    1622 </span>            : int
+<span class="lineNum">    1623 </span><span class="lineNoCov">          0 : xmlNanoHTTPFetch(const char *URL, const char *filename, char **contentType) {</span>
+<span class="lineNum">    1624 </span><span class="lineNoCov">          0 :     void *ctxt = NULL;</span>
+<span class="lineNum">    1625 </span><span class="lineNoCov">          0 :     char *buf = NULL;</span>
+<span class="lineNum">    1626 </span>            :     int fd;
+<span class="lineNum">    1627 </span>            :     int len;
+<span class="lineNum">    1628 </span><span class="lineNoCov">          0 :     int ret = 0;</span>
+<span class="lineNum">    1629 </span>            : 
+<span class="lineNum">    1630 </span><span class="lineNoCov">          0 :     if (filename == NULL) return(-1);</span>
+<span class="lineNum">    1631 </span><span class="lineNoCov">          0 :     ctxt = xmlNanoHTTPOpen(URL, contentType);</span>
+<span class="lineNum">    1632 </span><span class="lineNoCov">          0 :     if (ctxt == NULL) return(-1);</span>
+<span class="lineNum">    1633 </span>            : 
+<span class="lineNum">    1634 </span><span class="lineNoCov">          0 :     if (!strcmp(filename, &quot;-&quot;))</span>
+<span class="lineNum">    1635 </span>            :         fd = 0;
+<span class="lineNum">    1636 </span>            :     else {
+<span class="lineNum">    1637 </span><span class="lineNoCov">          0 :         fd = open(filename, O_CREAT | O_WRONLY, 00644);</span>
+<span class="lineNum">    1638 </span><span class="lineNoCov">          0 :         if (fd &lt; 0) {</span>
+<span class="lineNum">    1639 </span>            :             xmlNanoHTTPClose(ctxt);
+<span class="lineNum">    1640 </span><span class="lineNoCov">          0 :             if ((contentType != NULL) &amp;&amp; (*contentType != NULL)) {</span>
+<span class="lineNum">    1641 </span><span class="lineNoCov">          0 :                 xmlFree(*contentType);</span>
+<span class="lineNum">    1642 </span><span class="lineNoCov">          0 :                 *contentType = NULL;</span>
+<span class="lineNum">    1643 </span>            :             }
+<span class="lineNum">    1644 </span>            :             return(-1);
+<span class="lineNum">    1645 </span>            :         }
+<span class="lineNum">    1646 </span>            :     }
+<span class="lineNum">    1647 </span>            : 
+<span class="lineNum">    1648 </span><span class="lineNoCov">          0 :     xmlNanoHTTPFetchContent( ctxt, &amp;buf, &amp;len );</span>
+<span class="lineNum">    1649 </span><span class="lineNoCov">          0 :     if ( len &gt; 0 ) {</span>
+<span class="lineNum">    1650 </span><span class="lineNoCov">          0 :         if (write(fd, buf, len) == -1) {</span>
+<span class="lineNum">    1651 </span><span class="lineNoCov">          0 :             ret = -1;</span>
+<span class="lineNum">    1652 </span>            :         }
+<span class="lineNum">    1653 </span>            :     }
+<span class="lineNum">    1654 </span>            : 
+<span class="lineNum">    1655 </span>            :     xmlNanoHTTPClose(ctxt);
+<span class="lineNum">    1656 </span><span class="lineNoCov">          0 :     close(fd);</span>
+<span class="lineNum">    1657 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">    1658 </span>            : }
+<span class="lineNum">    1659 </span>            : 
+<span class="lineNum">    1660 </span>            : #ifdef LIBXML_OUTPUT_ENABLED
+<span class="lineNum">    1661 </span>            : /**
+<span class="lineNum">    1662 </span>            :  * xmlNanoHTTPSave:
+<span class="lineNum">    1663 </span>            :  * @ctxt:  the HTTP context
+<span class="lineNum">    1664 </span>            :  * @filename:  the filename where the content should be saved
+<span class="lineNum">    1665 </span>            :  *
+<span class="lineNum">    1666 </span>            :  * This function saves the output of the HTTP transaction to a file
+<span class="lineNum">    1667 </span>            :  * It closes and free the context at the end
+<span class="lineNum">    1668 </span>            :  *
+<span class="lineNum">    1669 </span>            :  * Returns -1 in case of failure, 0 incase of success.
+<span class="lineNum">    1670 </span>            :  */
+<span class="lineNum">    1671 </span>            : int
+<span class="lineNum">    1672 </span><span class="lineNoCov">          0 : xmlNanoHTTPSave(void *ctxt, const char *filename) {</span>
+<span class="lineNum">    1673 </span><span class="lineNoCov">          0 :     char *buf = NULL;</span>
+<span class="lineNum">    1674 </span>            :     int fd;
+<span class="lineNum">    1675 </span>            :     int len;
+<span class="lineNum">    1676 </span><span class="lineNoCov">          0 :     int ret = 0;</span>
+<span class="lineNum">    1677 </span>            : 
+<span class="lineNum">    1678 </span><span class="lineNoCov">          0 :     if ((ctxt == NULL) || (filename == NULL)) return(-1);</span>
+<span class="lineNum">    1679 </span>            : 
+<span class="lineNum">    1680 </span><span class="lineNoCov">          0 :     if (!strcmp(filename, &quot;-&quot;))</span>
+<span class="lineNum">    1681 </span>            :         fd = 0;
+<span class="lineNum">    1682 </span>            :     else {
+<span class="lineNum">    1683 </span><span class="lineNoCov">          0 :         fd = open(filename, O_CREAT | O_WRONLY, 0666);</span>
+<span class="lineNum">    1684 </span><span class="lineNoCov">          0 :         if (fd &lt; 0) {</span>
+<span class="lineNum">    1685 </span>            :             xmlNanoHTTPClose(ctxt);
+<span class="lineNum">    1686 </span>            :             return(-1);
+<span class="lineNum">    1687 </span>            :         }
+<span class="lineNum">    1688 </span>            :     }
+<span class="lineNum">    1689 </span>            : 
+<span class="lineNum">    1690 </span><span class="lineNoCov">          0 :     xmlNanoHTTPFetchContent( ctxt, &amp;buf, &amp;len );</span>
+<span class="lineNum">    1691 </span><span class="lineNoCov">          0 :     if ( len &gt; 0 ) {</span>
+<span class="lineNum">    1692 </span><span class="lineNoCov">          0 :         if (write(fd, buf, len) == -1) {</span>
+<span class="lineNum">    1693 </span><span class="lineNoCov">          0 :             ret = -1;</span>
+<span class="lineNum">    1694 </span>            :         }
+<span class="lineNum">    1695 </span>            :     }
+<span class="lineNum">    1696 </span>            : 
+<span class="lineNum">    1697 </span>            :     xmlNanoHTTPClose(ctxt);
+<span class="lineNum">    1698 </span><span class="lineNoCov">          0 :     close(fd);</span>
+<span class="lineNum">    1699 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">    1700 </span>            : }
+<span class="lineNum">    1701 </span>            : #endif /* LIBXML_OUTPUT_ENABLED */
+<span class="lineNum">    1702 </span>            : 
+<span class="lineNum">    1703 </span>            : /**
+<span class="lineNum">    1704 </span>            :  * xmlNanoHTTPReturnCode:
+<span class="lineNum">    1705 </span>            :  * @ctx:  the HTTP context
+<span class="lineNum">    1706 </span>            :  *
+<span class="lineNum">    1707 </span>            :  * Get the latest HTTP return code received
+<span class="lineNum">    1708 </span>            :  *
+<span class="lineNum">    1709 </span>            :  * Returns the HTTP return code for the request.
+<a name="1710"><span class="lineNum">    1710 </span>            :  */</a>
+<span class="lineNum">    1711 </span>            : int
+<span class="lineNum">    1712 </span><span class="lineNoCov">          0 : xmlNanoHTTPReturnCode(void *ctx) {</span>
+<span class="lineNum">    1713 </span><span class="lineNoCov">          0 :     xmlNanoHTTPCtxtPtr ctxt = (xmlNanoHTTPCtxtPtr) ctx;</span>
+<span class="lineNum">    1714 </span>            : 
+<span class="lineNum">    1715 </span><span class="lineNoCov">          0 :     if (ctxt == NULL) return(-1);</span>
+<span class="lineNum">    1716 </span>            : 
+<span class="lineNum">    1717 </span><span class="lineNoCov">          0 :     return(ctxt-&gt;returnValue);</span>
+<span class="lineNum">    1718 </span>            : }
+<span class="lineNum">    1719 </span>            : 
+<span class="lineNum">    1720 </span>            : /**
+<span class="lineNum">    1721 </span>            :  * xmlNanoHTTPAuthHeader:
+<span class="lineNum">    1722 </span>            :  * @ctx:  the HTTP context
+<span class="lineNum">    1723 </span>            :  *
+<span class="lineNum">    1724 </span>            :  * Get the authentication header of an HTTP context
+<span class="lineNum">    1725 </span>            :  *
+<span class="lineNum">    1726 </span>            :  * Returns the stashed value of the WWW-Authenticate or Proxy-Authenticate
+<span class="lineNum">    1727 </span>            :  * header.
+<a name="1728"><span class="lineNum">    1728 </span>            :  */</a>
+<span class="lineNum">    1729 </span>            : const char *
+<span class="lineNum">    1730 </span><span class="lineNoCov">          0 : xmlNanoHTTPAuthHeader(void *ctx) {</span>
+<span class="lineNum">    1731 </span><span class="lineNoCov">          0 :     xmlNanoHTTPCtxtPtr ctxt = (xmlNanoHTTPCtxtPtr) ctx;</span>
+<span class="lineNum">    1732 </span>            : 
+<span class="lineNum">    1733 </span><span class="lineNoCov">          0 :     if (ctxt == NULL) return(NULL);</span>
+<span class="lineNum">    1734 </span>            : 
+<span class="lineNum">    1735 </span><span class="lineNoCov">          0 :     return(ctxt-&gt;authHeader);</span>
+<span class="lineNum">    1736 </span>            : }
+<span class="lineNum">    1737 </span>            : 
+<span class="lineNum">    1738 </span>            : /**
+<span class="lineNum">    1739 </span>            :  * xmlNanoHTTPContentLength:
+<span class="lineNum">    1740 </span>            :  * @ctx:  the HTTP context
+<span class="lineNum">    1741 </span>            :  *
+<span class="lineNum">    1742 </span>            :  * Provides the specified content length from the HTTP header.
+<span class="lineNum">    1743 </span>            :  *
+<span class="lineNum">    1744 </span>            :  * Return the specified content length from the HTTP header.  Note that
+<span class="lineNum">    1745 </span>            :  * a value of -1 indicates that the content length element was not included in
+<span class="lineNum">    1746 </span>            :  * the response header.
+<a name="1747"><span class="lineNum">    1747 </span>            :  */</a>
+<span class="lineNum">    1748 </span>            : int
+<span class="lineNum">    1749 </span><span class="lineNoCov">          0 : xmlNanoHTTPContentLength( void * ctx ) {</span>
+<span class="lineNum">    1750 </span><span class="lineNoCov">          0 :     xmlNanoHTTPCtxtPtr  ctxt = (xmlNanoHTTPCtxtPtr)ctx;</span>
+<span class="lineNum">    1751 </span>            : 
+<span class="lineNum">    1752 </span><span class="lineNoCov">          0 :     return ( ( ctxt == NULL ) ? -1 : ctxt-&gt;ContentLength );</span>
+<span class="lineNum">    1753 </span>            : }
+<span class="lineNum">    1754 </span>            : 
+<span class="lineNum">    1755 </span>            : /**
+<span class="lineNum">    1756 </span>            :  * xmlNanoHTTPRedir:
+<span class="lineNum">    1757 </span>            :  * @ctx:  the HTTP context
+<span class="lineNum">    1758 </span>            :  *
+<span class="lineNum">    1759 </span>            :  * Provides the specified redirection URL if available from the HTTP header.
+<span class="lineNum">    1760 </span>            :  *
+<span class="lineNum">    1761 </span>            :  * Return the specified redirection URL or NULL if not redirected.
+<a name="1762"><span class="lineNum">    1762 </span>            :  */</a>
+<span class="lineNum">    1763 </span>            : const char *
+<span class="lineNum">    1764 </span><span class="lineNoCov">          0 : xmlNanoHTTPRedir( void * ctx ) {</span>
+<span class="lineNum">    1765 </span><span class="lineNoCov">          0 :     xmlNanoHTTPCtxtPtr  ctxt = (xmlNanoHTTPCtxtPtr)ctx;</span>
+<span class="lineNum">    1766 </span>            : 
+<span class="lineNum">    1767 </span><span class="lineNoCov">          0 :     return ( ( ctxt == NULL ) ? NULL : ctxt-&gt;location );</span>
+<span class="lineNum">    1768 </span>            : }
+<span class="lineNum">    1769 </span>            : 
+<span class="lineNum">    1770 </span>            : /**
+<span class="lineNum">    1771 </span>            :  * xmlNanoHTTPEncoding:
+<span class="lineNum">    1772 </span>            :  * @ctx:  the HTTP context
+<span class="lineNum">    1773 </span>            :  *
+<span class="lineNum">    1774 </span>            :  * Provides the specified encoding if specified in the HTTP headers.
+<span class="lineNum">    1775 </span>            :  *
+<span class="lineNum">    1776 </span>            :  * Return the specified encoding or NULL if not available
+<a name="1777"><span class="lineNum">    1777 </span>            :  */</a>
+<span class="lineNum">    1778 </span>            : const char *
+<span class="lineNum">    1779 </span><span class="lineNoCov">          0 : xmlNanoHTTPEncoding( void * ctx ) {</span>
+<span class="lineNum">    1780 </span><span class="lineNoCov">          0 :     xmlNanoHTTPCtxtPtr  ctxt = (xmlNanoHTTPCtxtPtr)ctx;</span>
+<span class="lineNum">    1781 </span>            : 
+<span class="lineNum">    1782 </span><span class="lineNoCov">          0 :     return ( ( ctxt == NULL ) ? NULL : ctxt-&gt;encoding );</span>
+<span class="lineNum">    1783 </span>            : }
+<span class="lineNum">    1784 </span>            : 
+<span class="lineNum">    1785 </span>            : /**
+<span class="lineNum">    1786 </span>            :  * xmlNanoHTTPMimeType:
+<span class="lineNum">    1787 </span>            :  * @ctx:  the HTTP context
+<span class="lineNum">    1788 </span>            :  *
+<span class="lineNum">    1789 </span>            :  * Provides the specified Mime-Type if specified in the HTTP headers.
+<span class="lineNum">    1790 </span>            :  *
+<span class="lineNum">    1791 </span>            :  * Return the specified Mime-Type or NULL if not available
+<a name="1792"><span class="lineNum">    1792 </span>            :  */</a>
+<span class="lineNum">    1793 </span>            : const char *
+<span class="lineNum">    1794 </span><span class="lineNoCov">          0 : xmlNanoHTTPMimeType( void * ctx ) {</span>
+<span class="lineNum">    1795 </span><span class="lineNoCov">          0 :     xmlNanoHTTPCtxtPtr  ctxt = (xmlNanoHTTPCtxtPtr)ctx;</span>
+<span class="lineNum">    1796 </span>            : 
+<span class="lineNum">    1797 </span><span class="lineNoCov">          0 :     return ( ( ctxt == NULL ) ? NULL : ctxt-&gt;mimeType );</span>
+<span class="lineNum">    1798 </span>            : }
+<span class="lineNum">    1799 </span>            : 
+<span class="lineNum">    1800 </span>            : /**
+<span class="lineNum">    1801 </span>            :  * xmlNanoHTTPFetchContent:
+<span class="lineNum">    1802 </span>            :  * @ctx:  the HTTP context
+<span class="lineNum">    1803 </span>            :  * @ptr:  pointer to set to the content buffer.
+<span class="lineNum">    1804 </span>            :  * @len:  integer pointer to hold the length of the content
+<span class="lineNum">    1805 </span>            :  *
+<span class="lineNum">    1806 </span>            :  * Check if all the content was read
+<span class="lineNum">    1807 </span>            :  *
+<span class="lineNum">    1808 </span>            :  * Returns 0 if all the content was read and available, returns
+<span class="lineNum">    1809 </span>            :  * -1 if received content length was less than specified or an error
+<span class="lineNum">    1810 </span>            :  * occurred.
+<a name="1811"><span class="lineNum">    1811 </span>            :  */</a>
+<span class="lineNum">    1812 </span>            : static int
+<span class="lineNum">    1813 </span><span class="lineNoCov">          0 : xmlNanoHTTPFetchContent( void * ctx, char ** ptr, int * len ) {</span>
+<span class="lineNum">    1814 </span><span class="lineNoCov">          0 :     xmlNanoHTTPCtxtPtr  ctxt = (xmlNanoHTTPCtxtPtr)ctx;</span>
+<span class="lineNum">    1815 </span>            : 
+<span class="lineNum">    1816 </span><span class="lineNoCov">          0 :     int                 rc = 0;</span>
+<span class="lineNum">    1817 </span>            :     int                 cur_lgth;
+<span class="lineNum">    1818 </span>            :     int                 rcvd_lgth;
+<span class="lineNum">    1819 </span>            :     int                 dummy_int;
+<span class="lineNum">    1820 </span><span class="lineNoCov">          0 :     char *              dummy_ptr = NULL;</span>
+<span class="lineNum">    1821 </span>            : 
+<span class="lineNum">    1822 </span>            :     /*  Dummy up return input parameters if not provided  */
+<span class="lineNum">    1823 </span>            : 
+<span class="lineNum">    1824 </span><span class="lineNoCov">          0 :     if ( len == NULL )</span>
+<span class="lineNum">    1825 </span><span class="lineNoCov">          0 :         len = &amp;dummy_int;</span>
+<span class="lineNum">    1826 </span>            : 
+<span class="lineNum">    1827 </span><span class="lineNoCov">          0 :     if ( ptr == NULL )</span>
+<span class="lineNum">    1828 </span><span class="lineNoCov">          0 :         ptr = &amp;dummy_ptr;</span>
+<span class="lineNum">    1829 </span>            : 
+<span class="lineNum">    1830 </span>            :     /*  But can't work without the context pointer  */
+<span class="lineNum">    1831 </span>            : 
+<span class="lineNum">    1832 </span><span class="lineNoCov">          0 :     if ( ( ctxt == NULL ) || ( ctxt-&gt;content == NULL ) ) {</span>
+<span class="lineNum">    1833 </span><span class="lineNoCov">          0 :         *len = 0;</span>
+<span class="lineNum">    1834 </span><span class="lineNoCov">          0 :         *ptr = NULL;</span>
+<span class="lineNum">    1835 </span><span class="lineNoCov">          0 :         return ( -1 );</span>
+<span class="lineNum">    1836 </span>            :     }
+<span class="lineNum">    1837 </span>            : 
+<span class="lineNum">    1838 </span><span class="lineNoCov">          0 :     rcvd_lgth = ctxt-&gt;inptr - ctxt-&gt;content;</span>
+<span class="lineNum">    1839 </span>            : 
+<span class="lineNum">    1840 </span><span class="lineNoCov">          0 :     while ( (cur_lgth = xmlNanoHTTPRecv( ctxt )) &gt; 0 ) {</span>
+<span class="lineNum">    1841 </span>            : 
+<span class="lineNum">    1842 </span><span class="lineNoCov">          0 :         rcvd_lgth += cur_lgth;</span>
+<span class="lineNum">    1843 </span><span class="lineNoCov">          0 :         if ( (ctxt-&gt;ContentLength &gt; 0) &amp;&amp; (rcvd_lgth &gt;= ctxt-&gt;ContentLength) )</span>
+<span class="lineNum">    1844 </span>            :             break;
+<span class="lineNum">    1845 </span>            :     }
+<span class="lineNum">    1846 </span>            : 
+<span class="lineNum">    1847 </span><span class="lineNoCov">          0 :     *ptr = ctxt-&gt;content;</span>
+<span class="lineNum">    1848 </span><span class="lineNoCov">          0 :     *len = rcvd_lgth;</span>
+<span class="lineNum">    1849 </span>            : 
+<span class="lineNum">    1850 </span><span class="lineNoCov">          0 :     if ( ( ctxt-&gt;ContentLength &gt; 0 ) &amp;&amp; ( rcvd_lgth &lt; ctxt-&gt;ContentLength ) )</span>
+<span class="lineNum">    1851 </span>            :         rc = -1;
+<span class="lineNum">    1852 </span><span class="lineNoCov">          0 :     else if ( rcvd_lgth == 0 )</span>
+<span class="lineNum">    1853 </span><span class="lineNoCov">          0 :         rc = -1;</span>
+<span class="lineNum">    1854 </span>            : 
+<span class="lineNum">    1855 </span><span class="lineNoCov">          0 :     return ( rc );</span>
+<span class="lineNum">    1856 </span>            : }
+<span class="lineNum">    1857 </span>            : 
+<span class="lineNum">    1858 </span>            : #ifdef STANDALONE
+<span class="lineNum">    1859 </span>            : int main(int argc, char **argv) {
+<span class="lineNum">    1860 </span>            :     char *contentType = NULL;
+<span class="lineNum">    1861 </span>            : 
+<span class="lineNum">    1862 </span>            :     if (argv[1] != NULL) {
+<span class="lineNum">    1863 </span>            :         if (argv[2] != NULL)
+<span class="lineNum">    1864 </span>            :             xmlNanoHTTPFetch(argv[1], argv[2], &amp;contentType);
+<span class="lineNum">    1865 </span>            :         else
+<span class="lineNum">    1866 </span>            :             xmlNanoHTTPFetch(argv[1], &quot;-&quot;, &amp;contentType);
+<span class="lineNum">    1867 </span>            :         if (contentType != NULL) xmlFree(contentType);
+<span class="lineNum">    1868 </span>            :     } else {
+<span class="lineNum">    1869 </span>            :         xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">    1870 </span>            :                 &quot;%s: minimal HTTP GET implementation\n&quot;, argv[0]);
+<span class="lineNum">    1871 </span>            :         xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">    1872 </span>            :                 &quot;\tusage %s [ URL [ filename ] ]\n&quot;, argv[0]);
+<span class="lineNum">    1873 </span>            :     }
+<span class="lineNum">    1874 </span>            :     xmlNanoHTTPCleanup();
+<span class="lineNum">    1875 </span>            :     xmlMemoryDump();
+<span class="lineNum">    1876 </span>            :     return(0);
+<span class="lineNum">    1877 </span>            : }
+<span class="lineNum">    1878 </span>            : #endif /* STANDALONE */
+<span class="lineNum">    1879 </span>            : #else /* !LIBXML_HTTP_ENABLED */
+<span class="lineNum">    1880 </span>            : #ifdef STANDALONE
+<span class="lineNum">    1881 </span>            : #include &lt;stdio.h&gt;
+<span class="lineNum">    1882 </span>            : int main(int argc, char **argv) {
+<span class="lineNum">    1883 </span>            :     xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">    1884 </span>            :             &quot;%s : HTTP support not compiled in\n&quot;, argv[0]);
+<span class="lineNum">    1885 </span>            :     return(0);
+<span class="lineNum">    1886 </span>            : }
+<span class="lineNum">    1887 </span>            : #endif /* STANDALONE */
+<span class="lineNum">    1888 </span>            : #endif /* LIBXML_HTTP_ENABLED */
+<span class="lineNum">    1889 </span>            : #define bottom_nanohttp
+<span class="lineNum">    1890 </span>            : #include &quot;elfgcchack.h&quot;
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

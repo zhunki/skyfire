@@ -1,0 +1,597 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - engine/verts.h</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">engine</a> - verts.h<span style="font-size: 80%;"> (source / <a href="verts.h.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">30</td>
+            <td class="headerCovTableEntry">47</td>
+            <td class="headerCovTableEntryLo">63.8 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-10-13</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">6</td>
+            <td class="headerCovTableEntry">20</td>
+            <td class="headerCovTableEntryLo">30.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* -*- mode: c++ -*-</a>
+<span class="lineNum">       2 </span>            :  * The contents of this file are subject to the Mozilla Public
+<span class="lineNum">       3 </span>            :  * License Version 1.1 (the &quot;License&quot;); you may not use this file
+<span class="lineNum">       4 </span>            :  * except in compliance with the License. You may obtain a copy of
+<span class="lineNum">       5 </span>            :  * the License at http://www.mozilla.org/MPL/
+<span class="lineNum">       6 </span>            :  * 
+<span class="lineNum">       7 </span>            :  * Software distributed under the License is distributed on an &quot;AS
+<span class="lineNum">       8 </span>            :  * IS&quot; basis, WITHOUT WARRANTY OF ANY KIND, either express or
+<span class="lineNum">       9 </span>            :  * implied. See the License for the specific language governing
+<span class="lineNum">      10 </span>            :  * rights and limitations under the License.
+<span class="lineNum">      11 </span>            :  * 
+<span class="lineNum">      12 </span>            :  * The Original Code is the Sablotron XSLT Processor.
+<span class="lineNum">      13 </span>            :  * 
+<span class="lineNum">      14 </span>            :  * The Initial Developer of the Original Code is Ginger Alliance Ltd.
+<span class="lineNum">      15 </span>            :  * Portions created by Ginger Alliance are Copyright (C) 2000-2002
+<span class="lineNum">      16 </span>            :  * Ginger Alliance Ltd. All Rights Reserved.
+<span class="lineNum">      17 </span>            :  * 
+<span class="lineNum">      18 </span>            :  * Contributor(s):
+<span class="lineNum">      19 </span>            :  * 
+<span class="lineNum">      20 </span>            :  * Alternatively, the contents of this file may be used under the
+<span class="lineNum">      21 </span>            :  * terms of the GNU General Public License Version 2 or later (the
+<span class="lineNum">      22 </span>            :  * &quot;GPL&quot;), in which case the provisions of the GPL are applicable 
+<span class="lineNum">      23 </span>            :  * instead of those above.  If you wish to allow use of your 
+<span class="lineNum">      24 </span>            :  * version of this file only under the terms of the GPL and not to
+<span class="lineNum">      25 </span>            :  * allow others to use your version of this file under the MPL,
+<span class="lineNum">      26 </span>            :  * indicate your decision by deleting the provisions above and
+<span class="lineNum">      27 </span>            :  * replace them with the notice and other provisions required by
+<span class="lineNum">      28 </span>            :  * the GPL.  If you do not delete the provisions above, a recipient
+<span class="lineNum">      29 </span>            :  * may use your version of this file under either the MPL or the
+<span class="lineNum">      30 </span>            :  * GPL.
+<span class="lineNum">      31 </span>            :  */
+<span class="lineNum">      32 </span>            : 
+<span class="lineNum">      33 </span>            : #ifndef VertsHIncl
+<span class="lineNum">      34 </span>            : #define VertsHIncl
+<span class="lineNum">      35 </span>            : 
+<span class="lineNum">      36 </span>            : // GP: clean
+<span class="lineNum">      37 </span>            : 
+<span class="lineNum">      38 </span>            : #include &quot;base.h&quot;
+<span class="lineNum">      39 </span>            : #include &quot;arena.h&quot;
+<span class="lineNum">      40 </span>            : #include &quot;datastr.h&quot;
+<span class="lineNum">      41 </span>            : #include &quot;expr.h&quot;
+<span class="lineNum">      42 </span>            : #include &quot;hash.h&quot;
+<span class="lineNum">      43 </span>            : // #include &quot;tree.h&quot;
+<span class="lineNum">      44 </span>            : 
+<span class="lineNum">      45 </span>            : #ifdef HAVE_CONFIG_H
+<span class="lineNum">      46 </span>            : #include &lt;config.h&gt;
+<span class="lineNum">      47 </span>            : #endif
+<span class="lineNum">      48 </span>            : 
+<span class="lineNum">      49 </span>            : #ifdef SABLOT_DEBUGGER
+<span class="lineNum">      50 </span>            : #include &quot;debugger.h&quot;
+<span class="lineNum">      51 </span>            : #endif
+<span class="lineNum">      52 </span>            : 
+<span class="lineNum">      53 </span>            : class Tree;
+<span class="lineNum">      54 </span>            : 
+<span class="lineNum">      55 </span>            : class Context;
+<span class="lineNum">      56 </span>            : class Expression;
+<span class="lineNum">      57 </span>            : class OutputterObj;
+<span class="lineNum">      58 </span>            : class OutputDefinition;
+<span class="lineNum">      59 </span>            : class AttList;
+<span class="lineNum">      60 </span>            : 
+<span class="lineNum">      61 </span>            : typedef void *NodeHandle;
+<span class="lineNum">      62 </span>            : class SubtreeInfo;
+<span class="lineNum">      63 </span>            : 
+<span class="lineNum">      64 </span>            : /****************************************
+<span class="lineNum">      65 </span>            : V e r t e x
+<span class="lineNum">      66 </span>            : ****************************************/
+<span class="lineNum">      67 </span>            : 
+<span class="lineNum">      68 </span>            : class Vertex : public SabArenaMember
+<a name="69"><span class="lineNum">      69 </span>            : {</a>
+<span class="lineNum">      70 </span>            : public:
+<span class="lineNum">      71 </span><span class="lineNoCov">          0 :     Vertex(Tree&amp; owner_, VTYPE avt = VT_VERTEX_WF)</span>
+<span class="lineNum">      72 </span>            :       : owner(owner_), vt(avt), parent(NULL), ordinal(0), subtree(NULL),
+<span class="lineNum">      73 </span><span class="lineCov">      92384 :         outputDocument(NULL)</span>
+<span class="lineNum">      74 </span>            :     {
+<span class="lineNum">      75 </span><span class="lineCov">      92384 :         stamp = lineno = 0;</span>
+<span class="lineNum">      76 </span><span class="lineCov">      92384 :             instanceData = NULL;</span>
+<span class="lineNum">      77 </span><span class="lineNoCov">          0 :     };</span>
+<span class="lineNum">      78 </span>            :     virtual ~Vertex();
+<span class="lineNum">      79 </span>            :     virtual eFlag execute(Sit S, Context *, Bool resolvingGlobals);
+<span class="lineNum">      80 </span>            :     virtual eFlag value(Sit S, DStr &amp;, Context *);
+<span class="lineNum">      81 </span>            :     virtual eFlag startCopy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">      82 </span>            :     virtual eFlag endCopy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">      83 </span>            :     virtual eFlag copy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">      84 </span>            :     virtual void speak(DStr &amp;, SpeakMode);
+<span class="lineNum">      85 </span>            :     void setParent(Vertex *v);
+<span class="lineNum">      86 </span>            :     Vertex* getPreviousSibling();
+<span class="lineNum">      87 </span>            :     Vertex* getNextSibling();
+<span class="lineNum">      88 </span>            :     virtual const QName&amp; getName() const;
+<span class="lineNum">      89 </span>            :     Tree&amp; getOwner() const;
+<span class="lineNum">      90 </span>            :     virtual eFlag serialize(Sit S, OutputterObj &amp;out);
+<span class="lineNum">      91 </span>            :     virtual eFlag getMatchingList(Sit S, Expression&amp; match, Context&amp; result);
+<span class="lineNum">      92 </span>            : 
+<span class="lineNum">      93 </span>            :     Tree &amp;owner;
+<span class="lineNum">      94 </span>            :     VTYPE vt;
+<span class="lineNum">      95 </span>            :     Vertex *parent;
+<span class="lineNum">      96 </span>            :     int ordinal;
+<span class="lineNum">      97 </span>            :     SubtreeInfo* subtree;
+<span class="lineNum">      98 </span>            :     int lineno;
+<span class="lineNum">      99 </span>            :     int stamp;          // the vertex number in doc order (0 = root)
+<a name="100"><span class="lineNum">     100 </span>            :     void report(Sit S, MsgType type, MsgCode code, const Str&amp; arg1, const Str&amp; arg2) const;</a>
+<a name="101"><span class="lineNum">     101 </span>            :     HashTable&amp; dict() const;</a>
+<span class="lineNum">     102 </span><span class="lineNoCov">          0 :     void setInstanceData(void *data) {instanceData = data;}</span>
+<span class="lineNum">     103 </span><span class="lineNoCov">          0 :     void* getInstanceData() {return instanceData;}</span>
+<span class="lineNum">     104 </span>            :     virtual void makeStamps(int&amp; stamp);
+<a name="105"><span class="lineNum">     105 </span>            : </a>
+<span class="lineNum">     106 </span>            :     // set the subtree information (base URI etc.)
+<span class="lineNum">     107 </span><span class="lineNoCov">          0 :     void setSubtreeInfo(SubtreeInfo* subtree_)</span>
+<a name="108"><span class="lineNum">     108 </span><span class="lineCov">      89283 :         { subtree = subtree_; }</span></a>
+<span class="lineNum">     109 </span>            :     // get the subtree information 
+<span class="lineNum">     110 </span><span class="lineNoCov">          0 :     SubtreeInfo* getSubtreeInfo() const</span>
+<a name="111"><span class="lineNum">     111 </span><span class="lineNoCov">          0 :         { return subtree; }</span></a>
+<span class="lineNum">     112 </span>            :     int getImportPrecedence();
+<span class="lineNum">     113 </span><span class="lineNoCov">          0 :     void setOutputDocument(OutputDocument *doc) </span>
+<span class="lineNum">     114 </span><span class="lineNoCov">          0 :       {outputDocument = doc;}</span>
+<span class="lineNum">     115 </span>            :     OutputDocument* getOutputDefinition() {return outputDocument;};
+<span class="lineNum">     116 </span>            : protected:
+<span class="lineNum">     117 </span>            :     eFlag startDocument(Sit S, OutputterObj*&amp; out);
+<span class="lineNum">     118 </span>            :     eFlag finishDocument(Sit S);
+<span class="lineNum">     119 </span>            : private:
+<span class="lineNum">     120 </span>            :     void *instanceData;    // for Perl interface
+<span class="lineNum">     121 </span>            :     // this is set in Tree::appendVertex
+<span class="lineNum">     122 </span>            :     OutputDocument *outputDocument;
+<span class="lineNum">     123 </span>            : };
+<span class="lineNum">     124 </span>            : 
+<span class="lineNum">     125 </span>            : /****************************************
+<span class="lineNum">     126 </span>            : V e r t e x L i s t
+<span class="lineNum">     127 </span>            : ****************************************/
+<span class="lineNum">     128 </span>            : 
+<span class="lineNum">     129 </span>            : // FIXME: changed PList to SList...
+<span class="lineNum">     130 </span>            : 
+<span class="lineNum">     131 </span>            : class VertexList: public SList&lt;Vertex*&gt;
+<span class="lineNum">     132 </span>            : {
+<span class="lineNum">     133 </span>            : public:
+<span class="lineNum">     134 </span>            :     VertexList(int logBlockSize_ = LIST_SIZE_SMALL);
+<span class="lineNum">     135 </span>            :     virtual ~VertexList();
+<span class="lineNum">     136 </span>            :     eFlag execute (Sit S, Context*, Bool resolvingGlobals);
+<span class="lineNum">     137 </span>            :     eFlag value(Sit S, DStr&amp;, Context *);
+<span class="lineNum">     138 </span>            :     virtual void speak(DStr &amp;, SpeakMode);
+<span class="lineNum">     139 </span>            :     virtual void append(Vertex *);
+<span class="lineNum">     140 </span>            :     void rm(int ndx);
+<span class="lineNum">     141 </span>            :     void destructMembers();
+<span class="lineNum">     142 </span>            :     int strip();
+<span class="lineNum">     143 </span>            :     eFlag copy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">     144 </span>            :     void insertBefore(Vertex *newChild, int refIndex);
+<span class="lineNum">     145 </span>            :     int getIndex(Vertex *v);
+<span class="lineNum">     146 </span>            :     eFlag serialize(Sit S, OutputterObj &amp;out);
+<span class="lineNum">     147 </span>            :     void makeStamps(int&amp; stamp);
+<span class="lineNum">     148 </span>            :     eFlag getMatchingList(Sit S, Expression&amp; match, Context&amp; result);
+<span class="lineNum">     149 </span>            : };
+<span class="lineNum">     150 </span>            : 
+<span class="lineNum">     151 </span>            : /****************************************
+<span class="lineNum">     152 </span>            : A r e n a V e r t e x L i s t
+<span class="lineNum">     153 </span>            : ****************************************/
+<span class="lineNum">     154 </span>            : 
+<span class="lineNum">     155 </span>            : class SabArenaVertexList : public VertexList, public SabArenaMember
+<a name="156"><span class="lineNum">     156 </span>            : {</a>
+<a name="157"><span class="lineNum">     157 </span>            : public:</a>
+<span class="lineNum">     158 </span><span class="lineNoCov">          0 :     SabArenaVertexList(SabArena *arena__=NULL, int logBlockSize_ = LIST_SIZE_SMALL)</span>
+<span class="lineNum">     159 </span><span class="lineCov">      81891 :         : VertexList(logBlockSize_), arena_(arena__) </span>
+<span class="lineNum">     160 </span>            :     {
+<a name="161"><span class="lineNum">     161 </span><span class="lineNoCov">          0 :     };</span></a>
+<span class="lineNum">     162 </span>            : 
+<span class="lineNum">     163 </span><span class="lineCov">      41289 :     ~SabArenaVertexList()</span>
+<span class="lineNum">     164 </span><span class="lineCov">      82578 :     {</span>
+<span class="lineNum">     165 </span><span class="lineCov">      41289 :         deppendall();</span>
+<span class="lineNum">     166 </span><span class="lineCov">      41289 :     }</span>
+<span class="lineNum">     167 </span>            : 
+<span class="lineNum">     168 </span>            : protected:
+<span class="lineNum">     169 </span><span class="lineCov">      29957 :     virtual Vertex** claimMemory( int nbytes ) const </span>
+<span class="lineNum">     170 </span>            :     { 
+<span class="lineNum">     171 </span>            :         return arena_ ? (Vertex**)(arena_ -&gt; armalloc(nbytes)) : 
+<span class="lineNum">     172 </span><span class="lineCov">      59914 :             (Vertex**)VertexList::claimMemory(nbytes); </span>
+<span class="lineNum">     173 </span>            :     }
+<span class="lineNum">     174 </span>            : 
+<span class="lineNum">     175 </span><span class="lineCov">      30685 :     virtual Vertex** reclaimMemory( Vertex**p, int newbytes, int oldbytes ) const </span>
+<span class="lineNum">     176 </span>            :     {
+<span class="lineNum">     177 </span><span class="lineCov">      30685 :         if (!arena_)</span>
+<span class="lineNum">     178 </span><span class="lineCov">       3040 :             return VertexList::reclaimMemory(p, newbytes, oldbytes);</span>
+<span class="lineNum">     179 </span><span class="lineCov">      29165 :         else if (newbytes &gt; oldbytes)</span>
+<span class="lineNum">     180 </span>            :         {
+<span class="lineNum">     181 </span><span class="lineCov">      26638 :             Vertex **newpos = (Vertex**) (arena_ -&gt; armalloc(newbytes));</span>
+<span class="lineNum">     182 </span><span class="lineCov">      26638 :             memcpy(newpos, p, oldbytes);</span>
+<span class="lineNum">     183 </span><span class="lineCov">      26638 :             return newpos;</span>
+<span class="lineNum">     184 </span>            :         }
+<span class="lineNum">     185 </span>            :         else
+<span class="lineNum">     186 </span>            :             return p;
+<span class="lineNum">     187 </span>            :     }
+<span class="lineNum">     188 </span>            : 
+<span class="lineNum">     189 </span><span class="lineCov">      41289 :     virtual void returnMemory( Vertex**&amp;p ) const </span>
+<span class="lineNum">     190 </span>            :     {
+<span class="lineNum">     191 </span><span class="lineCov">      41289 :         if (arena_)</span>
+<span class="lineNum">     192 </span><span class="lineCov">      40602 :             arena_ -&gt; arfree(p);</span>
+<span class="lineNum">     193 </span>            :         else
+<span class="lineNum">     194 </span><span class="lineCov">        687 :             if (p) VertexList::returnMemory(p); </span>
+<span class="lineNum">     195 </span><span class="lineCov">      41289 :         p = NULL;</span>
+<span class="lineNum">     196 </span><span class="lineCov">      41289 :     }</span>
+<span class="lineNum">     197 </span>            :     SabArena *arena_;
+<span class="lineNum">     198 </span>            : };
+<span class="lineNum">     199 </span>            : 
+<span class="lineNum">     200 </span>            : 
+<span class="lineNum">     201 </span>            : /****************************************
+<span class="lineNum">     202 </span>            : D a d d y
+<span class="lineNum">     203 </span>            : ****************************************/
+<span class="lineNum">     204 </span>            : 
+<span class="lineNum">     205 </span>            : class Daddy : public Vertex
+<span class="lineNum">     206 </span>            : {
+<span class="lineNum">     207 </span>            : public:
+<span class="lineNum">     208 </span>            :     Daddy(Tree&amp; owner_, VTYPE avt = VT_DADDY_WF);
+<span class="lineNum">     209 </span>            :     virtual ~Daddy(void);
+<span class="lineNum">     210 </span>            :     virtual eFlag execute(Sit S, Context *c, Bool resolvingGlobals);
+<span class="lineNum">     211 </span>            :         virtual eFlag value(Sit S, DStr &amp;, Context *);
+<span class="lineNum">     212 </span>            :     virtual eFlag newChild(Sit S, Vertex*);
+<span class="lineNum">     213 </span>            :     virtual eFlag checkChildren(Sit S);
+<span class="lineNum">     214 </span>            :     virtual void speak(DStr &amp;, SpeakMode);
+<span class="lineNum">     215 </span>            :     virtual int strip();
+<span class="lineNum">     216 </span>            :     virtual eFlag getMatchingList(Sit S, Expression&amp; match, Context&amp; result);
+<span class="lineNum">     217 </span>            :     //
+<span class="lineNum">     218 </span>            :     SabArenaVertexList contents;
+<span class="lineNum">     219 </span>            : };
+<span class="lineNum">     220 </span>            : 
+<span class="lineNum">     221 </span>            : /****************************************
+<span class="lineNum">     222 </span>            : A t t r i b u t e
+<span class="lineNum">     223 </span>            : ****************************************/
+<span class="lineNum">     224 </span>            : 
+<span class="lineNum">     225 </span>            : class Attribute : public Vertex
+<span class="lineNum">     226 </span>            : {
+<span class="lineNum">     227 </span>            : public:
+<span class="lineNum">     228 </span>            :     Attribute(Tree&amp; owner_, const QName&amp;, const Str&amp;, XSL_ATT);
+<span class="lineNum">     229 </span>            :     virtual ~Attribute();
+<span class="lineNum">     230 </span>            :     eFlag buildExpr(Sit S, Bool, ExType);
+<span class="lineNum">     231 </span>            :     virtual eFlag execute(Sit S, Context *c, Bool resolvingGlobals);
+<span class="lineNum">     232 </span>            :     virtual void speak(DStr &amp;, SpeakMode);
+<span class="lineNum">     233 </span>            :     virtual eFlag value(Sit S, DStr &amp;, Context *);
+<span class="lineNum">     234 </span>            :     virtual eFlag startCopy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">     235 </span>            :     virtual const QName&amp; getName() const;
+<span class="lineNum">     236 </span>            :     void setValue(const Str&amp; newValue);
+<span class="lineNum">     237 </span>            :     virtual eFlag serialize(Sit S, OutputterObj &amp;out);
+<span class="lineNum">     238 </span>            :     QName name;
+<span class="lineNum">     239 </span>            :     SabArenaStr cont;
+<span class="lineNum">     240 </span>            :     Expression *expr;
+<span class="lineNum">     241 </span>            :     XSL_ATT op;
+<span class="lineNum">     242 </span>            : };
+<span class="lineNum">     243 </span>            : 
+<span class="lineNum">     244 </span>            : /****************************************
+<span class="lineNum">     245 </span>            : A t t L i s t
+<a name="246"><span class="lineNum">     246 </span>            : ****************************************/</a>
+<span class="lineNum">     247 </span>            : 
+<span class="lineNum">     248 </span><span class="lineCov">      13534 : class AttList: public SabArenaVertexList</span>
+<span class="lineNum">     249 </span>            : {
+<span class="lineNum">     250 </span>            : public:
+<span class="lineNum">     251 </span><span class="lineNoCov">          0 :     AttList(SabArena *arena_)</span>
+<span class="lineNum">     252 </span><span class="lineCov">      27068 :         : SabArenaVertexList(arena_)</span>
+<span class="lineNum">     253 </span><span class="lineNoCov">          0 :     {};</span>
+<span class="lineNum">     254 </span>            :     Attribute* find(XSL_ATT);
+<span class="lineNum">     255 </span>            :     // assumes that attName belongs to the same hash
+<span class="lineNum">     256 </span>            :     Attribute* find(const QName&amp; attName);
+<span class="lineNum">     257 </span>            :     int findNdx(const QName&amp; attName);
+<span class="lineNum">     258 </span>            : };
+<span class="lineNum">     259 </span>            : 
+<span class="lineNum">     260 </span>            : /*****************************************************************
+<span class="lineNum">     261 </span>            :     N m S p a c e
+<span class="lineNum">     262 </span>            : *****************************************************************/
+<span class="lineNum">     263 </span>            : typedef enum 
+<span class="lineNum">     264 </span>            : {
+<span class="lineNum">     265 </span>            :     NSKIND_PARENT = 0,   // namespace is NOT explicitly declared by owning element - for instance inherited via namespace scoping
+<span class="lineNum">     266 </span>            :     NSKIND_DECLARED = 1  // namespace is explicitly declared by owning element
+<span class="lineNum">     267 </span>            : } NsKind;
+<span class="lineNum">     268 </span>            : 
+<span class="lineNum">     269 </span>            : class NmSpace: public Vertex
+<span class="lineNum">     270 </span>            : {
+<span class="lineNum">     271 </span>            : public:
+<span class="lineNum">     272 </span>            :   //  NmSpace(Tree&amp; owner_, Phrase _prefix, Phrase _uri, NsKind _kind);
+<span class="lineNum">     273 </span>            :     NmSpace(Tree&amp; owner_, Phrase _prefix, Phrase _uri, 
+<span class="lineNum">     274 </span>            :             Bool _excluded = FALSE, NsKind _kind = NSKIND_PARENT);
+<span class="lineNum">     275 </span>            :     virtual ~NmSpace();
+<span class="lineNum">     276 </span>            :     Phrase
+<span class="lineNum">     277 </span>            :         prefix,
+<span class="lineNum">     278 </span>            :         uri;
+<span class="lineNum">     279 </span>            :     QName name;
+<span class="lineNum">     280 </span>            :     NsKind kind; 
+<span class="lineNum">     281 </span>            :     Bool excluded;
+<span class="lineNum">     282 </span>            :     unsigned int usageCount;
+<span class="lineNum">     283 </span>            :     virtual eFlag execute(Sit S, Context *, Bool resolvingGlobals);
+<span class="lineNum">     284 </span>            :     virtual eFlag executeSkip(Sit S, Context *, Bool resolvingGlobals,
+<span class="lineNum">     285 </span>            :                               EQName &amp; exName, Bool aliased);
+<span class="lineNum">     286 </span>            :     virtual void speak(DStr &amp;, SpeakMode);
+<span class="lineNum">     287 </span>            :         virtual eFlag value(Sit S, DStr &amp;, Context *);
+<span class="lineNum">     288 </span>            :     virtual eFlag startCopy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">     289 </span>            :     virtual const QName&amp; getName() const;
+<span class="lineNum">     290 </span>            :     virtual eFlag serialize(Sit S, OutputterObj &amp;out);
+<span class="lineNum">     291 </span>            :     NsKind setKind(NsKind kind_);
+<span class="lineNum">     292 </span>            : };
+<span class="lineNum">     293 </span>            : 
+<span class="lineNum">     294 </span>            : /*****************************************************************
+<span class="lineNum">     295 </span>            :     N S L i s t
+<span class="lineNum">     296 </span>            : *****************************************************************/
+<span class="lineNum">     297 </span>            : 
+<span class="lineNum">     298 </span>            : class NSList : public SabArenaVertexList
+<span class="lineNum">     299 </span>            : {
+<span class="lineNum">     300 </span>            : public:
+<span class="lineNum">     301 </span><span class="lineNoCov">          0 :   NSList (SabArena* arena_ = NULL)</span>
+<span class="lineNum">     302 </span><span class="lineCov">      28442 :     : SabArenaVertexList(arena_,0)</span>
+<span class="lineNum">     303 </span><span class="lineNoCov">          0 :   { }</span>
+<span class="lineNum">     304 </span>            :   
+<span class="lineNum">     305 </span>            :   ~NSList();
+<span class="lineNum">     306 </span>            :   NmSpace* find(Phrase) const;
+<span class="lineNum">     307 </span>            :   int findNdx(Phrase prefix) const;
+<span class="lineNum">     308 </span>            :   eFlag resolve(Sit S, Phrase&amp;, Bool) const;
+<span class="lineNum">     309 </span>            :   void unresolve(Phrase&amp;) const;
+<span class="lineNum">     310 </span>            :   void giveCurrent(Sit S, NSList &amp;, Tree*, int nscount) const;
+<span class="lineNum">     311 </span>            :   void swallow(Sit S, NSList &amp;other, Tree *strTree, Tree *t);
+<span class="lineNum">     312 </span>            :   eFlag executeSkip(Sit S, Context *, Bool resolvingGlobals,
+<span class="lineNum">     313 </span>            :                     EQName &amp; exName, Bool aliased);
+<span class="lineNum">     314 </span>            :   // unresolve the qname's prefix
+<span class="lineNum">     315 </span>            :   void findPrefix(QName &amp;q);
+<span class="lineNum">     316 </span>            :   void report(Sit S, MsgType type, MsgCode code, 
+<span class="lineNum">     317 </span>            :               const Str &amp;arg1, const Str &amp;arg2) const;
+<span class="lineNum">     318 </span>            :   void setPrefixKind(Phrase prefix_, NsKind kind_) const;
+<span class="lineNum">     319 </span>            :   void incPrefixUsage(Phrase prefix_) const;
+<span class="lineNum">     320 </span>            :   void decPrefixUsage(Phrase prefix_) const;
+<span class="lineNum">     321 </span>            : };
+<span class="lineNum">     322 </span>            : 
+<span class="lineNum">     323 </span>            : 
+<span class="lineNum">     324 </span>            : /****************************************
+<span class="lineNum">     325 </span>            : E l e m e n t
+<span class="lineNum">     326 </span>            : ****************************************/
+<span class="lineNum">     327 </span>            : 
+<span class="lineNum">     328 </span>            : class Element : public Daddy
+<span class="lineNum">     329 </span>            : {
+<span class="lineNum">     330 </span>            : public:
+<span class="lineNum">     331 </span>            :     Element(Tree&amp; owner_, QName&amp;, VTYPE = VT_ELEMENT_WF);
+<span class="lineNum">     332 </span>            :     virtual ~Element();
+<span class="lineNum">     333 </span>            :     virtual int strip();
+<span class="lineNum">     334 </span>            :     virtual eFlag execute(Sit S, Context *c, Bool resolvingGlobals);
+<span class="lineNum">     335 </span>            :     virtual eFlag executeFallback(Sit S, Context *c, Bool &amp;hasSome,
+<span class="lineNum">     336 </span>            :                                   Bool resolvingGlobals);
+<span class="lineNum">     337 </span>            :     virtual eFlag newChild(Sit S, Vertex*);
+<span class="lineNum">     338 </span>            :     virtual void speak(DStr &amp;, SpeakMode);
+<span class="lineNum">     339 </span>            :     void removeBindings(Sit S);
+<span class="lineNum">     340 </span>            :     virtual eFlag startCopy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">     341 </span>            :     virtual eFlag endCopy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">     342 </span>            :     virtual eFlag copy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">     343 </span>            :     virtual const QName&amp; getName() const;
+<span class="lineNum">     344 </span>            :     virtual eFlag serialize(Sit S, OutputterObj &amp;out);
+<span class="lineNum">     345 </span>            :     virtual eFlag serializeSubtree(Sit S, OutputterObj &amp;out);
+<span class="lineNum">     346 </span>            :     void removeChild(Vertex *child);
+<span class="lineNum">     347 </span>            :     virtual void makeStamps(int&amp; stamp);
+<span class="lineNum">     348 </span>            :     virtual eFlag getMatchingList(Sit S, Expression&amp; match, Context&amp; result);
+<span class="lineNum">     349 </span>            :     
+<span class="lineNum">     350 </span>            :     // set qname to &quot;prefix:local&quot;. Last param says
+<span class="lineNum">     351 </span>            :     // whether to expand the default namespace
+<span class="lineNum">     352 </span>            :     eFlag setLogical(Sit S, QName &amp;q, const Str&amp;, 
+<span class="lineNum">     353 </span>            :                      Bool defaultToo, Phrase defUri = UNDEF_PHRASE) const;
+<span class="lineNum">     354 </span>            :     //
+<span class="lineNum">     355 </span>            :     NSList
+<span class="lineNum">     356 </span>            :         namespaces;
+<span class="lineNum">     357 </span>            :     AttList 
+<span class="lineNum">     358 </span>            :         atts;
+<span class="lineNum">     359 </span>            :     QName
+<span class="lineNum">     360 </span>            :         name;
+<span class="lineNum">     361 </span>            :     QNameList* attSetNames(Bool);
+<span class="lineNum">     362 </span>            :     eFlag executeAttributeSets(Sit S, Context *c, Bool resolvingGlobals);
+<span class="lineNum">     363 </span>            :     Bool preserveSpace;
+<span class="lineNum">     364 </span>            : #ifdef SABLOT_DEBUGGER
+<span class="lineNum">     365 </span>            :     Breakpoint *breakpoint;
+<span class="lineNum">     366 </span>            : #endif
+<span class="lineNum">     367 </span>            : protected:
+<span class="lineNum">     368 </span>            :     QNameList *attsNames;
+<span class="lineNum">     369 </span>            : private:
+<span class="lineNum">     370 </span>            : };
+<span class="lineNum">     371 </span>            : 
+<span class="lineNum">     372 </span>            : /****************************************
+<span class="lineNum">     373 </span>            : R o o t N o d e
+<span class="lineNum">     374 </span>            : ****************************************/
+<span class="lineNum">     375 </span>            : 
+<span class="lineNum">     376 </span>            : class RootNode : public Element
+<a name="377"><span class="lineNum">     377 </span>            : {</a>
+<span class="lineNum">     378 </span>            : public:
+<span class="lineNum">     379 </span><span class="lineNoCov">          0 :     RootNode(Tree&amp; owner_, QName&amp; name_)</span>
+<span class="lineNum">     380 </span><span class="lineCov">        687 :         : Element(owner_, name_, VT_ROOT_WF)</span>
+<span class="lineNum">     381 </span>            :     {
+<span class="lineNum">     382 </span><span class="lineNoCov">          0 :     };</span>
+<span class="lineNum">     383 </span>            :     virtual ~RootNode();
+<span class="lineNum">     384 </span>            :     virtual eFlag execute(Sit S, Context *c, Bool resolvingGlobals);
+<span class="lineNum">     385 </span>            :     virtual eFlag newChild(Sit S, Vertex*);
+<span class="lineNum">     386 </span>            :     virtual eFlag checkChildren(Sit S);
+<span class="lineNum">     387 </span>            :     virtual void speak(DStr &amp;, SpeakMode);
+<span class="lineNum">     388 </span>            :     virtual eFlag startCopy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">     389 </span>            :     virtual eFlag endCopy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">     390 </span>            :     virtual eFlag copy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">     391 </span>            :     virtual eFlag serialize(Sit S, OutputterObj &amp;out);
+<span class="lineNum">     392 </span>            : };
+<span class="lineNum">     393 </span>            : 
+<span class="lineNum">     394 </span>            : /****************************************
+<span class="lineNum">     395 </span>            : T e x t
+<span class="lineNum">     396 </span>            : ****************************************/
+<span class="lineNum">     397 </span>            : 
+<span class="lineNum">     398 </span>            : class Text : public Vertex
+<span class="lineNum">     399 </span>            : {
+<span class="lineNum">     400 </span>            : public:
+<span class="lineNum">     401 </span>            :     SabArenaStr cont;
+<span class="lineNum">     402 </span>            :     Text(Tree&amp; owner_, char *acont, int alen=0);
+<span class="lineNum">     403 </span>            :     virtual ~Text();
+<span class="lineNum">     404 </span>            :     virtual eFlag execute(Sit S, Context *, Bool resolvingGlobals);
+<span class="lineNum">     405 </span>            :     virtual void speak(DStr &amp;, SpeakMode);
+<span class="lineNum">     406 </span>            :         virtual eFlag value(Sit S, DStr &amp;, Context *);
+<span class="lineNum">     407 </span>            :     virtual eFlag startCopy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">     408 </span>            :     virtual eFlag serialize(Sit S, OutputterObj &amp;out);
+<span class="lineNum">     409 </span>            :     void beCDATA();
+<span class="lineNum">     410 </span>            :     Bool isCDATA(); 
+<span class="lineNum">     411 </span>            : private:
+<span class="lineNum">     412 </span>            :     Bool isCDATAFlag;
+<span class="lineNum">     413 </span>            : };
+<span class="lineNum">     414 </span>            : 
+<span class="lineNum">     415 </span>            : 
+<span class="lineNum">     416 </span>            : /****************************************
+<span class="lineNum">     417 </span>            : C o m m e n t
+<span class="lineNum">     418 </span>            : ****************************************/
+<span class="lineNum">     419 </span>            : 
+<span class="lineNum">     420 </span>            : class Comment: public Vertex
+<span class="lineNum">     421 </span>            : {
+<span class="lineNum">     422 </span>            : public:
+<span class="lineNum">     423 </span>            :     Comment(Tree&amp; owner_, const Str&amp; cont_);
+<span class="lineNum">     424 </span>            :     virtual ~Comment();
+<span class="lineNum">     425 </span>            :     virtual eFlag execute(Sit S, Context *, Bool resolvingGlobals);
+<span class="lineNum">     426 </span>            :     virtual void speak(DStr &amp;, SpeakMode);
+<span class="lineNum">     427 </span>            :         virtual eFlag value(Sit S, DStr &amp;, Context *);
+<span class="lineNum">     428 </span>            :     virtual eFlag startCopy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">     429 </span>            :     virtual eFlag serialize(Sit S, OutputterObj &amp;out);
+<span class="lineNum">     430 </span>            :     SabArenaStr cont;
+<span class="lineNum">     431 </span>            : };
+<span class="lineNum">     432 </span>            : 
+<span class="lineNum">     433 </span>            : 
+<span class="lineNum">     434 </span>            : /****************************************
+<span class="lineNum">     435 </span>            : P r o c I n s t r
+<span class="lineNum">     436 </span>            : ****************************************/
+<span class="lineNum">     437 </span>            : 
+<span class="lineNum">     438 </span>            : class ProcInstr: public Vertex
+<span class="lineNum">     439 </span>            : {
+<span class="lineNum">     440 </span>            : public:
+<span class="lineNum">     441 </span>            :     ProcInstr(Tree&amp; owner_, Phrase name_, const Str&amp; cont_);
+<span class="lineNum">     442 </span>            :     virtual ~ProcInstr();
+<span class="lineNum">     443 </span>            :     virtual eFlag execute(Sit S, Context *, Bool resolvingGlobals);
+<span class="lineNum">     444 </span>            :     virtual void speak(DStr &amp;, SpeakMode);
+<span class="lineNum">     445 </span>            :         virtual eFlag value(Sit S, DStr &amp;, Context *);
+<span class="lineNum">     446 </span>            :     virtual eFlag startCopy(Sit S, OutputterObj&amp; out);
+<span class="lineNum">     447 </span>            :     virtual const QName&amp; getName() const;
+<span class="lineNum">     448 </span>            :     virtual eFlag serialize(Sit S, OutputterObj &amp;out);
+<span class="lineNum">     449 </span>            :     SabArenaStr cont;
+<span class="lineNum">     450 </span>            :     QName name;
+<span class="lineNum">     451 </span>            : };
+<span class="lineNum">     452 </span>            : 
+<span class="lineNum">     453 </span>            : 
+<span class="lineNum">     454 </span>            : /****************************************
+<span class="lineNum">     455 </span>            : X S L E l e m e n t
+<a name="456"><span class="lineNum">     456 </span>            : ****************************************/</a>
+<span class="lineNum">     457 </span>            : 
+<span class="lineNum">     458 </span><span class="lineCov">       8590 : class XSLElement : public Element</span>
+<span class="lineNum">     459 </span>            : {
+<span class="lineNum">     460 </span>            : public:
+<span class="lineNum">     461 </span>            :     XSLElement(Tree&amp; owner_, QName&amp;, XSL_OP);
+<span class="lineNum">     462 </span>            :     virtual eFlag execute(Sit S, Context *c, Bool resolvingGlobals);
+<span class="lineNum">     463 </span>            :     virtual eFlag newChild(Sit S, Vertex*);
+<span class="lineNum">     464 </span>            :     eFlag checkToplevel(Sit S);
+<span class="lineNum">     465 </span>            :     virtual eFlag checkChildren(Sit S);
+<span class="lineNum">     466 </span>            :     void checkExtraChildren(int&amp; k);
+<span class="lineNum">     467 </span>            :     Expression* getAttExpr(XSL_ATT);
+<span class="lineNum">     468 </span>            :     virtual int strip();
+<span class="lineNum">     469 </span>            :     XSL_OP op;
+<span class="lineNum">     470 </span>            :     eFlag checkAtts(Sit S);       
+<span class="lineNum">     471 </span>            : //    VertexList defs;
+<span class="lineNum">     472 </span>            : private:
+<span class="lineNum">     473 </span>            :     // applies only to XSL_APPLY_TEMPLATES and XSL_FOR_EACH:
+<span class="lineNum">     474 </span>            :     eFlag makeSortDefs(Sit S, SortDefList &amp;sortDefs, Context *c);
+<span class="lineNum">     475 </span>            :     // applies only to XSL_SORT:
+<span class="lineNum">     476 </span>            :     eFlag make1SortDef(Sit S, SortDef *&amp;def, Context *c);
+<span class="lineNum">     477 </span>            : };
+<span class="lineNum">     478 </span>            : 
+<span class="lineNum">     479 </span>            : /****************************************
+<span class="lineNum">     480 </span>            : X S L E l e m e n t
+<span class="lineNum">     481 </span>            : ****************************************/
+<span class="lineNum">     482 </span>            : enum ExtNamespace {
+<span class="lineNum">     483 </span>            :   EXTNS_EXSLT_FUNCTIONS,
+<span class="lineNum">     484 </span>            :   EXTNS_EXSLT_FUNCTIONS_2,
+<span class="lineNum">     485 </span>            :   EXTNS_EXSLT_COMMON,
+<span class="lineNum">     486 </span>            :   EXTNS_UNKNOWN
+<span class="lineNum">     487 </span>            : };
+<span class="lineNum">     488 </span>            : 
+<span class="lineNum">     489 </span>            : enum ExtElement {
+<span class="lineNum">     490 </span>            :   //exslt.org/functions
+<span class="lineNum">     491 </span>            :   EXTE_EXSLT_FUNCTIONS = 0,
+<span class="lineNum">     492 </span>            :   EXTE_EXSLT_SCRIPT = 0,
+<span class="lineNum">     493 </span>            :   //exsl.org/common
+<span class="lineNum">     494 </span>            :   EXTE_EXSLT_COMMON = 100,
+<span class="lineNum">     495 </span>            :   EXTE_EXSLT_DOCUMENT = 100,
+<span class="lineNum">     496 </span>            :   EXTE_UNKNOWN
+<a name="497"><span class="lineNum">     497 </span>            : };</a>
+<span class="lineNum">     498 </span>            : 
+<span class="lineNum">     499 </span><span class="lineCov">          3 : class ExtensionElement : public Element</span>
+<span class="lineNum">     500 </span>            : {
+<span class="lineNum">     501 </span>            : public:  
+<span class="lineNum">     502 </span>            :   ExtensionElement(Tree&amp; owner_, QName&amp; aqname);
+<span class="lineNum">     503 </span>            :   virtual eFlag execute(Sit S, Context *c, Bool resolvingGlobals);
+<span class="lineNum">     504 </span>            :   virtual eFlag checkChildren(Sit S);
+<span class="lineNum">     505 </span>            :   eFlag checkAtts(Sit S);       
+<span class="lineNum">     506 </span>            :   static Bool elementAvailable(Tree &amp;t, QName &amp;name);
+<span class="lineNum">     507 </span>            : private:
+<span class="lineNum">     508 </span>            :   static void lookupExt(Tree &amp;t, QName &amp;name, 
+<span class="lineNum">     509 </span>            :                         ExtNamespace &amp;extns_, ExtElement &amp;op_);
+<span class="lineNum">     510 </span>            : #ifdef ENABLE_JS
+<span class="lineNum">     511 </span>            :   eFlag executeEXSLTScript(Sit S, Context *c, Bool resolvingGlobals);
+<span class="lineNum">     512 </span>            : #endif
+<span class="lineNum">     513 </span>            :   eFlag executeEXSLTDocument(Sit S, Context *c, Bool resolvingGlobals);
+<span class="lineNum">     514 </span>            :   eFlag checkHasAttr(Sit S, const char *name);
+<span class="lineNum">     515 </span>            :   eFlag exsltDocGetOutputterDef(Sit S, Context *c, OutputDefinition &amp;def);
+<span class="lineNum">     516 </span>            :   ExtNamespace extns;
+<span class="lineNum">     517 </span>            :   ExtElement op;
+<span class="lineNum">     518 </span>            : };
+<span class="lineNum">     519 </span>            : 
+<span class="lineNum">     520 </span>            : #endif //ifndef VertsHIncl
+<span class="lineNum">     521 </span>            : 
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

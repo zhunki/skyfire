@@ -1,0 +1,1115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - gcov/threads.c</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">gcov</a> - threads.c<span style="font-size: 80%;"> (source / <a href="threads.c.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">46</td>
+            <td class="headerCovTableEntry">138</td>
+            <td class="headerCovTableEntryLo">33.3 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-11-01</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">12</td>
+            <td class="headerCovTableEntry">21</td>
+            <td class="headerCovTableEntryLo">57.1 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /**</a>
+<span class="lineNum">       2 </span>            :  * threads.c: set of generic threading related routines
+<span class="lineNum">       3 </span>            :  *
+<span class="lineNum">       4 </span>            :  * See Copyright for the status of this software.
+<span class="lineNum">       5 </span>            :  *
+<span class="lineNum">       6 </span>            :  * Gary Pennington &lt;Gary.Pennington@uk.sun.com&gt;
+<span class="lineNum">       7 </span>            :  * daniel@veillard.com
+<span class="lineNum">       8 </span>            :  */
+<span class="lineNum">       9 </span>            : 
+<span class="lineNum">      10 </span>            : #define IN_LIBXML
+<span class="lineNum">      11 </span>            : #include &quot;libxml.h&quot;
+<span class="lineNum">      12 </span>            : 
+<span class="lineNum">      13 </span>            : #include &lt;string.h&gt;
+<span class="lineNum">      14 </span>            : 
+<span class="lineNum">      15 </span>            : #include &lt;libxml/threads.h&gt;
+<span class="lineNum">      16 </span>            : #include &lt;libxml/globals.h&gt;
+<span class="lineNum">      17 </span>            : 
+<span class="lineNum">      18 </span>            : #ifdef HAVE_SYS_TYPES_H
+<span class="lineNum">      19 </span>            : #include &lt;sys/types.h&gt;
+<span class="lineNum">      20 </span>            : #endif
+<span class="lineNum">      21 </span>            : #ifdef HAVE_UNISTD_H
+<span class="lineNum">      22 </span>            : #include &lt;unistd.h&gt;
+<span class="lineNum">      23 </span>            : #endif
+<span class="lineNum">      24 </span>            : #ifdef HAVE_STDLIB_H
+<span class="lineNum">      25 </span>            : #include &lt;stdlib.h&gt;
+<span class="lineNum">      26 </span>            : #endif
+<span class="lineNum">      27 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">      28 </span>            : #include &lt;pthread.h&gt;
+<span class="lineNum">      29 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">      30 </span>            : #include &lt;windows.h&gt;
+<span class="lineNum">      31 </span>            : #ifndef HAVE_COMPILER_TLS
+<span class="lineNum">      32 </span>            : #include &lt;process.h&gt;
+<span class="lineNum">      33 </span>            : #endif
+<span class="lineNum">      34 </span>            : #endif
+<span class="lineNum">      35 </span>            : 
+<span class="lineNum">      36 </span>            : #ifdef HAVE_BEOS_THREADS
+<span class="lineNum">      37 </span>            : #include &lt;OS.h&gt;
+<span class="lineNum">      38 </span>            : #include &lt;TLS.h&gt;
+<span class="lineNum">      39 </span>            : #endif
+<span class="lineNum">      40 </span>            : 
+<span class="lineNum">      41 </span>            : #if defined(SOLARIS)
+<span class="lineNum">      42 </span>            : #include &lt;note.h&gt;
+<span class="lineNum">      43 </span>            : #endif
+<span class="lineNum">      44 </span>            : 
+<span class="lineNum">      45 </span>            : /* #define DEBUG_THREADS */
+<span class="lineNum">      46 </span>            : 
+<span class="lineNum">      47 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">      48 </span>            : 
+<span class="lineNum">      49 </span>            : static int libxml_is_threaded = -1;
+<span class="lineNum">      50 </span>            : #if defined(__GNUC__) &amp;&amp; defined(__GLIBC__)
+<span class="lineNum">      51 </span>            : #ifdef linux
+<span class="lineNum">      52 </span>            : #if (__GNUC__ == 3 &amp;&amp; __GNUC_MINOR__ &gt;= 3) || (__GNUC__ &gt; 3)
+<span class="lineNum">      53 </span>            : extern int pthread_once (pthread_once_t *__once_control,
+<span class="lineNum">      54 </span>            :                          void (*__init_routine) (void))
+<span class="lineNum">      55 </span>            :            __attribute((weak));
+<span class="lineNum">      56 </span>            : extern void *pthread_getspecific (pthread_key_t __key)
+<span class="lineNum">      57 </span>            :            __attribute((weak));
+<span class="lineNum">      58 </span>            : extern int pthread_setspecific (pthread_key_t __key,
+<span class="lineNum">      59 </span>            :                                 __const void *__pointer)
+<span class="lineNum">      60 </span>            :            __attribute((weak));
+<span class="lineNum">      61 </span>            : extern int pthread_key_create (pthread_key_t *__key,
+<span class="lineNum">      62 </span>            :                                void (*__destr_function) (void *))
+<span class="lineNum">      63 </span>            :            __attribute((weak));
+<span class="lineNum">      64 </span>            : extern int pthread_key_delete (pthread_key_t __key)
+<span class="lineNum">      65 </span>            :            __attribute((weak));
+<span class="lineNum">      66 </span>            : extern int pthread_mutex_init ()
+<span class="lineNum">      67 </span>            :            __attribute((weak));
+<span class="lineNum">      68 </span>            : extern int pthread_mutex_destroy ()
+<span class="lineNum">      69 </span>            :            __attribute((weak));
+<span class="lineNum">      70 </span>            : extern int pthread_mutex_lock ()
+<span class="lineNum">      71 </span>            :            __attribute((weak));
+<span class="lineNum">      72 </span>            : extern int pthread_mutex_unlock ()
+<span class="lineNum">      73 </span>            :            __attribute((weak));
+<span class="lineNum">      74 </span>            : extern int pthread_cond_init ()
+<span class="lineNum">      75 </span>            :            __attribute((weak));
+<span class="lineNum">      76 </span>            : extern int pthread_cond_destroy ()
+<span class="lineNum">      77 </span>            :            __attribute((weak));
+<span class="lineNum">      78 </span>            : extern int pthread_cond_wait ()
+<span class="lineNum">      79 </span>            :            __attribute((weak));
+<span class="lineNum">      80 </span>            : extern int pthread_equal ()
+<span class="lineNum">      81 </span>            :            __attribute((weak));
+<span class="lineNum">      82 </span>            : extern pthread_t pthread_self ()
+<span class="lineNum">      83 </span>            :            __attribute((weak));
+<span class="lineNum">      84 </span>            : extern int pthread_key_create ()
+<span class="lineNum">      85 </span>            :            __attribute((weak));
+<span class="lineNum">      86 </span>            : extern int pthread_key_delete ()
+<span class="lineNum">      87 </span>            :            __attribute((weak));
+<span class="lineNum">      88 </span>            : extern int pthread_cond_signal ()
+<span class="lineNum">      89 </span>            :            __attribute((weak));
+<span class="lineNum">      90 </span>            : #endif
+<span class="lineNum">      91 </span>            : #endif /* linux */
+<span class="lineNum">      92 </span>            : #endif /* defined(__GNUC__) &amp;&amp; defined(__GLIBC__) */
+<span class="lineNum">      93 </span>            : #endif /* HAVE_PTHREAD_H */
+<span class="lineNum">      94 </span>            : 
+<span class="lineNum">      95 </span>            : /*
+<span class="lineNum">      96 </span>            :  * TODO: this module still uses malloc/free and not xmlMalloc/xmlFree
+<span class="lineNum">      97 </span>            :  *       to avoid some crazyness since xmlMalloc/xmlFree may actually
+<span class="lineNum">      98 </span>            :  *       be hosted on allocated blocks needing them for the allocation ...
+<span class="lineNum">      99 </span>            :  */
+<span class="lineNum">     100 </span>            : 
+<span class="lineNum">     101 </span>            : /*
+<span class="lineNum">     102 </span>            :  * xmlMutex are a simple mutual exception locks
+<span class="lineNum">     103 </span>            :  */
+<span class="lineNum">     104 </span>            : struct _xmlMutex {
+<span class="lineNum">     105 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     106 </span>            :     pthread_mutex_t lock;
+<span class="lineNum">     107 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     108 </span>            :     HANDLE mutex;
+<span class="lineNum">     109 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     110 </span>            :     sem_id sem;
+<span class="lineNum">     111 </span>            :     thread_id tid;
+<span class="lineNum">     112 </span>            : #else
+<span class="lineNum">     113 </span>            :     int empty;
+<span class="lineNum">     114 </span>            : #endif
+<span class="lineNum">     115 </span>            : };
+<span class="lineNum">     116 </span>            : 
+<span class="lineNum">     117 </span>            : /*
+<span class="lineNum">     118 </span>            :  * xmlRMutex are reentrant mutual exception locks
+<span class="lineNum">     119 </span>            :  */
+<span class="lineNum">     120 </span>            : struct _xmlRMutex {
+<span class="lineNum">     121 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     122 </span>            :     pthread_mutex_t lock;
+<span class="lineNum">     123 </span>            :     unsigned int held;
+<span class="lineNum">     124 </span>            :     unsigned int waiters;
+<span class="lineNum">     125 </span>            :     pthread_t tid;
+<span class="lineNum">     126 </span>            :     pthread_cond_t cv;
+<span class="lineNum">     127 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     128 </span>            :     CRITICAL_SECTION cs;
+<span class="lineNum">     129 </span>            :     unsigned int count;
+<span class="lineNum">     130 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     131 </span>            :     xmlMutexPtr lock;
+<span class="lineNum">     132 </span>            :     thread_id tid;
+<span class="lineNum">     133 </span>            :     int32 count;
+<span class="lineNum">     134 </span>            : #else
+<span class="lineNum">     135 </span>            :     int empty;
+<span class="lineNum">     136 </span>            : #endif
+<span class="lineNum">     137 </span>            : };
+<span class="lineNum">     138 </span>            : 
+<span class="lineNum">     139 </span>            : /*
+<span class="lineNum">     140 </span>            :  * This module still has some internal static data.
+<span class="lineNum">     141 </span>            :  *   - xmlLibraryLock a global lock
+<span class="lineNum">     142 </span>            :  *   - globalkey used for per-thread data
+<span class="lineNum">     143 </span>            :  */
+<span class="lineNum">     144 </span>            : 
+<span class="lineNum">     145 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     146 </span>            : static pthread_key_t globalkey;
+<span class="lineNum">     147 </span>            : static pthread_t mainthread;
+<span class="lineNum">     148 </span>            : static pthread_once_t once_control = PTHREAD_ONCE_INIT;
+<span class="lineNum">     149 </span>            : static pthread_once_t once_control_init = PTHREAD_ONCE_INIT;
+<span class="lineNum">     150 </span>            : static pthread_mutex_t global_init_lock = PTHREAD_MUTEX_INITIALIZER;
+<span class="lineNum">     151 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     152 </span>            : #if defined(HAVE_COMPILER_TLS)
+<span class="lineNum">     153 </span>            : static __declspec(thread) xmlGlobalState tlstate;
+<span class="lineNum">     154 </span>            : static __declspec(thread) int tlstate_inited = 0;
+<span class="lineNum">     155 </span>            : #else /* HAVE_COMPILER_TLS */
+<span class="lineNum">     156 </span>            : static DWORD globalkey = TLS_OUT_OF_INDEXES;
+<span class="lineNum">     157 </span>            : #endif /* HAVE_COMPILER_TLS */
+<span class="lineNum">     158 </span>            : static DWORD mainthread;
+<span class="lineNum">     159 </span>            : static struct {
+<span class="lineNum">     160 </span>            :     DWORD done;
+<span class="lineNum">     161 </span>            :     DWORD control;
+<span class="lineNum">     162 </span>            : } run_once = { 0, 0};
+<span class="lineNum">     163 </span>            : static volatile LPCRITICAL_SECTION global_init_lock = NULL;
+<span class="lineNum">     164 </span>            : 
+<span class="lineNum">     165 </span>            : /* endif HAVE_WIN32_THREADS */
+<span class="lineNum">     166 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     167 </span>            : int32 globalkey = 0;
+<span class="lineNum">     168 </span>            : thread_id mainthread = 0;
+<span class="lineNum">     169 </span>            : int32 run_once_init = 0;
+<span class="lineNum">     170 </span>            : static int32 global_init_lock = -1;
+<span class="lineNum">     171 </span>            : static vint32 global_init_count = 0;
+<span class="lineNum">     172 </span>            : #endif
+<span class="lineNum">     173 </span>            : 
+<span class="lineNum">     174 </span>            : static xmlRMutexPtr xmlLibraryLock = NULL;
+<span class="lineNum">     175 </span>            : 
+<span class="lineNum">     176 </span>            : #ifdef LIBXML_THREAD_ENABLED
+<span class="lineNum">     177 </span>            : static void xmlOnceInit(void);
+<span class="lineNum">     178 </span>            : #endif
+<span class="lineNum">     179 </span>            : 
+<span class="lineNum">     180 </span>            : /**
+<span class="lineNum">     181 </span>            :  * xmlNewMutex:
+<span class="lineNum">     182 </span>            :  *
+<span class="lineNum">     183 </span>            :  * xmlNewMutex() is used to allocate a libxml2 token struct for use in
+<span class="lineNum">     184 </span>            :  * synchronizing access to data.
+<span class="lineNum">     185 </span>            :  *
+<span class="lineNum">     186 </span>            :  * Returns a new simple mutex pointer or NULL in case of error
+<a name="187"><span class="lineNum">     187 </span>            :  */</a>
+<span class="lineNum">     188 </span>            : xmlMutexPtr
+<span class="lineNum">     189 </span><span class="lineCov">       2744 : xmlNewMutex(void)</span>
+<span class="lineNum">     190 </span>            : {
+<span class="lineNum">     191 </span>            :     xmlMutexPtr tok;
+<span class="lineNum">     192 </span>            : 
+<span class="lineNum">     193 </span><span class="lineCov">       2744 :     if ((tok = malloc(sizeof(xmlMutex))) == NULL)</span>
+<span class="lineNum">     194 </span>            :         return (NULL);
+<span class="lineNum">     195 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     196 </span><span class="lineCov">       2744 :     if (libxml_is_threaded != 0)</span>
+<span class="lineNum">     197 </span><span class="lineNoCov">          0 :         pthread_mutex_init(&amp;tok-&gt;lock, NULL);</span>
+<span class="lineNum">     198 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     199 </span>            :     tok-&gt;mutex = CreateMutex(NULL, FALSE, NULL);
+<span class="lineNum">     200 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     201 </span>            :     if ((tok-&gt;sem = create_sem(1, &quot;xmlMutex&quot;)) &lt; B_OK) {
+<span class="lineNum">     202 </span>            :         free(tok);
+<span class="lineNum">     203 </span>            :         return NULL;
+<span class="lineNum">     204 </span>            :     }
+<span class="lineNum">     205 </span>            :     tok-&gt;tid = -1;
+<span class="lineNum">     206 </span>            : #endif
+<span class="lineNum">     207 </span><span class="lineCov">       2744 :     return (tok);</span>
+<span class="lineNum">     208 </span>            : }
+<span class="lineNum">     209 </span>            : 
+<span class="lineNum">     210 </span>            : /**
+<span class="lineNum">     211 </span>            :  * xmlFreeMutex:
+<span class="lineNum">     212 </span>            :  * @tok:  the simple mutex
+<span class="lineNum">     213 </span>            :  *
+<span class="lineNum">     214 </span>            :  * xmlFreeMutex() is used to reclaim resources associated with a libxml2 token
+<span class="lineNum">     215 </span>            :  * struct.
+<a name="216"><span class="lineNum">     216 </span>            :  */</a>
+<span class="lineNum">     217 </span>            : void
+<span class="lineNum">     218 </span><span class="lineCov">       2744 : xmlFreeMutex(xmlMutexPtr tok)</span>
+<span class="lineNum">     219 </span>            : {
+<span class="lineNum">     220 </span><span class="lineCov">       2744 :     if (tok == NULL)</span>
+<span class="lineNum">     221 </span><span class="lineCov">       2744 :         return;</span>
+<span class="lineNum">     222 </span>            : 
+<span class="lineNum">     223 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     224 </span><span class="lineCov">       2744 :     if (libxml_is_threaded != 0)</span>
+<span class="lineNum">     225 </span><span class="lineNoCov">          0 :         pthread_mutex_destroy(&amp;tok-&gt;lock);</span>
+<span class="lineNum">     226 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     227 </span>            :     CloseHandle(tok-&gt;mutex);
+<span class="lineNum">     228 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     229 </span>            :     delete_sem(tok-&gt;sem);
+<span class="lineNum">     230 </span>            : #endif
+<span class="lineNum">     231 </span><span class="lineCov">       2744 :     free(tok);</span>
+<span class="lineNum">     232 </span>            : }
+<span class="lineNum">     233 </span>            : 
+<span class="lineNum">     234 </span>            : /**
+<span class="lineNum">     235 </span>            :  * xmlMutexLock:
+<span class="lineNum">     236 </span>            :  * @tok:  the simple mutex
+<span class="lineNum">     237 </span>            :  *
+<span class="lineNum">     238 </span>            :  * xmlMutexLock() is used to lock a libxml2 token.
+<a name="239"><span class="lineNum">     239 </span>            :  */</a>
+<span class="lineNum">     240 </span>            : void
+<span class="lineNum">     241 </span><span class="lineNoCov">          0 : xmlMutexLock(xmlMutexPtr tok)</span>
+<span class="lineNum">     242 </span>            : {
+<span class="lineNum">     243 </span><span class="lineNoCov">          0 :     if (tok == NULL)</span>
+<span class="lineNum">     244 </span><span class="lineNoCov">          0 :         return;</span>
+<span class="lineNum">     245 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     246 </span><span class="lineNoCov">          0 :     if (libxml_is_threaded != 0)</span>
+<span class="lineNum">     247 </span><span class="lineNoCov">          0 :         pthread_mutex_lock(&amp;tok-&gt;lock);</span>
+<span class="lineNum">     248 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     249 </span>            :     WaitForSingleObject(tok-&gt;mutex, INFINITE);
+<span class="lineNum">     250 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     251 </span>            :     if (acquire_sem(tok-&gt;sem) != B_NO_ERROR) {
+<span class="lineNum">     252 </span>            : #ifdef DEBUG_THREADS
+<span class="lineNum">     253 </span>            :         xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">     254 </span>            :                         &quot;xmlMutexLock():BeOS:Couldn't aquire semaphore\n&quot;);
+<span class="lineNum">     255 </span>            : #endif
+<span class="lineNum">     256 </span>            :     }
+<span class="lineNum">     257 </span>            :     tok-&gt;tid = find_thread(NULL);
+<span class="lineNum">     258 </span>            : #endif
+<span class="lineNum">     259 </span>            : 
+<span class="lineNum">     260 </span>            : }
+<span class="lineNum">     261 </span>            : 
+<span class="lineNum">     262 </span>            : /**
+<span class="lineNum">     263 </span>            :  * xmlMutexUnlock:
+<span class="lineNum">     264 </span>            :  * @tok:  the simple mutex
+<span class="lineNum">     265 </span>            :  *
+<span class="lineNum">     266 </span>            :  * xmlMutexUnlock() is used to unlock a libxml2 token.
+<a name="267"><span class="lineNum">     267 </span>            :  */</a>
+<span class="lineNum">     268 </span>            : void
+<span class="lineNum">     269 </span><span class="lineNoCov">          0 : xmlMutexUnlock(xmlMutexPtr tok)</span>
+<span class="lineNum">     270 </span>            : {
+<span class="lineNum">     271 </span><span class="lineNoCov">          0 :     if (tok == NULL)</span>
+<span class="lineNum">     272 </span><span class="lineNoCov">          0 :         return;</span>
+<span class="lineNum">     273 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     274 </span><span class="lineNoCov">          0 :     if (libxml_is_threaded != 0)</span>
+<span class="lineNum">     275 </span><span class="lineNoCov">          0 :         pthread_mutex_unlock(&amp;tok-&gt;lock);</span>
+<span class="lineNum">     276 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     277 </span>            :     ReleaseMutex(tok-&gt;mutex);
+<span class="lineNum">     278 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     279 </span>            :     if (tok-&gt;tid == find_thread(NULL)) {
+<span class="lineNum">     280 </span>            :         tok-&gt;tid = -1;
+<span class="lineNum">     281 </span>            :         release_sem(tok-&gt;sem);
+<span class="lineNum">     282 </span>            :     }
+<span class="lineNum">     283 </span>            : #endif
+<span class="lineNum">     284 </span>            : }
+<span class="lineNum">     285 </span>            : 
+<span class="lineNum">     286 </span>            : /**
+<span class="lineNum">     287 </span>            :  * xmlNewRMutex:
+<span class="lineNum">     288 </span>            :  *
+<span class="lineNum">     289 </span>            :  * xmlRNewMutex() is used to allocate a reentrant mutex for use in
+<span class="lineNum">     290 </span>            :  * synchronizing access to data. token_r is a re-entrant lock and thus useful
+<span class="lineNum">     291 </span>            :  * for synchronizing access to data structures that may be manipulated in a
+<span class="lineNum">     292 </span>            :  * recursive fashion.
+<span class="lineNum">     293 </span>            :  *
+<span class="lineNum">     294 </span>            :  * Returns the new reentrant mutex pointer or NULL in case of error
+<a name="295"><span class="lineNum">     295 </span>            :  */</a>
+<span class="lineNum">     296 </span>            : xmlRMutexPtr
+<span class="lineNum">     297 </span><span class="lineCov">       1372 : xmlNewRMutex(void)</span>
+<span class="lineNum">     298 </span>            : {
+<span class="lineNum">     299 </span>            :     xmlRMutexPtr tok;
+<span class="lineNum">     300 </span>            : 
+<span class="lineNum">     301 </span><span class="lineCov">       1372 :     if ((tok = malloc(sizeof(xmlRMutex))) == NULL)</span>
+<span class="lineNum">     302 </span>            :         return (NULL);
+<span class="lineNum">     303 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     304 </span><span class="lineCov">       1372 :     if (libxml_is_threaded != 0) {</span>
+<span class="lineNum">     305 </span><span class="lineNoCov">          0 :         pthread_mutex_init(&amp;tok-&gt;lock, NULL);</span>
+<span class="lineNum">     306 </span><span class="lineNoCov">          0 :         tok-&gt;held = 0;</span>
+<span class="lineNum">     307 </span><span class="lineNoCov">          0 :         tok-&gt;waiters = 0;</span>
+<span class="lineNum">     308 </span><span class="lineNoCov">          0 :         pthread_cond_init(&amp;tok-&gt;cv, NULL);</span>
+<span class="lineNum">     309 </span>            :     }
+<span class="lineNum">     310 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     311 </span>            :     InitializeCriticalSection(&amp;tok-&gt;cs);
+<span class="lineNum">     312 </span>            :     tok-&gt;count = 0;
+<span class="lineNum">     313 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     314 </span>            :     if ((tok-&gt;lock = xmlNewMutex()) == NULL) {
+<span class="lineNum">     315 </span>            :         free(tok);
+<span class="lineNum">     316 </span>            :         return NULL;
+<span class="lineNum">     317 </span>            :     }
+<span class="lineNum">     318 </span>            :     tok-&gt;count = 0;
+<span class="lineNum">     319 </span>            : #endif
+<span class="lineNum">     320 </span><span class="lineCov">       1372 :     return (tok);</span>
+<span class="lineNum">     321 </span>            : }
+<span class="lineNum">     322 </span>            : 
+<span class="lineNum">     323 </span>            : /**
+<span class="lineNum">     324 </span>            :  * xmlFreeRMutex:
+<span class="lineNum">     325 </span>            :  * @tok:  the reentrant mutex
+<span class="lineNum">     326 </span>            :  *
+<span class="lineNum">     327 </span>            :  * xmlRFreeMutex() is used to reclaim resources associated with a
+<span class="lineNum">     328 </span>            :  * reentrant mutex.
+<a name="329"><span class="lineNum">     329 </span>            :  */</a>
+<span class="lineNum">     330 </span>            : void
+<span class="lineNum">     331 </span><span class="lineCov">       1372 : xmlFreeRMutex(xmlRMutexPtr tok ATTRIBUTE_UNUSED)</span>
+<span class="lineNum">     332 </span>            : {
+<span class="lineNum">     333 </span><span class="lineCov">       1372 :     if (tok == NULL)</span>
+<span class="lineNum">     334 </span><span class="lineCov">       1372 :         return;</span>
+<span class="lineNum">     335 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     336 </span><span class="lineCov">       1372 :     if (libxml_is_threaded != 0) {</span>
+<span class="lineNum">     337 </span><span class="lineNoCov">          0 :         pthread_mutex_destroy(&amp;tok-&gt;lock);</span>
+<span class="lineNum">     338 </span><span class="lineNoCov">          0 :         pthread_cond_destroy(&amp;tok-&gt;cv);</span>
+<span class="lineNum">     339 </span>            :     }
+<span class="lineNum">     340 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     341 </span>            :     DeleteCriticalSection(&amp;tok-&gt;cs);
+<span class="lineNum">     342 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     343 </span>            :     xmlFreeMutex(tok-&gt;lock);
+<span class="lineNum">     344 </span>            : #endif
+<span class="lineNum">     345 </span><span class="lineCov">       1372 :     free(tok);</span>
+<span class="lineNum">     346 </span>            : }
+<span class="lineNum">     347 </span>            : 
+<span class="lineNum">     348 </span>            : /**
+<span class="lineNum">     349 </span>            :  * xmlRMutexLock:
+<span class="lineNum">     350 </span>            :  * @tok:  the reentrant mutex
+<span class="lineNum">     351 </span>            :  *
+<span class="lineNum">     352 </span>            :  * xmlRMutexLock() is used to lock a libxml2 token_r.
+<a name="353"><span class="lineNum">     353 </span>            :  */</a>
+<span class="lineNum">     354 </span>            : void
+<span class="lineNum">     355 </span><span class="lineCov">       7940 : xmlRMutexLock(xmlRMutexPtr tok)</span>
+<span class="lineNum">     356 </span>            : {
+<span class="lineNum">     357 </span><span class="lineCov">       7940 :     if (tok == NULL)</span>
+<span class="lineNum">     358 </span>            :         return;
+<span class="lineNum">     359 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     360 </span><span class="lineCov">       7940 :     if (libxml_is_threaded == 0)</span>
+<span class="lineNum">     361 </span>            :         return;
+<span class="lineNum">     362 </span>            : 
+<span class="lineNum">     363 </span><span class="lineNoCov">          0 :     pthread_mutex_lock(&amp;tok-&gt;lock);</span>
+<span class="lineNum">     364 </span><span class="lineNoCov">          0 :     if (tok-&gt;held) {</span>
+<span class="lineNum">     365 </span><span class="lineNoCov">          0 :         if (pthread_equal(tok-&gt;tid, pthread_self())) {</span>
+<span class="lineNum">     366 </span><span class="lineNoCov">          0 :             tok-&gt;held++;</span>
+<span class="lineNum">     367 </span><span class="lineNoCov">          0 :             pthread_mutex_unlock(&amp;tok-&gt;lock);</span>
+<span class="lineNum">     368 </span><span class="lineNoCov">          0 :             return;</span>
+<span class="lineNum">     369 </span>            :         } else {
+<span class="lineNum">     370 </span><span class="lineNoCov">          0 :             tok-&gt;waiters++;</span>
+<span class="lineNum">     371 </span><span class="lineNoCov">          0 :             while (tok-&gt;held)</span>
+<span class="lineNum">     372 </span><span class="lineNoCov">          0 :                 pthread_cond_wait(&amp;tok-&gt;cv, &amp;tok-&gt;lock);</span>
+<span class="lineNum">     373 </span><span class="lineNoCov">          0 :             tok-&gt;waiters--;</span>
+<span class="lineNum">     374 </span>            :         }
+<span class="lineNum">     375 </span>            :     }
+<span class="lineNum">     376 </span><span class="lineNoCov">          0 :     tok-&gt;tid = pthread_self();</span>
+<span class="lineNum">     377 </span><span class="lineNoCov">          0 :     tok-&gt;held = 1;</span>
+<span class="lineNum">     378 </span><span class="lineNoCov">          0 :     pthread_mutex_unlock(&amp;tok-&gt;lock);</span>
+<span class="lineNum">     379 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     380 </span>            :     EnterCriticalSection(&amp;tok-&gt;cs);
+<span class="lineNum">     381 </span>            :     tok-&gt;count++;
+<span class="lineNum">     382 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     383 </span>            :     if (tok-&gt;lock-&gt;tid == find_thread(NULL)) {
+<span class="lineNum">     384 </span>            :         tok-&gt;count++;
+<span class="lineNum">     385 </span>            :         return;
+<span class="lineNum">     386 </span>            :     } else {
+<span class="lineNum">     387 </span>            :         xmlMutexLock(tok-&gt;lock);
+<span class="lineNum">     388 </span>            :         tok-&gt;count = 1;
+<span class="lineNum">     389 </span>            :     }
+<span class="lineNum">     390 </span>            : #endif
+<span class="lineNum">     391 </span>            : }
+<span class="lineNum">     392 </span>            : 
+<span class="lineNum">     393 </span>            : /**
+<span class="lineNum">     394 </span>            :  * xmlRMutexUnlock:
+<span class="lineNum">     395 </span>            :  * @tok:  the reentrant mutex
+<span class="lineNum">     396 </span>            :  *
+<span class="lineNum">     397 </span>            :  * xmlRMutexUnlock() is used to unlock a libxml2 token_r.
+<a name="398"><span class="lineNum">     398 </span>            :  */</a>
+<span class="lineNum">     399 </span>            : void
+<span class="lineNum">     400 </span><span class="lineCov">       7940 : xmlRMutexUnlock(xmlRMutexPtr tok ATTRIBUTE_UNUSED)</span>
+<span class="lineNum">     401 </span>            : {
+<span class="lineNum">     402 </span><span class="lineCov">       7940 :     if (tok == NULL)</span>
+<span class="lineNum">     403 </span>            :         return;
+<span class="lineNum">     404 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     405 </span><span class="lineCov">       7940 :     if (libxml_is_threaded == 0)</span>
+<span class="lineNum">     406 </span>            :         return;
+<span class="lineNum">     407 </span>            : 
+<span class="lineNum">     408 </span><span class="lineNoCov">          0 :     pthread_mutex_lock(&amp;tok-&gt;lock);</span>
+<span class="lineNum">     409 </span><span class="lineNoCov">          0 :     tok-&gt;held--;</span>
+<span class="lineNum">     410 </span><span class="lineNoCov">          0 :     if (tok-&gt;held == 0) {</span>
+<span class="lineNum">     411 </span><span class="lineNoCov">          0 :         if (tok-&gt;waiters)</span>
+<span class="lineNum">     412 </span><span class="lineNoCov">          0 :             pthread_cond_signal(&amp;tok-&gt;cv);</span>
+<span class="lineNum">     413 </span><span class="lineNoCov">          0 :         memset(&amp;tok-&gt;tid, 0, sizeof(tok-&gt;tid));</span>
+<span class="lineNum">     414 </span>            :     }
+<span class="lineNum">     415 </span><span class="lineNoCov">          0 :     pthread_mutex_unlock(&amp;tok-&gt;lock);</span>
+<span class="lineNum">     416 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     417 </span>            :     if (tok-&gt;count &gt; 0) {
+<span class="lineNum">     418 </span>            :         tok-&gt;count--;
+<span class="lineNum">     419 </span>            :         LeaveCriticalSection(&amp;tok-&gt;cs);
+<span class="lineNum">     420 </span>            :     }
+<span class="lineNum">     421 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     422 </span>            :     if (tok-&gt;lock-&gt;tid == find_thread(NULL)) {
+<span class="lineNum">     423 </span>            :         tok-&gt;count--;
+<span class="lineNum">     424 </span>            :         if (tok-&gt;count == 0) {
+<span class="lineNum">     425 </span>            :             xmlMutexUnlock(tok-&gt;lock);
+<span class="lineNum">     426 </span>            :         }
+<span class="lineNum">     427 </span>            :         return;
+<span class="lineNum">     428 </span>            :     }
+<span class="lineNum">     429 </span>            : #endif
+<span class="lineNum">     430 </span>            : }
+<span class="lineNum">     431 </span>            : 
+<span class="lineNum">     432 </span>            : /**
+<span class="lineNum">     433 </span>            :  * xmlGlobalInitMutexLock
+<span class="lineNum">     434 </span>            :  *
+<span class="lineNum">     435 </span>            :  * Makes sure that the global initialization mutex is initialized and
+<span class="lineNum">     436 </span>            :  * locks it.
+<a name="437"><span class="lineNum">     437 </span>            :  */</a>
+<span class="lineNum">     438 </span>            : void
+<span class="lineNum">     439 </span><span class="lineCov">       1372 : __xmlGlobalInitMutexLock(void)</span>
+<span class="lineNum">     440 </span>            : {
+<span class="lineNum">     441 </span>            :     /* Make sure the global init lock is initialized and then lock it. */
+<span class="lineNum">     442 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     443 </span>            :     /* The mutex is statically initialized, so we just lock it. */
+<span class="lineNum">     444 </span><span class="lineCov">       1372 :     if (pthread_mutex_lock != NULL)</span>
+<span class="lineNum">     445 </span><span class="lineCov">       1372 :         pthread_mutex_lock(&amp;global_init_lock);</span>
+<span class="lineNum">     446 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     447 </span>            :     LPCRITICAL_SECTION cs;
+<span class="lineNum">     448 </span>            : 
+<span class="lineNum">     449 </span>            :     /* Create a new critical section */
+<span class="lineNum">     450 </span>            :     if (global_init_lock == NULL) {
+<span class="lineNum">     451 </span>            :         cs = malloc(sizeof(CRITICAL_SECTION));
+<span class="lineNum">     452 </span>            :         if (cs == NULL) {
+<span class="lineNum">     453 </span>            :             xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">     454 </span>            :                             &quot;xmlGlobalInitMutexLock: out of memory\n&quot;);
+<span class="lineNum">     455 </span>            :             return;
+<span class="lineNum">     456 </span>            :         }
+<span class="lineNum">     457 </span>            :         InitializeCriticalSection(cs);
+<span class="lineNum">     458 </span>            : 
+<span class="lineNum">     459 </span>            :         /* Swap it into the global_init_lock */
+<span class="lineNum">     460 </span>            : #ifdef InterlockedCompareExchangePointer
+<span class="lineNum">     461 </span>            :         InterlockedCompareExchangePointer(&amp;global_init_lock, cs, NULL);
+<span class="lineNum">     462 </span>            : #else /* Use older void* version */
+<span class="lineNum">     463 </span>            :         InterlockedCompareExchange((void **) &amp;global_init_lock,
+<span class="lineNum">     464 </span>            :                                    (void *) cs, NULL);
+<span class="lineNum">     465 </span>            : #endif /* InterlockedCompareExchangePointer */
+<span class="lineNum">     466 </span>            : 
+<span class="lineNum">     467 </span>            :         /* If another thread successfully recorded its critical
+<span class="lineNum">     468 </span>            :          * section in the global_init_lock then discard the one
+<span class="lineNum">     469 </span>            :          * allocated by this thread. */
+<span class="lineNum">     470 </span>            :         if (global_init_lock != cs) {
+<span class="lineNum">     471 </span>            :             DeleteCriticalSection(cs);
+<span class="lineNum">     472 </span>            :             free(cs);
+<span class="lineNum">     473 </span>            :         }
+<span class="lineNum">     474 </span>            :     }
+<span class="lineNum">     475 </span>            : 
+<span class="lineNum">     476 </span>            :     /* Lock the chosen critical section */
+<span class="lineNum">     477 </span>            :     EnterCriticalSection(global_init_lock);
+<span class="lineNum">     478 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     479 </span>            :     int32 sem;
+<span class="lineNum">     480 </span>            : 
+<span class="lineNum">     481 </span>            :     /* Allocate a new semaphore */
+<span class="lineNum">     482 </span>            :     sem = create_sem(1, &quot;xmlGlobalinitMutex&quot;);
+<span class="lineNum">     483 </span>            : 
+<span class="lineNum">     484 </span>            :     while (global_init_lock == -1) {
+<span class="lineNum">     485 </span>            :         if (atomic_add(&amp;global_init_count, 1) == 0) {
+<span class="lineNum">     486 </span>            :             global_init_lock = sem;
+<span class="lineNum">     487 </span>            :         } else {
+<span class="lineNum">     488 </span>            :             snooze(1);
+<span class="lineNum">     489 </span>            :             atomic_add(&amp;global_init_count, -1);
+<span class="lineNum">     490 </span>            :         }
+<span class="lineNum">     491 </span>            :     }
+<span class="lineNum">     492 </span>            : 
+<span class="lineNum">     493 </span>            :     /* If another thread successfully recorded its critical
+<span class="lineNum">     494 </span>            :      * section in the global_init_lock then discard the one
+<span class="lineNum">     495 </span>            :      * allocated by this thread. */
+<span class="lineNum">     496 </span>            :     if (global_init_lock != sem)
+<span class="lineNum">     497 </span>            :         delete_sem(sem);
+<span class="lineNum">     498 </span>            : 
+<span class="lineNum">     499 </span>            :     /* Acquire the chosen semaphore */
+<span class="lineNum">     500 </span>            :     if (acquire_sem(global_init_lock) != B_NO_ERROR) {
+<span class="lineNum">     501 </span>            : #ifdef DEBUG_THREADS
+<span class="lineNum">     502 </span>            :         xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">     503 </span>            :                         &quot;xmlGlobalInitMutexLock():BeOS:Couldn't acquire semaphore\n&quot;);
+<span class="lineNum">     504 </span>            : #endif
+<span class="lineNum">     505 </span>            :     }
+<span class="lineNum">     506 </span>            : #endif
+<span class="lineNum">     507 </span><span class="lineCov">       1372 : }</span>
+<a name="508"><span class="lineNum">     508 </span>            : </a>
+<span class="lineNum">     509 </span>            : void
+<span class="lineNum">     510 </span><span class="lineCov">       1372 : __xmlGlobalInitMutexUnlock(void)</span>
+<span class="lineNum">     511 </span>            : {
+<span class="lineNum">     512 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     513 </span><span class="lineCov">       1372 :     if (pthread_mutex_unlock != NULL)</span>
+<span class="lineNum">     514 </span><span class="lineCov">       1372 :         pthread_mutex_unlock(&amp;global_init_lock);</span>
+<span class="lineNum">     515 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     516 </span>            :     if (global_init_lock != NULL) {
+<span class="lineNum">     517 </span>            :         LeaveCriticalSection(global_init_lock);
+<span class="lineNum">     518 </span>            :     }
+<span class="lineNum">     519 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     520 </span>            :     release_sem(global_init_lock);
+<span class="lineNum">     521 </span>            : #endif
+<span class="lineNum">     522 </span><span class="lineCov">       1372 : }</span>
+<span class="lineNum">     523 </span>            : 
+<span class="lineNum">     524 </span>            : /**
+<span class="lineNum">     525 </span>            :  * xmlGlobalInitMutexDestroy
+<span class="lineNum">     526 </span>            :  *
+<span class="lineNum">     527 </span>            :  * Makes sure that the global initialization mutex is destroyed before
+<span class="lineNum">     528 </span>            :  * application termination.
+<a name="529"><span class="lineNum">     529 </span>            :  */</a>
+<span class="lineNum">     530 </span>            : void
+<span class="lineNum">     531 </span><span class="lineCov">       1372 : __xmlGlobalInitMutexDestroy(void)</span>
+<span class="lineNum">     532 </span>            : {
+<span class="lineNum">     533 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     534 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     535 </span>            :     if (global_init_lock != NULL) {
+<span class="lineNum">     536 </span>            :         DeleteCriticalSection(global_init_lock);
+<span class="lineNum">     537 </span>            :         free(global_init_lock);
+<span class="lineNum">     538 </span>            :         global_init_lock = NULL;
+<span class="lineNum">     539 </span>            :     }
+<span class="lineNum">     540 </span>            : #endif
+<span class="lineNum">     541 </span><span class="lineCov">       1372 : }</span>
+<span class="lineNum">     542 </span>            : 
+<span class="lineNum">     543 </span>            : /************************************************************************
+<span class="lineNum">     544 </span>            :  *                                                                      *
+<span class="lineNum">     545 </span>            :  *                      Per thread global state handling                *
+<span class="lineNum">     546 </span>            :  *                                                                      *
+<span class="lineNum">     547 </span>            :  ************************************************************************/
+<span class="lineNum">     548 </span>            : 
+<span class="lineNum">     549 </span>            : #ifdef LIBXML_THREAD_ENABLED
+<span class="lineNum">     550 </span>            : #ifdef xmlLastError
+<span class="lineNum">     551 </span>            : #undef xmlLastError
+<span class="lineNum">     552 </span>            : #endif
+<span class="lineNum">     553 </span>            : 
+<span class="lineNum">     554 </span>            : /**
+<span class="lineNum">     555 </span>            :  * xmlFreeGlobalState:
+<span class="lineNum">     556 </span>            :  * @state:  a thread global state
+<span class="lineNum">     557 </span>            :  *
+<span class="lineNum">     558 </span>            :  * xmlFreeGlobalState() is called when a thread terminates with a non-NULL
+<span class="lineNum">     559 </span>            :  * global state. It is is used here to reclaim memory resources.
+<a name="560"><span class="lineNum">     560 </span>            :  */</a>
+<span class="lineNum">     561 </span>            : static void
+<span class="lineNum">     562 </span><span class="lineNoCov">          0 : xmlFreeGlobalState(void *state)</span>
+<span class="lineNum">     563 </span>            : {
+<span class="lineNum">     564 </span><span class="lineNoCov">          0 :     xmlGlobalState *gs = (xmlGlobalState *) state;</span>
+<span class="lineNum">     565 </span>            : 
+<span class="lineNum">     566 </span>            :     /* free any memory allocated in the thread's xmlLastError */
+<span class="lineNum">     567 </span><span class="lineNoCov">          0 :     xmlResetError(&amp;(gs-&gt;xmlLastError));</span>
+<span class="lineNum">     568 </span><span class="lineNoCov">          0 :     free(state);</span>
+<span class="lineNum">     569 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">     570 </span>            : 
+<span class="lineNum">     571 </span>            : /**
+<span class="lineNum">     572 </span>            :  * xmlNewGlobalState:
+<span class="lineNum">     573 </span>            :  *
+<span class="lineNum">     574 </span>            :  * xmlNewGlobalState() allocates a global state. This structure is used to
+<span class="lineNum">     575 </span>            :  * hold all data for use by a thread when supporting backwards compatibility
+<span class="lineNum">     576 </span>            :  * of libxml2 to pre-thread-safe behaviour.
+<span class="lineNum">     577 </span>            :  *
+<span class="lineNum">     578 </span>            :  * Returns the newly allocated xmlGlobalStatePtr or NULL in case of error
+<a name="579"><span class="lineNum">     579 </span>            :  */</a>
+<span class="lineNum">     580 </span>            : static xmlGlobalStatePtr
+<span class="lineNum">     581 </span><span class="lineNoCov">          0 : xmlNewGlobalState(void)</span>
+<span class="lineNum">     582 </span>            : {
+<span class="lineNum">     583 </span>            :     xmlGlobalState *gs;
+<span class="lineNum">     584 </span>            : 
+<span class="lineNum">     585 </span><span class="lineNoCov">          0 :     gs = malloc(sizeof(xmlGlobalState));</span>
+<span class="lineNum">     586 </span><span class="lineNoCov">          0 :     if (gs == NULL) {</span>
+<span class="lineNum">     587 </span><span class="lineNoCov">          0 :         xmlGenericError(xmlGenericErrorContext,</span>
+<span class="lineNum">     588 </span>            :                         &quot;xmlGetGlobalState: out of memory\n&quot;);
+<span class="lineNum">     589 </span><span class="lineNoCov">          0 :         return (NULL);</span>
+<span class="lineNum">     590 </span>            :     }
+<span class="lineNum">     591 </span>            : 
+<span class="lineNum">     592 </span>            :     memset(gs, 0, sizeof(xmlGlobalState));
+<span class="lineNum">     593 </span><span class="lineNoCov">          0 :     xmlInitializeGlobalState(gs);</span>
+<span class="lineNum">     594 </span><span class="lineNoCov">          0 :     return (gs);</span>
+<span class="lineNum">     595 </span>            : }
+<span class="lineNum">     596 </span>            : #endif /* LIBXML_THREAD_ENABLED */
+<span class="lineNum">     597 </span>            : 
+<span class="lineNum">     598 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     599 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     600 </span>            : #if !defined(HAVE_COMPILER_TLS)
+<span class="lineNum">     601 </span>            : #if defined(LIBXML_STATIC) &amp;&amp; !defined(LIBXML_STATIC_FOR_DLL)
+<span class="lineNum">     602 </span>            : typedef struct _xmlGlobalStateCleanupHelperParams {
+<span class="lineNum">     603 </span>            :     HANDLE thread;
+<span class="lineNum">     604 </span>            :     void *memory;
+<span class="lineNum">     605 </span>            : } xmlGlobalStateCleanupHelperParams;
+<span class="lineNum">     606 </span>            : 
+<span class="lineNum">     607 </span>            : static void XMLCDECL
+<span class="lineNum">     608 </span>            : xmlGlobalStateCleanupHelper(void *p)
+<span class="lineNum">     609 </span>            : {
+<span class="lineNum">     610 </span>            :     xmlGlobalStateCleanupHelperParams *params =
+<span class="lineNum">     611 </span>            :         (xmlGlobalStateCleanupHelperParams *) p;
+<span class="lineNum">     612 </span>            :     WaitForSingleObject(params-&gt;thread, INFINITE);
+<span class="lineNum">     613 </span>            :     CloseHandle(params-&gt;thread);
+<span class="lineNum">     614 </span>            :     xmlFreeGlobalState(params-&gt;memory);
+<span class="lineNum">     615 </span>            :     free(params);
+<span class="lineNum">     616 </span>            :     _endthread();
+<span class="lineNum">     617 </span>            : }
+<span class="lineNum">     618 </span>            : #else /* LIBXML_STATIC &amp;&amp; !LIBXML_STATIC_FOR_DLL */
+<span class="lineNum">     619 </span>            : 
+<span class="lineNum">     620 </span>            : typedef struct _xmlGlobalStateCleanupHelperParams {
+<span class="lineNum">     621 </span>            :     void *memory;
+<span class="lineNum">     622 </span>            :     struct _xmlGlobalStateCleanupHelperParams *prev;
+<span class="lineNum">     623 </span>            :     struct _xmlGlobalStateCleanupHelperParams *next;
+<span class="lineNum">     624 </span>            : } xmlGlobalStateCleanupHelperParams;
+<span class="lineNum">     625 </span>            : 
+<span class="lineNum">     626 </span>            : static xmlGlobalStateCleanupHelperParams *cleanup_helpers_head = NULL;
+<span class="lineNum">     627 </span>            : static CRITICAL_SECTION cleanup_helpers_cs;
+<span class="lineNum">     628 </span>            : 
+<span class="lineNum">     629 </span>            : #endif /* LIBXMLSTATIC &amp;&amp; !LIBXML_STATIC_FOR_DLL */
+<span class="lineNum">     630 </span>            : #endif /* HAVE_COMPILER_TLS */
+<span class="lineNum">     631 </span>            : #endif /* HAVE_WIN32_THREADS */
+<span class="lineNum">     632 </span>            : 
+<span class="lineNum">     633 </span>            : #if defined HAVE_BEOS_THREADS
+<span class="lineNum">     634 </span>            : 
+<span class="lineNum">     635 </span>            : /**
+<span class="lineNum">     636 </span>            :  * xmlGlobalStateCleanup:
+<span class="lineNum">     637 </span>            :  * @data: unused parameter
+<span class="lineNum">     638 </span>            :  *
+<span class="lineNum">     639 </span>            :  * Used for Beos only
+<span class="lineNum">     640 </span>            :  */
+<span class="lineNum">     641 </span>            : void
+<span class="lineNum">     642 </span>            : xmlGlobalStateCleanup(void *data)
+<span class="lineNum">     643 </span>            : {
+<span class="lineNum">     644 </span>            :     void *globalval = tls_get(globalkey);
+<span class="lineNum">     645 </span>            : 
+<span class="lineNum">     646 </span>            :     if (globalval != NULL)
+<span class="lineNum">     647 </span>            :         xmlFreeGlobalState(globalval);
+<span class="lineNum">     648 </span>            : }
+<span class="lineNum">     649 </span>            : #endif
+<span class="lineNum">     650 </span>            : 
+<span class="lineNum">     651 </span>            : /**
+<span class="lineNum">     652 </span>            :  * xmlGetGlobalState:
+<span class="lineNum">     653 </span>            :  *
+<span class="lineNum">     654 </span>            :  * xmlGetGlobalState() is called to retrieve the global state for a thread.
+<span class="lineNum">     655 </span>            :  *
+<span class="lineNum">     656 </span>            :  * Returns the thread global state or NULL in case of error
+<a name="657"><span class="lineNum">     657 </span>            :  */</a>
+<span class="lineNum">     658 </span>            : xmlGlobalStatePtr
+<span class="lineNum">     659 </span><span class="lineNoCov">          0 : xmlGetGlobalState(void)</span>
+<span class="lineNum">     660 </span>            : {
+<span class="lineNum">     661 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     662 </span>            :     xmlGlobalState *globalval;
+<span class="lineNum">     663 </span>            : 
+<span class="lineNum">     664 </span><span class="lineNoCov">          0 :     if (libxml_is_threaded == 0)</span>
+<span class="lineNum">     665 </span>            :         return (NULL);
+<span class="lineNum">     666 </span>            : 
+<span class="lineNum">     667 </span><span class="lineNoCov">          0 :     pthread_once(&amp;once_control, xmlOnceInit);</span>
+<span class="lineNum">     668 </span>            : 
+<span class="lineNum">     669 </span><span class="lineNoCov">          0 :     if ((globalval = (xmlGlobalState *)</span>
+<span class="lineNum">     670 </span><span class="lineNoCov">          0 :          pthread_getspecific(globalkey)) == NULL) {</span>
+<span class="lineNum">     671 </span><span class="lineNoCov">          0 :         xmlGlobalState *tsd = xmlNewGlobalState();</span>
+<span class="lineNum">     672 </span><span class="lineNoCov">          0 :         if (tsd == NULL)</span>
+<span class="lineNum">     673 </span>            :             return(NULL);
+<span class="lineNum">     674 </span>            : 
+<span class="lineNum">     675 </span><span class="lineNoCov">          0 :         pthread_setspecific(globalkey, tsd);</span>
+<span class="lineNum">     676 </span><span class="lineNoCov">          0 :         return (tsd);</span>
+<span class="lineNum">     677 </span>            :     }
+<span class="lineNum">     678 </span>            :     return (globalval);
+<span class="lineNum">     679 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     680 </span>            : #if defined(HAVE_COMPILER_TLS)
+<span class="lineNum">     681 </span>            :     if (!tlstate_inited) {
+<span class="lineNum">     682 </span>            :         tlstate_inited = 1;
+<span class="lineNum">     683 </span>            :         xmlInitializeGlobalState(&amp;tlstate);
+<span class="lineNum">     684 </span>            :     }
+<span class="lineNum">     685 </span>            :     return &amp;tlstate;
+<span class="lineNum">     686 </span>            : #else /* HAVE_COMPILER_TLS */
+<span class="lineNum">     687 </span>            :     xmlGlobalState *globalval;
+<span class="lineNum">     688 </span>            :     xmlGlobalStateCleanupHelperParams *p;
+<span class="lineNum">     689 </span>            : 
+<span class="lineNum">     690 </span>            :     xmlOnceInit();
+<span class="lineNum">     691 </span>            : #if defined(LIBXML_STATIC) &amp;&amp; !defined(LIBXML_STATIC_FOR_DLL)
+<span class="lineNum">     692 </span>            :     globalval = (xmlGlobalState *) TlsGetValue(globalkey);
+<span class="lineNum">     693 </span>            : #else
+<span class="lineNum">     694 </span>            :     p = (xmlGlobalStateCleanupHelperParams *) TlsGetValue(globalkey);
+<span class="lineNum">     695 </span>            :     globalval = (xmlGlobalState *) (p ? p-&gt;memory : NULL);
+<span class="lineNum">     696 </span>            : #endif
+<span class="lineNum">     697 </span>            :     if (globalval == NULL) {
+<span class="lineNum">     698 </span>            :         xmlGlobalState *tsd = xmlNewGlobalState();
+<span class="lineNum">     699 </span>            : 
+<span class="lineNum">     700 </span>            :         if (tsd == NULL)
+<span class="lineNum">     701 </span>            :             return(NULL);
+<span class="lineNum">     702 </span>            :         p = (xmlGlobalStateCleanupHelperParams *)
+<span class="lineNum">     703 </span>            :             malloc(sizeof(xmlGlobalStateCleanupHelperParams));
+<span class="lineNum">     704 </span>            :         if (p == NULL) {
+<span class="lineNum">     705 </span>            :             xmlGenericError(xmlGenericErrorContext,
+<span class="lineNum">     706 </span>            :                             &quot;xmlGetGlobalState: out of memory\n&quot;);
+<span class="lineNum">     707 </span>            :             xmlFreeGlobalState(tsd);
+<span class="lineNum">     708 </span>            :             return(NULL);
+<span class="lineNum">     709 </span>            :         }
+<span class="lineNum">     710 </span>            :         p-&gt;memory = tsd;
+<span class="lineNum">     711 </span>            : #if defined(LIBXML_STATIC) &amp;&amp; !defined(LIBXML_STATIC_FOR_DLL)
+<span class="lineNum">     712 </span>            :         DuplicateHandle(GetCurrentProcess(), GetCurrentThread(),
+<span class="lineNum">     713 </span>            :                         GetCurrentProcess(), &amp;p-&gt;thread, 0, TRUE,
+<span class="lineNum">     714 </span>            :                         DUPLICATE_SAME_ACCESS);
+<span class="lineNum">     715 </span>            :         TlsSetValue(globalkey, tsd);
+<span class="lineNum">     716 </span>            :         _beginthread(xmlGlobalStateCleanupHelper, 0, p);
+<span class="lineNum">     717 </span>            : #else
+<span class="lineNum">     718 </span>            :         EnterCriticalSection(&amp;cleanup_helpers_cs);
+<span class="lineNum">     719 </span>            :         if (cleanup_helpers_head != NULL) {
+<span class="lineNum">     720 </span>            :             cleanup_helpers_head-&gt;prev = p;
+<span class="lineNum">     721 </span>            :         }
+<span class="lineNum">     722 </span>            :         p-&gt;next = cleanup_helpers_head;
+<span class="lineNum">     723 </span>            :         p-&gt;prev = NULL;
+<span class="lineNum">     724 </span>            :         cleanup_helpers_head = p;
+<span class="lineNum">     725 </span>            :         TlsSetValue(globalkey, p);
+<span class="lineNum">     726 </span>            :         LeaveCriticalSection(&amp;cleanup_helpers_cs);
+<span class="lineNum">     727 </span>            : #endif
+<span class="lineNum">     728 </span>            : 
+<span class="lineNum">     729 </span>            :         return (tsd);
+<span class="lineNum">     730 </span>            :     }
+<span class="lineNum">     731 </span>            :     return (globalval);
+<span class="lineNum">     732 </span>            : #endif /* HAVE_COMPILER_TLS */
+<span class="lineNum">     733 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     734 </span>            :     xmlGlobalState *globalval;
+<span class="lineNum">     735 </span>            : 
+<span class="lineNum">     736 </span>            :     xmlOnceInit();
+<span class="lineNum">     737 </span>            : 
+<span class="lineNum">     738 </span>            :     if ((globalval = (xmlGlobalState *) tls_get(globalkey)) == NULL) {
+<span class="lineNum">     739 </span>            :         xmlGlobalState *tsd = xmlNewGlobalState();
+<span class="lineNum">     740 </span>            :         if (tsd == NULL)
+<span class="lineNum">     741 </span>            :             return (NULL);
+<span class="lineNum">     742 </span>            : 
+<span class="lineNum">     743 </span>            :         tls_set(globalkey, tsd);
+<span class="lineNum">     744 </span>            :         on_exit_thread(xmlGlobalStateCleanup, NULL);
+<span class="lineNum">     745 </span>            :         return (tsd);
+<span class="lineNum">     746 </span>            :     }
+<span class="lineNum">     747 </span>            :     return (globalval);
+<span class="lineNum">     748 </span>            : #else
+<span class="lineNum">     749 </span>            :     return (NULL);
+<span class="lineNum">     750 </span>            : #endif
+<span class="lineNum">     751 </span>            : }
+<span class="lineNum">     752 </span>            : 
+<span class="lineNum">     753 </span>            : /************************************************************************
+<span class="lineNum">     754 </span>            :  *                                                                      *
+<span class="lineNum">     755 </span>            :  *                      Library wide thread interfaces                  *
+<span class="lineNum">     756 </span>            :  *                                                                      *
+<span class="lineNum">     757 </span>            :  ************************************************************************/
+<span class="lineNum">     758 </span>            : 
+<span class="lineNum">     759 </span>            : /**
+<span class="lineNum">     760 </span>            :  * xmlGetThreadId:
+<span class="lineNum">     761 </span>            :  *
+<span class="lineNum">     762 </span>            :  * xmlGetThreadId() find the current thread ID number
+<span class="lineNum">     763 </span>            :  * Note that this is likely to be broken on some platforms using pthreads
+<span class="lineNum">     764 </span>            :  * as the specification doesn't mandate pthread_t to be an integer type
+<span class="lineNum">     765 </span>            :  *
+<span class="lineNum">     766 </span>            :  * Returns the current thread ID number
+<a name="767"><span class="lineNum">     767 </span>            :  */</a>
+<span class="lineNum">     768 </span>            : int
+<span class="lineNum">     769 </span><span class="lineNoCov">          0 : xmlGetThreadId(void)</span>
+<span class="lineNum">     770 </span>            : {
+<span class="lineNum">     771 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     772 </span>            :     pthread_t id;
+<span class="lineNum">     773 </span>            :     int ret;
+<span class="lineNum">     774 </span>            : 
+<span class="lineNum">     775 </span><span class="lineNoCov">          0 :     if (libxml_is_threaded == 0)</span>
+<span class="lineNum">     776 </span>            :         return (0);
+<span class="lineNum">     777 </span><span class="lineNoCov">          0 :     id = pthread_self();</span>
+<span class="lineNum">     778 </span>            :     /* horrible but preserves compat, see warning above */
+<span class="lineNum">     779 </span>            :     memcpy(&amp;ret, &amp;id, sizeof(ret));
+<span class="lineNum">     780 </span><span class="lineNoCov">          0 :     return (ret);</span>
+<span class="lineNum">     781 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     782 </span>            :     return GetCurrentThreadId();
+<span class="lineNum">     783 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     784 </span>            :     return find_thread(NULL);
+<span class="lineNum">     785 </span>            : #else
+<span class="lineNum">     786 </span>            :     return ((int) 0);
+<span class="lineNum">     787 </span>            : #endif
+<span class="lineNum">     788 </span>            : }
+<span class="lineNum">     789 </span>            : 
+<span class="lineNum">     790 </span>            : /**
+<span class="lineNum">     791 </span>            :  * xmlIsMainThread:
+<span class="lineNum">     792 </span>            :  *
+<span class="lineNum">     793 </span>            :  * xmlIsMainThread() check whether the current thread is the main thread.
+<span class="lineNum">     794 </span>            :  *
+<span class="lineNum">     795 </span>            :  * Returns 1 if the current thread is the main thread, 0 otherwise
+<a name="796"><span class="lineNum">     796 </span>            :  */</a>
+<span class="lineNum">     797 </span>            : int
+<span class="lineNum">     798 </span><span class="lineCov">     155183 : xmlIsMainThread(void)</span>
+<span class="lineNum">     799 </span>            : {
+<span class="lineNum">     800 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     801 </span><span class="lineCov">     155183 :     if (libxml_is_threaded == -1)</span>
+<span class="lineNum">     802 </span><span class="lineNoCov">          0 :         xmlInitThreads();</span>
+<span class="lineNum">     803 </span><span class="lineCov">     155183 :     if (libxml_is_threaded == 0)</span>
+<span class="lineNum">     804 </span>            :         return (1);
+<span class="lineNum">     805 </span><span class="lineNoCov">          0 :     pthread_once(&amp;once_control, xmlOnceInit);</span>
+<span class="lineNum">     806 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     807 </span>            :     xmlOnceInit();
+<span class="lineNum">     808 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     809 </span>            :     xmlOnceInit();
+<span class="lineNum">     810 </span>            : #endif
+<span class="lineNum">     811 </span>            : 
+<span class="lineNum">     812 </span>            : #ifdef DEBUG_THREADS
+<span class="lineNum">     813 </span>            :     xmlGenericError(xmlGenericErrorContext, &quot;xmlIsMainThread()\n&quot;);
+<span class="lineNum">     814 </span>            : #endif
+<span class="lineNum">     815 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     816 </span><span class="lineNoCov">          0 :     return (pthread_equal(mainthread,pthread_self()));</span>
+<span class="lineNum">     817 </span>            : #elif defined HAVE_WIN32_THREADS
+<span class="lineNum">     818 </span>            :     return (mainthread == GetCurrentThreadId());
+<span class="lineNum">     819 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     820 </span>            :     return (mainthread == find_thread(NULL));
+<span class="lineNum">     821 </span>            : #else
+<span class="lineNum">     822 </span>            :     return (1);
+<span class="lineNum">     823 </span>            : #endif
+<span class="lineNum">     824 </span>            : }
+<span class="lineNum">     825 </span>            : 
+<span class="lineNum">     826 </span>            : /**
+<span class="lineNum">     827 </span>            :  * xmlLockLibrary:
+<span class="lineNum">     828 </span>            :  *
+<span class="lineNum">     829 </span>            :  * xmlLockLibrary() is used to take out a re-entrant lock on the libxml2
+<span class="lineNum">     830 </span>            :  * library.
+<a name="831"><span class="lineNum">     831 </span>            :  */</a>
+<span class="lineNum">     832 </span>            : void
+<span class="lineNum">     833 </span><span class="lineNoCov">          0 : xmlLockLibrary(void)</span>
+<span class="lineNum">     834 </span>            : {
+<span class="lineNum">     835 </span>            : #ifdef DEBUG_THREADS
+<span class="lineNum">     836 </span>            :     xmlGenericError(xmlGenericErrorContext, &quot;xmlLockLibrary()\n&quot;);
+<span class="lineNum">     837 </span>            : #endif
+<span class="lineNum">     838 </span><span class="lineNoCov">          0 :     xmlRMutexLock(xmlLibraryLock);</span>
+<span class="lineNum">     839 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">     840 </span>            : 
+<span class="lineNum">     841 </span>            : /**
+<span class="lineNum">     842 </span>            :  * xmlUnlockLibrary:
+<span class="lineNum">     843 </span>            :  *
+<span class="lineNum">     844 </span>            :  * xmlUnlockLibrary() is used to release a re-entrant lock on the libxml2
+<span class="lineNum">     845 </span>            :  * library.
+<a name="846"><span class="lineNum">     846 </span>            :  */</a>
+<span class="lineNum">     847 </span>            : void
+<span class="lineNum">     848 </span><span class="lineNoCov">          0 : xmlUnlockLibrary(void)</span>
+<span class="lineNum">     849 </span>            : {
+<span class="lineNum">     850 </span>            : #ifdef DEBUG_THREADS
+<span class="lineNum">     851 </span>            :     xmlGenericError(xmlGenericErrorContext, &quot;xmlUnlockLibrary()\n&quot;);
+<span class="lineNum">     852 </span>            : #endif
+<span class="lineNum">     853 </span><span class="lineNoCov">          0 :     xmlRMutexUnlock(xmlLibraryLock);</span>
+<span class="lineNum">     854 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">     855 </span>            : 
+<span class="lineNum">     856 </span>            : /**
+<span class="lineNum">     857 </span>            :  * xmlInitThreads:
+<span class="lineNum">     858 </span>            :  *
+<span class="lineNum">     859 </span>            :  * xmlInitThreads() is used to to initialize all the thread related
+<span class="lineNum">     860 </span>            :  * data of the libxml2 library.
+<a name="861"><span class="lineNum">     861 </span>            :  */</a>
+<span class="lineNum">     862 </span>            : void
+<span class="lineNum">     863 </span><span class="lineCov">       1372 : xmlInitThreads(void)</span>
+<span class="lineNum">     864 </span>            : {
+<span class="lineNum">     865 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     866 </span><span class="lineCov">       1372 :     if (libxml_is_threaded == -1) {</span>
+<span class="lineNum">     867 </span><span class="lineCov">       1372 :         if ((pthread_once != NULL) &amp;&amp;</span>
+<span class="lineNum">     868 </span><span class="lineNoCov">          0 :             (pthread_getspecific != NULL) &amp;&amp;</span>
+<span class="lineNum">     869 </span><span class="lineNoCov">          0 :             (pthread_setspecific != NULL) &amp;&amp;</span>
+<span class="lineNum">     870 </span><span class="lineNoCov">          0 :             (pthread_key_create != NULL) &amp;&amp;</span>
+<span class="lineNum">     871 </span><span class="lineNoCov">          0 :             (pthread_key_delete != NULL) &amp;&amp;</span>
+<span class="lineNum">     872 </span><span class="lineNoCov">          0 :             (pthread_mutex_init != NULL) &amp;&amp;</span>
+<span class="lineNum">     873 </span><span class="lineNoCov">          0 :             (pthread_mutex_destroy != NULL) &amp;&amp;</span>
+<span class="lineNum">     874 </span><span class="lineNoCov">          0 :             (pthread_mutex_lock != NULL) &amp;&amp;</span>
+<span class="lineNum">     875 </span><span class="lineNoCov">          0 :             (pthread_mutex_unlock != NULL) &amp;&amp;</span>
+<span class="lineNum">     876 </span><span class="lineNoCov">          0 :             (pthread_cond_init != NULL) &amp;&amp;</span>
+<span class="lineNum">     877 </span><span class="lineNoCov">          0 :             (pthread_cond_destroy != NULL) &amp;&amp;</span>
+<span class="lineNum">     878 </span><span class="lineNoCov">          0 :             (pthread_cond_wait != NULL) &amp;&amp;</span>
+<span class="lineNum">     879 </span><span class="lineNoCov">          0 :             (pthread_equal != NULL) &amp;&amp;</span>
+<span class="lineNum">     880 </span><span class="lineNoCov">          0 :             (pthread_self != NULL) &amp;&amp;</span>
+<span class="lineNum">     881 </span>            :             (pthread_cond_signal != NULL)) {
+<span class="lineNum">     882 </span><span class="lineNoCov">          0 :             libxml_is_threaded = 1;</span>
+<span class="lineNum">     883 </span>            : 
+<span class="lineNum">     884 </span>            : /* fprintf(stderr, &quot;Running multithreaded\n&quot;); */
+<span class="lineNum">     885 </span>            :         } else {
+<span class="lineNum">     886 </span>            : 
+<span class="lineNum">     887 </span>            : /* fprintf(stderr, &quot;Running without multithread\n&quot;); */
+<span class="lineNum">     888 </span><span class="lineCov">       1372 :             libxml_is_threaded = 0;</span>
+<span class="lineNum">     889 </span>            :         }
+<span class="lineNum">     890 </span>            :     }
+<span class="lineNum">     891 </span>            : #elif defined(HAVE_WIN32_THREADS) &amp;&amp; !defined(HAVE_COMPILER_TLS) &amp;&amp; (!defined(LIBXML_STATIC) || defined(LIBXML_STATIC_FOR_DLL))
+<span class="lineNum">     892 </span>            :     InitializeCriticalSection(&amp;cleanup_helpers_cs);
+<span class="lineNum">     893 </span>            : #endif
+<span class="lineNum">     894 </span><span class="lineCov">       1372 : }</span>
+<span class="lineNum">     895 </span>            : 
+<span class="lineNum">     896 </span>            : /**
+<span class="lineNum">     897 </span>            :  * xmlCleanupThreads:
+<span class="lineNum">     898 </span>            :  *
+<span class="lineNum">     899 </span>            :  * xmlCleanupThreads() is used to to cleanup all the thread related
+<span class="lineNum">     900 </span>            :  * data of the libxml2 library once processing has ended.
+<span class="lineNum">     901 </span>            :  *
+<span class="lineNum">     902 </span>            :  * WARNING: if your application is multithreaded or has plugin support
+<span class="lineNum">     903 </span>            :  *          calling this may crash the application if another thread or
+<span class="lineNum">     904 </span>            :  *          a plugin is still using libxml2. It's sometimes very hard to
+<span class="lineNum">     905 </span>            :  *          guess if libxml2 is in use in the application, some libraries
+<span class="lineNum">     906 </span>            :  *          or plugins may use it without notice. In case of doubt abstain
+<span class="lineNum">     907 </span>            :  *          from calling this function or do it just before calling exit()
+<span class="lineNum">     908 </span>            :  *          to avoid leak reports from valgrind !
+<a name="909"><span class="lineNum">     909 </span>            :  */</a>
+<span class="lineNum">     910 </span>            : void
+<span class="lineNum">     911 </span><span class="lineCov">       1372 : xmlCleanupThreads(void)</span>
+<span class="lineNum">     912 </span>            : {
+<span class="lineNum">     913 </span>            : #ifdef DEBUG_THREADS
+<span class="lineNum">     914 </span>            :     xmlGenericError(xmlGenericErrorContext, &quot;xmlCleanupThreads()\n&quot;);
+<span class="lineNum">     915 </span>            : #endif
+<span class="lineNum">     916 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     917 </span><span class="lineCov">       1372 :     if ((libxml_is_threaded)  &amp;&amp; (pthread_key_delete != NULL))</span>
+<span class="lineNum">     918 </span><span class="lineNoCov">          0 :         pthread_key_delete(globalkey);</span>
+<span class="lineNum">     919 </span><span class="lineCov">       1372 :     once_control = once_control_init;</span>
+<span class="lineNum">     920 </span>            : #elif defined(HAVE_WIN32_THREADS) &amp;&amp; !defined(HAVE_COMPILER_TLS) &amp;&amp; (!defined(LIBXML_STATIC) || defined(LIBXML_STATIC_FOR_DLL))
+<span class="lineNum">     921 </span>            :     if (globalkey != TLS_OUT_OF_INDEXES) {
+<span class="lineNum">     922 </span>            :         xmlGlobalStateCleanupHelperParams *p;
+<span class="lineNum">     923 </span>            : 
+<span class="lineNum">     924 </span>            :         EnterCriticalSection(&amp;cleanup_helpers_cs);
+<span class="lineNum">     925 </span>            :         p = cleanup_helpers_head;
+<span class="lineNum">     926 </span>            :         while (p != NULL) {
+<span class="lineNum">     927 </span>            :             xmlGlobalStateCleanupHelperParams *temp = p;
+<span class="lineNum">     928 </span>            : 
+<span class="lineNum">     929 </span>            :             p = p-&gt;next;
+<span class="lineNum">     930 </span>            :             xmlFreeGlobalState(temp-&gt;memory);
+<span class="lineNum">     931 </span>            :             free(temp);
+<span class="lineNum">     932 </span>            :         }
+<span class="lineNum">     933 </span>            :         cleanup_helpers_head = 0;
+<span class="lineNum">     934 </span>            :         LeaveCriticalSection(&amp;cleanup_helpers_cs);
+<span class="lineNum">     935 </span>            :         TlsFree(globalkey);
+<span class="lineNum">     936 </span>            :         globalkey = TLS_OUT_OF_INDEXES;
+<span class="lineNum">     937 </span>            :     }
+<span class="lineNum">     938 </span>            :     DeleteCriticalSection(&amp;cleanup_helpers_cs);
+<span class="lineNum">     939 </span>            : #endif
+<span class="lineNum">     940 </span><span class="lineCov">       1372 : }</span>
+<span class="lineNum">     941 </span>            : 
+<span class="lineNum">     942 </span>            : #ifdef LIBXML_THREAD_ENABLED
+<span class="lineNum">     943 </span>            : 
+<span class="lineNum">     944 </span>            : /**
+<span class="lineNum">     945 </span>            :  * xmlOnceInit
+<span class="lineNum">     946 </span>            :  *
+<span class="lineNum">     947 </span>            :  * xmlOnceInit() is used to initialize the value of mainthread for use
+<span class="lineNum">     948 </span>            :  * in other routines. This function should only be called using
+<span class="lineNum">     949 </span>            :  * pthread_once() in association with the once_control variable to ensure
+<span class="lineNum">     950 </span>            :  * that the function is only called once. See man pthread_once for more
+<span class="lineNum">     951 </span>            :  * details.
+<a name="952"><span class="lineNum">     952 </span>            :  */</a>
+<span class="lineNum">     953 </span>            : static void
+<span class="lineNum">     954 </span><span class="lineNoCov">          0 : xmlOnceInit(void)</span>
+<span class="lineNum">     955 </span>            : {
+<span class="lineNum">     956 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">     957 </span><span class="lineNoCov">          0 :     (void) pthread_key_create(&amp;globalkey, xmlFreeGlobalState);</span>
+<span class="lineNum">     958 </span><span class="lineNoCov">          0 :     mainthread = pthread_self();</span>
+<span class="lineNum">     959 </span><span class="lineNoCov">          0 :     __xmlInitializeDict();</span>
+<span class="lineNum">     960 </span>            : #elif defined(HAVE_WIN32_THREADS)
+<span class="lineNum">     961 </span>            :     if (!run_once.done) {
+<span class="lineNum">     962 </span>            :         if (InterlockedIncrement(&amp;run_once.control) == 1) {
+<span class="lineNum">     963 </span>            : #if !defined(HAVE_COMPILER_TLS)
+<span class="lineNum">     964 </span>            :             globalkey = TlsAlloc();
+<span class="lineNum">     965 </span>            : #endif
+<span class="lineNum">     966 </span>            :             mainthread = GetCurrentThreadId();
+<span class="lineNum">     967 </span>            :             __xmlInitializeDict();
+<span class="lineNum">     968 </span>            :             run_once.done = 1;
+<span class="lineNum">     969 </span>            :         } else {
+<span class="lineNum">     970 </span>            :             /* Another thread is working; give up our slice and
+<span class="lineNum">     971 </span>            :              * wait until they're done. */
+<span class="lineNum">     972 </span>            :             while (!run_once.done)
+<span class="lineNum">     973 </span>            :                 Sleep(0);
+<span class="lineNum">     974 </span>            :         }
+<span class="lineNum">     975 </span>            :     }
+<span class="lineNum">     976 </span>            : #elif defined HAVE_BEOS_THREADS
+<span class="lineNum">     977 </span>            :     if (atomic_add(&amp;run_once_init, 1) == 0) {
+<span class="lineNum">     978 </span>            :         globalkey = tls_allocate();
+<span class="lineNum">     979 </span>            :         tls_set(globalkey, NULL);
+<span class="lineNum">     980 </span>            :         mainthread = find_thread(NULL);
+<span class="lineNum">     981 </span>            :         __xmlInitializeDict();
+<span class="lineNum">     982 </span>            :     } else
+<span class="lineNum">     983 </span>            :         atomic_add(&amp;run_once_init, -1);
+<span class="lineNum">     984 </span>            : #endif
+<span class="lineNum">     985 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">     986 </span>            : #endif
+<span class="lineNum">     987 </span>            : 
+<span class="lineNum">     988 </span>            : /**
+<span class="lineNum">     989 </span>            :  * DllMain:
+<span class="lineNum">     990 </span>            :  * @hinstDLL: handle to DLL instance
+<span class="lineNum">     991 </span>            :  * @fdwReason: Reason code for entry
+<span class="lineNum">     992 </span>            :  * @lpvReserved: generic pointer (depends upon reason code)
+<span class="lineNum">     993 </span>            :  *
+<span class="lineNum">     994 </span>            :  * Entry point for Windows library. It is being used to free thread-specific
+<span class="lineNum">     995 </span>            :  * storage.
+<span class="lineNum">     996 </span>            :  *
+<span class="lineNum">     997 </span>            :  * Returns TRUE always
+<span class="lineNum">     998 </span>            :  */
+<span class="lineNum">     999 </span>            : #ifdef HAVE_PTHREAD_H
+<span class="lineNum">    1000 </span>            : #elif defined(HAVE_WIN32_THREADS) &amp;&amp; !defined(HAVE_COMPILER_TLS) &amp;&amp; (!defined(LIBXML_STATIC) || defined(LIBXML_STATIC_FOR_DLL))
+<span class="lineNum">    1001 </span>            : #if defined(LIBXML_STATIC_FOR_DLL)
+<span class="lineNum">    1002 </span>            : BOOL XMLCALL
+<span class="lineNum">    1003 </span>            : xmlDllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+<span class="lineNum">    1004 </span>            : #else
+<span class="lineNum">    1005 </span>            : BOOL WINAPI
+<span class="lineNum">    1006 </span>            : DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+<span class="lineNum">    1007 </span>            : #endif
+<span class="lineNum">    1008 </span>            : {
+<span class="lineNum">    1009 </span>            :     switch (fdwReason) {
+<span class="lineNum">    1010 </span>            :         case DLL_THREAD_DETACH:
+<span class="lineNum">    1011 </span>            :             if (globalkey != TLS_OUT_OF_INDEXES) {
+<span class="lineNum">    1012 </span>            :                 xmlGlobalState *globalval = NULL;
+<span class="lineNum">    1013 </span>            :                 xmlGlobalStateCleanupHelperParams *p =
+<span class="lineNum">    1014 </span>            :                     (xmlGlobalStateCleanupHelperParams *)
+<span class="lineNum">    1015 </span>            :                     TlsGetValue(globalkey);
+<span class="lineNum">    1016 </span>            :                 globalval = (xmlGlobalState *) (p ? p-&gt;memory : NULL);
+<span class="lineNum">    1017 </span>            :                 if (globalval) {
+<span class="lineNum">    1018 </span>            :                     xmlFreeGlobalState(globalval);
+<span class="lineNum">    1019 </span>            :                     TlsSetValue(globalkey, NULL);
+<span class="lineNum">    1020 </span>            :                 }
+<span class="lineNum">    1021 </span>            :                 if (p) {
+<span class="lineNum">    1022 </span>            :                     EnterCriticalSection(&amp;cleanup_helpers_cs);
+<span class="lineNum">    1023 </span>            :                     if (p == cleanup_helpers_head)
+<span class="lineNum">    1024 </span>            :                         cleanup_helpers_head = p-&gt;next;
+<span class="lineNum">    1025 </span>            :                     else
+<span class="lineNum">    1026 </span>            :                         p-&gt;prev-&gt;next = p-&gt;next;
+<span class="lineNum">    1027 </span>            :                     if (p-&gt;next != NULL)
+<span class="lineNum">    1028 </span>            :                         p-&gt;next-&gt;prev = p-&gt;prev;
+<span class="lineNum">    1029 </span>            :                     LeaveCriticalSection(&amp;cleanup_helpers_cs);
+<span class="lineNum">    1030 </span>            :                     free(p);
+<span class="lineNum">    1031 </span>            :                 }
+<span class="lineNum">    1032 </span>            :             }
+<span class="lineNum">    1033 </span>            :             break;
+<span class="lineNum">    1034 </span>            :     }
+<span class="lineNum">    1035 </span>            :     return TRUE;
+<span class="lineNum">    1036 </span>            : }
+<span class="lineNum">    1037 </span>            : #endif
+<span class="lineNum">    1038 </span>            : #define bottom_threads
+<span class="lineNum">    1039 </span>            : #include &quot;elfgcchack.h&quot;
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

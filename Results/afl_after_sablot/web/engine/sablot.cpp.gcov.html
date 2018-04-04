@@ -1,0 +1,927 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - engine/sablot.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">engine</a> - sablot.cpp<span style="font-size: 80%;"> (source / <a href="sablot.cpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">56</td>
+            <td class="headerCovTableEntry">240</td>
+            <td class="headerCovTableEntryLo">23.3 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-10-21</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">8</td>
+            <td class="headerCovTableEntry">42</td>
+            <td class="headerCovTableEntryLo">19.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* </a>
+<span class="lineNum">       2 </span>            :  * The contents of this file are subject to the Mozilla Public
+<span class="lineNum">       3 </span>            :  * License Version 1.1 (the &quot;License&quot;); you may not use this file
+<span class="lineNum">       4 </span>            :  * except in compliance with the License. You may obtain a copy of
+<span class="lineNum">       5 </span>            :  * the License at http://www.mozilla.org/MPL/
+<span class="lineNum">       6 </span>            :  * 
+<span class="lineNum">       7 </span>            :  * Software distributed under the License is distributed on an &quot;AS
+<span class="lineNum">       8 </span>            :  * IS&quot; basis, WITHOUT WARRANTY OF ANY KIND, either express or
+<span class="lineNum">       9 </span>            :  * implied. See the License for the specific language governing
+<span class="lineNum">      10 </span>            :  * rights and limitations under the License.
+<span class="lineNum">      11 </span>            :  * 
+<span class="lineNum">      12 </span>            :  * The Original Code is the Sablotron XSLT Processor.
+<span class="lineNum">      13 </span>            :  * 
+<span class="lineNum">      14 </span>            :  * The Initial Developer of the Original Code is Ginger Alliance Ltd.
+<span class="lineNum">      15 </span>            :  * Portions created by Ginger Alliance are Copyright (C) 2000-2002
+<span class="lineNum">      16 </span>            :  * Ginger Alliance Ltd. All Rights Reserved.
+<span class="lineNum">      17 </span>            :  * 
+<span class="lineNum">      18 </span>            :  * Contributor(s):
+<span class="lineNum">      19 </span>            :  * 
+<span class="lineNum">      20 </span>            :  * Alternatively, the contents of this file may be used under the
+<span class="lineNum">      21 </span>            :  * terms of the GNU General Public License Version 2 or later (the
+<span class="lineNum">      22 </span>            :  * &quot;GPL&quot;), in which case the provisions of the GPL are applicable 
+<span class="lineNum">      23 </span>            :  * instead of those above.  If you wish to allow use of your 
+<span class="lineNum">      24 </span>            :  * version of this file only under the terms of the GPL and not to
+<span class="lineNum">      25 </span>            :  * allow others to use your version of this file under the MPL,
+<span class="lineNum">      26 </span>            :  * indicate your decision by deleting the provisions above and
+<span class="lineNum">      27 </span>            :  * replace them with the notice and other provisions required by
+<span class="lineNum">      28 </span>            :  * the GPL.  If you do not delete the provisions above, a recipient
+<span class="lineNum">      29 </span>            :  * may use your version of this file under either the MPL or the
+<span class="lineNum">      30 </span>            :  * GPL.
+<span class="lineNum">      31 </span>            :  */
+<span class="lineNum">      32 </span>            : 
+<span class="lineNum">      33 </span>            : /****************************************
+<span class="lineNum">      34 </span>            : *                                       *
+<span class="lineNum">      35 </span>            : i n c l u d e s
+<span class="lineNum">      36 </span>            : *                                       *
+<span class="lineNum">      37 </span>            : ****************************************/
+<span class="lineNum">      38 </span>            : 
+<span class="lineNum">      39 </span>            : // #include&lt;iostream.h&gt;
+<span class="lineNum">      40 </span>            : 
+<span class="lineNum">      41 </span>            : // GP: clean
+<span class="lineNum">      42 </span>            : 
+<span class="lineNum">      43 </span>            : #include &lt;stdarg.h&gt;
+<span class="lineNum">      44 </span>            : 
+<span class="lineNum">      45 </span>            : #define SablotAsExport
+<span class="lineNum">      46 </span>            : #include &quot;sablot.h&quot;
+<span class="lineNum">      47 </span>            : 
+<span class="lineNum">      48 </span>            : #include &quot;base.h&quot;
+<span class="lineNum">      49 </span>            : #include &quot;verts.h&quot;
+<span class="lineNum">      50 </span>            : #include &quot;tree.h&quot;
+<span class="lineNum">      51 </span>            : #include &quot;expr.h&quot;
+<span class="lineNum">      52 </span>            : #include &quot;proc.h&quot;
+<span class="lineNum">      53 </span>            : #include &quot;situa.h&quot;
+<span class="lineNum">      54 </span>            : #include &quot;uri.h&quot;
+<span class="lineNum">      55 </span>            : #include &quot;parser.h&quot;
+<span class="lineNum">      56 </span>            : #include &quot;guard.h&quot;
+<span class="lineNum">      57 </span>            : #include &quot;sxpath.h&quot;
+<span class="lineNum">      58 </span>            : #include &quot;domprovider.h&quot;
+<span class="lineNum">      59 </span>            : 
+<span class="lineNum">      60 </span>            : //
+<span class="lineNum">      61 </span>            : //  defines
+<span class="lineNum">      62 </span>            : //
+<span class="lineNum">      63 </span>            : 
+<span class="lineNum">      64 </span>            : #define P( PTR ) ((Processor *)(PTR))
+<span class="lineNum">      65 </span>            : #define EE(statement) {int code___=(statement); if (code___) return code___;}
+<span class="lineNum">      66 </span>            : #define ES(statement) {if (statement) return SIT(S).getError();}
+<span class="lineNum">      67 </span>            : // same as EE() but destroys the given processor
+<span class="lineNum">      68 </span>            : #define EE_D(CODE,PROC) {int code___=(CODE); if (code___) {SablotDestroyProcessor(PROC); return code___;}}
+<span class="lineNum">      69 </span>            : // error-checking chain
+<span class="lineNum">      70 </span>            : #define EC( VAR, STMT ) {if (!VAR) VAR = STMT;}
+<span class="lineNum">      71 </span>            : #define SIT( S ) (*(Situation*)S)
+<span class="lineNum">      72 </span>            : 
+<span class="lineNum">      73 </span>            : 
+<span class="lineNum">      74 </span>            : /****************************************
+<span class="lineNum">      75 </span>            : g l o b a l s
+<span class="lineNum">      76 </span>            : ****************************************/
+<span class="lineNum">      77 </span>            : #define checkErr(situation) {if (situation-&gt;isError()) \
+<span class="lineNum">      78 </span>            :     {Warn(situation, W_PENDING_ERROR); return NOT_OK;}}
+<span class="lineNum">      79 </span>            : 
+<span class="lineNum">      80 </span>            : 
+<span class="lineNum">      81 </span>            : /****************************************
+<span class="lineNum">      82 </span>            : d e f i n i t i o n s
+<a name="83"><span class="lineNum">      83 </span>            : ****************************************/</a>
+<span class="lineNum">      84 </span>            : 
+<span class="lineNum">      85 </span><span class="lineCov">       2992 : void doStart(Sit S)</span>
+<span class="lineNum">      86 </span>            : {
+<span class="lineNum">      87 </span><span class="lineCov">       2992 :     S.message(MT_LOG, L_START, S.timeStr(), (char*) NULL);</span>
+<span class="lineNum">      88 </span>            : //    Log1(S, L_START, S.timeStr());
+<a name="89"><span class="lineNum">      89 </span><span class="lineCov">       2992 : };</span></a>
+<span class="lineNum">      90 </span>            : 
+<span class="lineNum">      91 </span><span class="lineCov">       2992 : void doEnd(Sit S)</span>
+<span class="lineNum">      92 </span>            : {
+<span class="lineNum">      93 </span><span class="lineCov">       2992 :     S.message(MT_LOG, L_STOP, S.timeStr(), (char*) NULL);</span>
+<span class="lineNum">      94 </span>            : //    Log1(S, L_STOP, S.timeStr());
+<span class="lineNum">      95 </span><span class="lineCov">       2992 : }</span>
+<span class="lineNum">      96 </span>            : 
+<span class="lineNum">      97 </span>            : #define ErrQ(S, e) {\
+<span class="lineNum">      98 </span>            :     S.message(MT_ERROR, e,(char*) NULL, (char*)NULL); \
+<span class="lineNum">      99 </span>            :     doEnd(S); \
+<span class="lineNum">     100 </span>            :     return e; \
+<span class="lineNum">     101 </span>            :         }
+<a name="102"><span class="lineNum">     102 </span>            : </a>
+<span class="lineNum">     103 </span>            : // report function to enable the Sablot... globals to use Err and Log           
+<span class="lineNum">     104 </span><span class="lineNoCov">          0 : void report(Sit S, MsgType type, MsgCode code, const Str&amp; arg1, const Str&amp; arg2) </span>
+<span class="lineNum">     105 </span>            : {
+<span class="lineNum">     106 </span><span class="lineNoCov">          0 :     S.message(type, code, arg1, arg2);</span>
+<span class="lineNum">     107 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">     108 </span>            : 
+<span class="lineNum">     109 </span>            : 
+<span class="lineNum">     110 </span>            : //
+<span class="lineNum">     111 </span>            : //
+<span class="lineNum">     112 </span>            : //      situation functions
+<span class="lineNum">     113 </span>            : //
+<a name="114"><span class="lineNum">     114 </span>            : //</a>
+<span class="lineNum">     115 </span>            : 
+<span class="lineNum">     116 </span><span class="lineCov">       2992 : int SablotCreateSituation(SablotSituation *sPtr)</span>
+<span class="lineNum">     117 </span>            : {
+<span class="lineNum">     118 </span><span class="lineCov">       2992 :     *sPtr = new Situation;</span>
+<span class="lineNum">     119 </span><span class="lineCov">       2992 :     if (!*sPtr)</span>
+<span class="lineNum">     120 </span>            :         return E_MEMORY;
+<span class="lineNum">     121 </span><span class="lineCov">       2992 :     return OK;</span>
+<a name="122"><span class="lineNum">     122 </span>            : }</a>
+<span class="lineNum">     123 </span>            : 
+<span class="lineNum">     124 </span><span class="lineCov">       2992 : int SablotDestroySituation(SablotSituation S)</span>
+<span class="lineNum">     125 </span>            : {
+<span class="lineNum">     126 </span><span class="lineCov">       2992 :     if (S) delete (Situation*)S;</span>
+<span class="lineNum">     127 </span><span class="lineCov">       2992 :     S = NULL;</span>
+<span class="lineNum">     128 </span><span class="lineCov">       2992 :     return OK;</span>
+<a name="129"><span class="lineNum">     129 </span>            : }</a>
+<span class="lineNum">     130 </span>            : 
+<span class="lineNum">     131 </span><span class="lineNoCov">          0 : int SablotSetOptions(SablotSituation S, int flags)</span>
+<span class="lineNum">     132 </span>            : {
+<span class="lineNum">     133 </span><span class="lineNoCov">          0 :     ((Situation*)S) -&gt; setFlags(flags);</span>
+<span class="lineNum">     134 </span><span class="lineNoCov">          0 :     return OK;</span>
+<a name="135"><span class="lineNum">     135 </span>            : }</a>
+<span class="lineNum">     136 </span>            : 
+<span class="lineNum">     137 </span><span class="lineNoCov">          0 : int SablotGetOptions(SablotSituation S)</span>
+<span class="lineNum">     138 </span>            : {
+<span class="lineNum">     139 </span><span class="lineNoCov">          0 :   return ((Situation*)S) -&gt; getFlags();</span>
+<a name="140"><span class="lineNum">     140 </span>            : }</a>
+<span class="lineNum">     141 </span>            : 
+<span class="lineNum">     142 </span><span class="lineNoCov">          0 : int SablotClearSituation(SablotSituation S)</span>
+<span class="lineNum">     143 </span>            : {
+<span class="lineNum">     144 </span><span class="lineNoCov">          0 :     ((Situation*)S) -&gt; clear();</span>
+<span class="lineNum">     145 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     146 </span>            : }
+<span class="lineNum">     147 </span>            : 
+<span class="lineNum">     148 </span>            : //
+<span class="lineNum">     149 </span>            : //    document functions
+<a name="150"><span class="lineNum">     150 </span>            : //</a>
+<span class="lineNum">     151 </span>            : 
+<span class="lineNum">     152 </span><span class="lineNoCov">          0 : int SablotCreateDocument(SablotSituation S, SDOM_Document *D)</span>
+<span class="lineNum">     153 </span>            : {
+<span class="lineNum">     154 </span>            :     // non-XSL tree with empty name
+<span class="lineNum">     155 </span><span class="lineNoCov">          0 :     Tree *t = new Tree((char*)&quot;&quot;, FALSE);</span>
+<span class="lineNum">     156 </span><span class="lineNoCov">          0 :     SabArena &amp;ar = t -&gt; getArena();</span>
+<span class="lineNum">     157 </span><span class="lineNoCov">          0 :     NmSpace *nm = new (&amp;ar) NmSpace(*t, t -&gt; unexpand(&quot;xml&quot;), </span>
+<span class="lineNum">     158 </span><span class="lineNoCov">          0 :                                     t -&gt; unexpand(theXMLNamespace),</span>
+<span class="lineNum">     159 </span><span class="lineNoCov">          0 :                                     TRUE, NSKIND_DECLARED);</span>
+<span class="lineNum">     160 </span><span class="lineNoCov">          0 :     RootNode &amp;root = t -&gt; getRoot();</span>
+<span class="lineNum">     161 </span><span class="lineNoCov">          0 :     root.namespaces.append(nm);</span>
+<span class="lineNum">     162 </span><span class="lineNoCov">          0 :     *D = &amp;root;</span>
+<span class="lineNum">     163 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     164 </span>            : }
+<span class="lineNum">     165 </span>            : 
+<span class="lineNum">     166 </span><span class="lineNoCov">          0 : int SablotParse_(</span>
+<span class="lineNum">     167 </span>            :     SablotSituation S, 
+<span class="lineNum">     168 </span>            :     const char *uri, 
+<span class="lineNum">     169 </span>            :     const char *buffer,
+<span class="lineNum">     170 </span>            :     SDOM_Document *D,
+<span class="lineNum">     171 </span>            :     Bool asStylesheet)
+<span class="lineNum">     172 </span>            : {
+<span class="lineNum">     173 </span><span class="lineNoCov">          0 :     Str absolute;</span>
+<span class="lineNum">     174 </span>            :     StrStrList argList;
+<span class="lineNum">     175 </span><span class="lineNoCov">          0 :     DStr base;</span>
+<span class="lineNum">     176 </span><span class="lineNoCov">          0 :     *D = NULL;</span>
+<span class="lineNum">     177 </span><span class="lineNoCov">          0 :     double time_was = getMillisecs();</span>
+<span class="lineNum">     178 </span><span class="lineNoCov">          0 :     int code = 0;</span>
+<span class="lineNum">     179 </span>            : 
+<span class="lineNum">     180 </span><span class="lineNoCov">          0 :     SIT(S).clear();</span>
+<span class="lineNum">     181 </span>            :     // make absolute address
+<span class="lineNum">     182 </span><span class="lineNoCov">          0 :     char *parserBase = NULL;</span>
+<span class="lineNum">     183 </span><span class="lineNoCov">          0 :     if (!buffer)</span>
+<span class="lineNum">     184 </span>            :     {
+<span class="lineNum">     185 </span><span class="lineNoCov">          0 :         my_getcwd(base);</span>
+<span class="lineNum">     186 </span><span class="lineNoCov">          0 :         base = Str(&quot;file://&quot;) + base;</span>
+<span class="lineNum">     187 </span>            :         // should call Processor::findBaseURI() here (but have no Processor)
+<span class="lineNum">     188 </span><span class="lineNoCov">          0 :         makeAbsoluteURI(SIT(S), uri, base, absolute);</span>
+<span class="lineNum">     189 </span><span class="lineNoCov">          0 :         parserBase = (char*)absolute;</span>
+<span class="lineNum">     190 </span>            :     }
+<span class="lineNum">     191 </span>            :     else
+<span class="lineNum">     192 </span><span class="lineNoCov">          0 :       absolute = &quot;arg:/_parsed_&quot;;</span>
+<span class="lineNum">     193 </span>            :     
+<span class="lineNum">     194 </span>            :     // create the tree and dataline
+<span class="lineNum">     195 </span><span class="lineNoCov">          0 :     DataLine line;</span>
+<span class="lineNum">     196 </span><span class="lineNoCov">          0 :     GP( Tree ) newTree = new Tree(absolute, /* isXSL = */ asStylesheet);</span>
+<span class="lineNum">     197 </span><span class="lineNoCov">          0 :     TreeConstructer tc(SIT(S));</span>
+<span class="lineNum">     198 </span>            :     
+<span class="lineNum">     199 </span>            :     // add buffer if there is one
+<span class="lineNum">     200 </span><span class="lineNoCov">          0 :     if (buffer)</span>
+<span class="lineNum">     201 </span><span class="lineNoCov">          0 :         argList.appendConstruct(&quot;/_parsed_&quot;, buffer);</span>
+<span class="lineNum">     202 </span>            :                     
+<span class="lineNum">     203 </span>            :     // open the line
+<span class="lineNum">     204 </span><span class="lineNoCov">          0 :     EC( code, line.open(SIT(S), absolute, DLMODE_READ, &amp;argList) );</span>
+<span class="lineNum">     205 </span>            :     
+<span class="lineNum">     206 </span><span class="lineNoCov">          0 :     Log1(SIT(S), L1_PARSING, absolute);</span>
+<span class="lineNum">     207 </span><span class="lineNoCov">          0 :     EC( code, tc.parseDataLineUsingExpat(SIT(S), newTree, &amp;line, parserBase) );        </span>
+<span class="lineNum">     208 </span><span class="lineNoCov">          0 :     EC( code, line.close(SIT(S)) );</span>
+<span class="lineNum">     209 </span><span class="lineNoCov">          0 :     *D = &amp;(newTree.keep() -&gt; getRoot());    </span>
+<span class="lineNum">     210 </span><span class="lineNoCov">          0 :     Log1(SIT(S), L1_PARSE_DONE, getMillisecsDiff(time_was));</span>
+<span class="lineNum">     211 </span>            : 
+<span class="lineNum">     212 </span><span class="lineNoCov">          0 :     argList.freeall(FALSE);</span>
+<span class="lineNum">     213 </span><span class="lineNoCov">          0 :     return SIT(S).getError();</span>
+<span class="lineNum">     214 </span>            : }
+<a name="215"><span class="lineNum">     215 </span>            : </a>
+<span class="lineNum">     216 </span>            : 
+<span class="lineNum">     217 </span><span class="lineNoCov">          0 : int SablotParse(</span>
+<span class="lineNum">     218 </span>            :     SablotSituation S, 
+<span class="lineNum">     219 </span>            :     const char *uri, 
+<span class="lineNum">     220 </span>            :     SDOM_Document *D)
+<span class="lineNum">     221 </span>            : {
+<span class="lineNum">     222 </span><span class="lineNoCov">          0 :     return SablotParse_(S, uri, NULL, D, FALSE);</span>
+<a name="223"><span class="lineNum">     223 </span>            : }</a>
+<span class="lineNum">     224 </span>            : 
+<span class="lineNum">     225 </span><span class="lineNoCov">          0 : int SablotParseBuffer(</span>
+<span class="lineNum">     226 </span>            :     SablotSituation S, 
+<span class="lineNum">     227 </span>            :     const char *buffer, 
+<span class="lineNum">     228 </span>            :     SDOM_Document *D)
+<span class="lineNum">     229 </span>            : {
+<span class="lineNum">     230 </span><span class="lineNoCov">          0 :     return SablotParse_(S, NULL, buffer, D, FALSE);</span>
+<a name="231"><span class="lineNum">     231 </span>            : }</a>
+<span class="lineNum">     232 </span>            : 
+<span class="lineNum">     233 </span><span class="lineNoCov">          0 : int SablotParseStylesheet(</span>
+<span class="lineNum">     234 </span>            :     SablotSituation S, 
+<span class="lineNum">     235 </span>            :     const char *uri, 
+<span class="lineNum">     236 </span>            :     SDOM_Document *D)
+<span class="lineNum">     237 </span>            : {
+<span class="lineNum">     238 </span><span class="lineNoCov">          0 :     return SablotParse_(S, uri, NULL, D, TRUE);</span>
+<a name="239"><span class="lineNum">     239 </span>            : }</a>
+<span class="lineNum">     240 </span>            : 
+<span class="lineNum">     241 </span><span class="lineNoCov">          0 : int SablotParseStylesheetBuffer(</span>
+<span class="lineNum">     242 </span>            :     SablotSituation S, 
+<span class="lineNum">     243 </span>            :     const char *buffer, 
+<span class="lineNum">     244 </span>            :     SDOM_Document *D)
+<span class="lineNum">     245 </span>            : {
+<span class="lineNum">     246 </span><span class="lineNoCov">          0 :     return SablotParse_(S, NULL, buffer, D, TRUE);</span>
+<a name="247"><span class="lineNum">     247 </span>            : }</a>
+<span class="lineNum">     248 </span>            : 
+<span class="lineNum">     249 </span><span class="lineNoCov">          0 : int SablotLockDocument(SablotSituation S, SDOM_Document D)</span>
+<span class="lineNum">     250 </span>            : {
+<span class="lineNum">     251 </span><span class="lineNoCov">          0 :     ((RootNode*)D) -&gt; getOwner().makeStamps();</span>
+<span class="lineNum">     252 </span><span class="lineNoCov">          0 :     return OK;</span>
+<a name="253"><span class="lineNum">     253 </span>            : }</a>
+<span class="lineNum">     254 </span>            : 
+<span class="lineNum">     255 </span><span class="lineNoCov">          0 : int SablotDestroyDocument(SablotSituation S, SDOM_Document D)</span>
+<span class="lineNum">     256 </span>            : {
+<span class="lineNum">     257 </span><span class="lineNoCov">          0 :   delete &amp;((toRoot(toV(D))) -&gt; getOwner());</span>
+<span class="lineNum">     258 </span><span class="lineNoCov">          0 :   return OK;</span>
+<span class="lineNum">     259 </span>            : }
+<span class="lineNum">     260 </span>            : 
+<span class="lineNum">     261 </span>            : 
+<span class="lineNum">     262 </span>            : //
+<span class="lineNum">     263 </span>            : //
+<span class="lineNum">     264 </span>            : //      SablotCreateProcessor
+<span class="lineNum">     265 </span>            : //
+<a name="266"><span class="lineNum">     266 </span>            : //</a>
+<span class="lineNum">     267 </span>            : 
+<span class="lineNum">     268 </span><span class="lineNoCov">          0 : int SablotCreateProcessor(void **processorPtr)</span>
+<span class="lineNum">     269 </span>            : {
+<span class="lineNum">     270 </span>            :     // to debug memory leaks in MSVC, uncomment the call to checkLeak()
+<span class="lineNum">     271 </span>            :     // and set _crtBreakAlloc to the # of block (proc=51)
+<span class="lineNum">     272 </span>            : 
+<span class="lineNum">     273 </span>            :     // create a new situation for this processor
+<span class="lineNum">     274 </span><span class="lineNoCov">          0 :     void *newSit = NULL;</span>
+<span class="lineNum">     275 </span><span class="lineNoCov">          0 :     SablotCreateSituation(&amp;newSit);</span>
+<span class="lineNum">     276 </span>            : 
+<span class="lineNum">     277 </span>            : #if defined(HAVE_MTRACE) &amp;&amp; defined(CHECK_LEAKS)
+<span class="lineNum">     278 </span>            :     mtrace();
+<span class="lineNum">     279 </span>            : #endif
+<span class="lineNum">     280 </span><span class="lineNoCov">          0 :     *processorPtr = new Processor;</span>
+<span class="lineNum">     281 </span><span class="lineNoCov">          0 :     if (!*processorPtr)</span>
+<span class="lineNum">     282 </span>            :     {
+<span class="lineNum">     283 </span><span class="lineNoCov">          0 :         ((Situation*)newSit) -&gt; message(MT_ERROR, E_MEMORY, (char*) NULL, (char*) NULL);</span>
+<span class="lineNum">     284 </span><span class="lineNoCov">          0 :         return E_MEMORY;</span>
+<span class="lineNum">     285 </span>            :         // Err( *newSit, E_MEMORY );
+<span class="lineNum">     286 </span>            :     }
+<span class="lineNum">     287 </span>            :     // the processor must remember its situation (this is just to
+<span class="lineNum">     288 </span>            :     // avoid compatibility breakdown)
+<span class="lineNum">     289 </span><span class="lineNoCov">          0 :     P( *processorPtr ) -&gt; rememberSituation((Situation*)newSit);</span>
+<span class="lineNum">     290 </span><span class="lineNoCov">          0 :     SIT( newSit).setProcessor( P(*processorPtr) );</span>
+<span class="lineNum">     291 </span>            : 
+<span class="lineNum">     292 </span>            :     // the following seems superfluous - the processor is new
+<span class="lineNum">     293 </span>            :     // checkErr( P(*processorPtr)-&gt;situation );
+<span class="lineNum">     294 </span><span class="lineNoCov">          0 :     doStart ( SIT( newSit ) );</span>
+<span class="lineNum">     295 </span>            :     return OK;
+<a name="296"><span class="lineNum">     296 </span>            : }</a>
+<span class="lineNum">     297 </span>            : 
+<span class="lineNum">     298 </span><span class="lineCov">       2992 : int SablotCreateProcessorForSituation(SablotSituation S, void **processorPtr)</span>
+<span class="lineNum">     299 </span>            : {
+<span class="lineNum">     300 </span>            : #if defined(HAVE_MTRACE) &amp;&amp; defined(CHECK_LEAKS)
+<span class="lineNum">     301 </span>            :     mtrace();
+<span class="lineNum">     302 </span>            : #endif
+<span class="lineNum">     303 </span><span class="lineCov">       2992 :     *processorPtr = new Processor;</span>
+<span class="lineNum">     304 </span><span class="lineCov">       2992 :     if (!*processorPtr)</span>
+<span class="lineNum">     305 </span>            :     {
+<span class="lineNum">     306 </span><span class="lineNoCov">          0 :         SIT(S).message(MT_ERROR, E_MEMORY, (char*) NULL, (char*) NULL);</span>
+<span class="lineNum">     307 </span><span class="lineNoCov">          0 :         return E_MEMORY;</span>
+<span class="lineNum">     308 </span>            :     }
+<span class="lineNum">     309 </span><span class="lineCov">       2992 :     P( *processorPtr ) -&gt; rememberMasterSituation((Situation*)S);</span>
+<span class="lineNum">     310 </span><span class="lineCov">       2992 :     SIT(S).setProcessor( P(*processorPtr) ); // this will go asap</span>
+<span class="lineNum">     311 </span><span class="lineCov">       2992 :     doStart ( SIT(S) );</span>
+<span class="lineNum">     312 </span><span class="lineCov">       2992 :     return OK;</span>
+<a name="313"><span class="lineNum">     313 </span>            : }</a>
+<span class="lineNum">     314 </span>            : 
+<span class="lineNum">     315 </span><span class="lineNoCov">          0 : int SablotAddParam(</span>
+<span class="lineNum">     316 </span>            :     SablotSituation S,
+<span class="lineNum">     317 </span>            :     void *processor_,
+<span class="lineNum">     318 </span>            :     const char *paramName,
+<span class="lineNum">     319 </span>            :     const char *paramValue)
+<span class="lineNum">     320 </span>            : {
+<span class="lineNum">     321 </span><span class="lineNoCov">          0 :     SIT(S).clear();</span>
+<span class="lineNum">     322 </span><span class="lineNoCov">          0 :     ES( P(processor_) -&gt; addGlobalParam(SIT(S), </span>
+<span class="lineNum">     323 </span>            :         (char*)paramName, (char*)paramValue) );
+<span class="lineNum">     324 </span>            :     return OK;
+<a name="325"><span class="lineNum">     325 </span>            : }</a>
+<span class="lineNum">     326 </span>            : 
+<span class="lineNum">     327 </span><span class="lineNoCov">          0 : int SablotAddArgBuffer(</span>
+<span class="lineNum">     328 </span>            :     SablotSituation S,
+<span class="lineNum">     329 </span><span class="lineNoCov">          0 :     void *processor_,</span>
+<span class="lineNum">     330 </span>            :     const char *argName,
+<span class="lineNum">     331 </span>            :     const char *bufferValue)
+<span class="lineNum">     332 </span>            : {
+<span class="lineNum">     333 </span><span class="lineNoCov">          0 :     SIT(S).clear();</span>
+<span class="lineNum">     334 </span><span class="lineNoCov">          0 :     if (!(P(processor_) -&gt; getAddedFlag()))</span>
+<span class="lineNum">     335 </span>            :         SablotFreeResultArgs (processor_);
+<span class="lineNum">     336 </span><span class="lineNoCov">          0 :     ES( P(processor_) -&gt; useArg(SIT(S), (char*)argName, (char*)bufferValue) );</span>
+<span class="lineNum">     337 </span>            :     return OK;
+<a name="338"><span class="lineNum">     338 </span>            : }</a>
+<span class="lineNum">     339 </span>            : 
+<span class="lineNum">     340 </span><span class="lineNoCov">          0 : int SablotAddArgTree(</span>
+<span class="lineNum">     341 </span>            :     SablotSituation S,
+<span class="lineNum">     342 </span><span class="lineNoCov">          0 :     void *processor_,</span>
+<span class="lineNum">     343 </span>            :     const char *argName,
+<span class="lineNum">     344 </span>            :     SDOM_Document tree)
+<span class="lineNum">     345 </span>            : {
+<span class="lineNum">     346 </span><span class="lineNoCov">          0 :     SIT(S).clear();</span>
+<span class="lineNum">     347 </span><span class="lineNoCov">          0 :     if (!(P(processor_) -&gt; getAddedFlag()))</span>
+<span class="lineNum">     348 </span>            :         SablotFreeResultArgs (processor_);
+<span class="lineNum">     349 </span><span class="lineNoCov">          0 :     ES( P(processor_) -&gt; useTree(SIT(S), (char*) argName, </span>
+<span class="lineNum">     350 </span>            :                                  &amp;(toRoot(tree) -&gt; getOwner())) );
+<span class="lineNum">     351 </span>            :     return OK;
+<a name="352"><span class="lineNum">     352 </span>            : }</a>
+<span class="lineNum">     353 </span>            : 
+<span class="lineNum">     354 </span><span class="lineNoCov">          0 : int SablotRunProcessorGen(</span>
+<span class="lineNum">     355 </span>            :     SablotSituation S,
+<span class="lineNum">     356 </span><span class="lineNoCov">          0 :     void *processor_,</span>
+<span class="lineNum">     357 </span>            :     const char *sheetURI, 
+<span class="lineNum">     358 </span>            :     const char *inputURI, 
+<span class="lineNum">     359 </span>            :     const char *resultURI)
+<span class="lineNum">     360 </span>            : {
+<span class="lineNum">     361 </span><span class="lineNoCov">          0 :     int code = 0;</span>
+<span class="lineNum">     362 </span>            : 
+<span class="lineNum">     363 </span><span class="lineNoCov">          0 :     void *saveproc = processor_;</span>
+<span class="lineNum">     364 </span><span class="lineNoCov">          0 :     SIT(S).swapProcessor(saveproc);</span>
+<span class="lineNum">     365 </span>            : 
+<span class="lineNum">     366 </span><span class="lineNoCov">          0 :     SIT(S).clear();</span>
+<span class="lineNum">     367 </span>            :     // remove the existing 'arg' buffers
+<span class="lineNum">     368 </span><span class="lineNoCov">          0 :     if (!(P(processor_) -&gt; getAddedFlag()))</span>
+<span class="lineNum">     369 </span><span class="lineNoCov">          0 :         EC( code, SablotFreeResultArgs (processor_) );</span>
+<span class="lineNum">     370 </span><span class="lineNoCov">          0 :     if (!code)</span>
+<span class="lineNum">     371 </span><span class="lineNoCov">          0 :         P(processor_) -&gt; prepareForRun();</span>
+<span class="lineNum">     372 </span>            :     // must first open the files, then use global params
+<span class="lineNum">     373 </span>            :     // because VarsList needs stylesheet's dictionary
+<span class="lineNum">     374 </span><span class="lineNoCov">          0 :     EC( code, P(processor_) -&gt; open(SIT(S), sheetURI,inputURI) );</span>
+<span class="lineNum">     375 </span><span class="lineNoCov">          0 :     EC( code, P(processor_) -&gt; useGlobalParams(SIT(S)) );</span>
+<span class="lineNum">     376 </span><span class="lineNoCov">          0 :     EC( code, P(processor_) -&gt; run(SIT(S), resultURI) );</span>
+<span class="lineNum">     377 </span><span class="lineNoCov">          0 :     code = SIT(S).getError();</span>
+<span class="lineNum">     378 </span><span class="lineNoCov">          0 :     P(processor_) -&gt; cleanupAfterRun((Situation*)S);</span>
+<span class="lineNum">     379 </span><span class="lineNoCov">          0 :     if (code)</span>
+<span class="lineNum">     380 </span>            :     {
+<span class="lineNum">     381 </span>            :         // GP: if not all files could be opened, those that could are
+<span class="lineNum">     382 </span>            :         // closed in cleanupAfterRun
+<span class="lineNum">     383 </span>            :         // code = SIT(S).getError();
+<span class="lineNum">     384 </span><span class="lineNoCov">          0 :         P(processor_) -&gt; freeResultArgs(SIT(S));</span>
+<span class="lineNum">     385 </span>            :     };
+<span class="lineNum">     386 </span>            :     
+<span class="lineNum">     387 </span><span class="lineNoCov">          0 :     SIT(S).swapProcessor(saveproc);</span>
+<span class="lineNum">     388 </span><span class="lineNoCov">          0 :     return code;</span>
+<a name="389"><span class="lineNum">     389 </span>            : }</a>
+<span class="lineNum">     390 </span>            : 
+<span class="lineNum">     391 </span><span class="lineNoCov">          0 : int SablotRunProcessorExt(</span>
+<span class="lineNum">     392 </span>            :     SablotSituation S,
+<span class="lineNum">     393 </span><span class="lineNoCov">          0 :     void *processor_,</span>
+<span class="lineNum">     394 </span>            :     const char *sheetURI, 
+<span class="lineNum">     395 </span>            :     const char *resultURI, 
+<span class="lineNum">     396 </span>            :     NodeHandle doc)
+<span class="lineNum">     397 </span>            : {
+<span class="lineNum">     398 </span><span class="lineNoCov">          0 :     int code = 0;</span>
+<span class="lineNum">     399 </span>            :     //mask external node
+<span class="lineNum">     400 </span><span class="lineNoCov">          0 :     doc = SXP_MASK_LEVEL(doc, SIT(S).getSXPMaskBit());</span>
+<span class="lineNum">     401 </span>            : 
+<span class="lineNum">     402 </span><span class="lineNoCov">          0 :     void *saveproc = processor_;</span>
+<span class="lineNum">     403 </span><span class="lineNoCov">          0 :     SIT(S).swapProcessor(saveproc);</span>
+<span class="lineNum">     404 </span>            : 
+<span class="lineNum">     405 </span><span class="lineNoCov">          0 :     SIT(S).clear();</span>
+<span class="lineNum">     406 </span>            :     // remove the existing 'arg' buffers
+<span class="lineNum">     407 </span><span class="lineNoCov">          0 :     if (!(P(processor_) -&gt; getAddedFlag()))</span>
+<span class="lineNum">     408 </span><span class="lineNoCov">          0 :         EC( code, SablotFreeResultArgs (processor_) );</span>
+<span class="lineNum">     409 </span><span class="lineNoCov">          0 :     if (!code)</span>
+<span class="lineNum">     410 </span><span class="lineNoCov">          0 :         P(processor_) -&gt; prepareForRun();</span>
+<span class="lineNum">     411 </span>            :     // must first open the files, then use global params
+<span class="lineNum">     412 </span>            :     // because VarsList needs stylesheet's dictionary
+<span class="lineNum">     413 </span><span class="lineNoCov">          0 :     EC( code, P(processor_) -&gt; open(SIT(S), sheetURI, NULL) );</span>
+<span class="lineNum">     414 </span><span class="lineNoCov">          0 :     EC( code, P(processor_) -&gt; useGlobalParams(SIT(S)) );</span>
+<span class="lineNum">     415 </span><span class="lineNoCov">          0 :     EC( code, P(processor_) -&gt; run(SIT(S), resultURI, doc) );</span>
+<span class="lineNum">     416 </span><span class="lineNoCov">          0 :     code = SIT(S).getError();</span>
+<span class="lineNum">     417 </span><span class="lineNoCov">          0 :     P(processor_) -&gt; cleanupAfterRun((Situation*)S);</span>
+<span class="lineNum">     418 </span><span class="lineNoCov">          0 :     if (code)</span>
+<span class="lineNum">     419 </span>            :     {
+<span class="lineNum">     420 </span>            :         // GP: if not all files could be opened, those that could are
+<span class="lineNum">     421 </span>            :         // closed in cleanupAfterRun
+<span class="lineNum">     422 </span>            :         // code = SIT(S).getError();
+<span class="lineNum">     423 </span><span class="lineNoCov">          0 :         P(processor_) -&gt; freeResultArgs(SIT(S));</span>
+<span class="lineNum">     424 </span>            :     };
+<span class="lineNum">     425 </span>            :     
+<span class="lineNum">     426 </span><span class="lineNoCov">          0 :     SIT(S).swapProcessor(saveproc);</span>
+<span class="lineNum">     427 </span><span class="lineNoCov">          0 :     return code;</span>
+<span class="lineNum">     428 </span>            : }
+<span class="lineNum">     429 </span>            : 
+<span class="lineNum">     430 </span>            : 
+<span class="lineNum">     431 </span>            : //
+<span class="lineNum">     432 </span>            : //
+<span class="lineNum">     433 </span>            : //      SablotRunProcessor
+<a name="434"><span class="lineNum">     434 </span>            : //</a>
+<span class="lineNum">     435 </span>            : //
+<span class="lineNum">     436 </span><span class="lineCov">       5984 : int SablotRunProcessor(void *processor_,</span>
+<span class="lineNum">     437 </span>            :                        const char *sheetURI, 
+<span class="lineNum">     438 </span>            :                        const char *inputURI, 
+<span class="lineNum">     439 </span>            :                        const char *resultURI,
+<span class="lineNum">     440 </span>            :                        const char **params, 
+<span class="lineNum">     441 </span>            :                        const char **arguments)
+<span class="lineNum">     442 </span>            : {    
+<span class="lineNum">     443 </span><span class="lineCov">       2992 :     Bool problem = FALSE;</span>
+<span class="lineNum">     444 </span><span class="lineCov">       5984 :     Sit S = *(NZ(P( processor_ )) -&gt; recallSituation());</span>
+<span class="lineNum">     445 </span>            : 
+<span class="lineNum">     446 </span>            :     {
+<span class="lineNum">     447 </span>            :         // remove the existing 'arg' buffers
+<span class="lineNum">     448 </span><span class="lineCov">       2992 :             S.clearError();</span>
+<span class="lineNum">     449 </span><span class="lineCov">       2992 :         E( SablotFreeResultArgs (processor_));</span>
+<span class="lineNum">     450 </span><span class="lineCov">       2992 :         P(processor_) -&gt; prepareForRun();</span>
+<span class="lineNum">     451 </span>            :         const char **p;
+<span class="lineNum">     452 </span><span class="lineCov">       2992 :         if (arguments)</span>
+<span class="lineNum">     453 </span>            :         {
+<span class="lineNum">     454 </span><span class="lineNoCov">          0 :             for (p = arguments; *p &amp;&amp; !problem; p += 2)</span>
+<span class="lineNum">     455 </span><span class="lineNoCov">          0 :                 problem = P(processor_) -&gt; useArg(S, p[0], p[1]);</span>
+<span class="lineNum">     456 </span>            :         }
+<span class="lineNum">     457 </span><span class="lineCov">       2992 :             if (!problem)</span>
+<span class="lineNum">     458 </span>            :             {
+<span class="lineNum">     459 </span>            :                 // must first open the files, then use global params
+<span class="lineNum">     460 </span>            :                     // because VarsList needs stylesheet's dictionary
+<span class="lineNum">     461 </span><span class="lineCov">       2992 :                 problem = P(processor_) -&gt; open(S, sheetURI,inputURI);</span>
+<span class="lineNum">     462 </span><span class="lineCov">       2992 :             if (params)</span>
+<span class="lineNum">     463 </span>            :             {
+<span class="lineNum">     464 </span><span class="lineNoCov">          0 :                 for (p = params; *p &amp;&amp; !problem; p += 2)</span>
+<span class="lineNum">     465 </span><span class="lineNoCov">          0 :                     problem = P(processor_) -&gt; useGlobalParam(S, p[0], p[1]);</span>
+<span class="lineNum">     466 </span>            :             }
+<span class="lineNum">     467 </span>            :             }
+<span class="lineNum">     468 </span><span class="lineCov">       2992 :         if (problem || P(processor_) -&gt; run(S, resultURI))</span>
+<span class="lineNum">     469 </span>            :         {
+<span class="lineNum">     470 </span>            :             // GP: if not all files could be opened, those that could are
+<span class="lineNum">     471 </span>            :             // closed in cleanupAfterRun
+<span class="lineNum">     472 </span><span class="lineCov">       2422 :             int code = S.getError();</span>
+<span class="lineNum">     473 </span><span class="lineCov">       2422 :             P(processor_) -&gt; cleanupAfterRun(&amp;S);</span>
+<span class="lineNum">     474 </span><span class="lineCov">       2422 :             P(processor_) -&gt; freeResultArgs(S);</span>
+<span class="lineNum">     475 </span>            : //            cdelete(proc);
+<span class="lineNum">     476 </span>            :             // S.clear(); (why forget the message?)
+<span class="lineNum">     477 </span><span class="lineCov">       2422 :             return code;</span>
+<span class="lineNum">     478 </span>            :         }
+<span class="lineNum">     479 </span>            :     }
+<span class="lineNum">     480 </span><span class="lineCov">        570 :     P(processor_) -&gt; cleanupAfterRun(&amp;S);</span>
+<span class="lineNum">     481 </span><span class="lineCov">        570 :     return OK;</span>
+<span class="lineNum">     482 </span>            : }
+<span class="lineNum">     483 </span>            : 
+<span class="lineNum">     484 </span>            : 
+<span class="lineNum">     485 </span>            : 
+<span class="lineNum">     486 </span>            : //
+<span class="lineNum">     487 </span>            : //
+<span class="lineNum">     488 </span>            : //      SablotDestroyProcessor
+<span class="lineNum">     489 </span>            : //
+<span class="lineNum">     490 </span>            : //
+<a name="491"><span class="lineNum">     491 </span>            : </a>
+<span class="lineNum">     492 </span>            : 
+<span class="lineNum">     493 </span><span class="lineCov">       5984 : int SablotDestroyProcessor(void *processor_)</span>
+<span class="lineNum">     494 </span>            : {
+<span class="lineNum">     495 </span>            :     int code;
+<span class="lineNum">     496 </span><span class="lineCov">       2992 :     Bool killSit = !(P( processor_ ) -&gt; situationIsMaster());</span>
+<span class="lineNum">     497 </span><span class="lineCov">       2992 :     Situation *SP = P(processor_) -&gt; recallSituation();</span>
+<span class="lineNum">     498 </span><span class="lineCov">       2992 :     code = SablotFreeResultArgs(processor_);</span>
+<span class="lineNum">     499 </span><span class="lineCov">       2992 :     doEnd(*SP);</span>
+<span class="lineNum">     500 </span><span class="lineCov">       2992 :     if(processor_) delete P( processor_);</span>
+<span class="lineNum">     501 </span><span class="lineCov">       2992 :     processor_ = NULL;    </span>
+<span class="lineNum">     502 </span><span class="lineCov">       2992 :     if (killSit)</span>
+<span class="lineNum">     503 </span><span class="lineNoCov">          0 :         cdelete(SP);</span>
+<span class="lineNum">     504 </span>            : #if defined(WIN32) &amp;&amp; defined(CHECK_LEAKS)
+<span class="lineNum">     505 </span>            :     memStats();
+<span class="lineNum">     506 </span>            :     checkLeak();
+<span class="lineNum">     507 </span>            : #endif
+<span class="lineNum">     508 </span><span class="lineCov">       2992 :     return code;</span>
+<span class="lineNum">     509 </span>            : };
+<span class="lineNum">     510 </span>            : 
+<span class="lineNum">     511 </span>            : 
+<span class="lineNum">     512 </span>            : 
+<span class="lineNum">     513 </span>            : //
+<span class="lineNum">     514 </span>            : //
+<span class="lineNum">     515 </span>            : //      SablotSetBase
+<span class="lineNum">     516 </span>            : //
+<a name="517"><span class="lineNum">     517 </span>            : //</a>
+<span class="lineNum">     518 </span>            : 
+<span class="lineNum">     519 </span><span class="lineNoCov">          0 : int SablotSetBase(void* processor_, </span>
+<a name="520"><span class="lineNum">     520 </span>            :                   const char *theBase)</a>
+<span class="lineNum">     521 </span>            : {
+<span class="lineNum">     522 </span><span class="lineNoCov">          0 :     P(processor_) -&gt; setHardBaseURI(theBase);</span>
+<span class="lineNum">     523 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     524 </span>            : }
+<span class="lineNum">     525 </span>            : 
+<span class="lineNum">     526 </span>            : 
+<span class="lineNum">     527 </span>            : //
+<span class="lineNum">     528 </span>            : //
+<span class="lineNum">     529 </span>            : //      SablotSetBaseForScheme
+<span class="lineNum">     530 </span>            : //
+<a name="531"><span class="lineNum">     531 </span>            : //</a>
+<span class="lineNum">     532 </span>            : 
+<span class="lineNum">     533 </span><span class="lineNoCov">          0 : int SablotSetBaseForScheme(void* processor_, </span>
+<span class="lineNum">     534 </span>            :                   const char *scheme, const char *base)
+<span class="lineNum">     535 </span>            : {
+<span class="lineNum">     536 </span><span class="lineNoCov">          0 :     P(processor_) -&gt; addBaseURIMapping(scheme, base);</span>
+<span class="lineNum">     537 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     538 </span>            : }
+<span class="lineNum">     539 </span>            : 
+<span class="lineNum">     540 </span>            : 
+<span class="lineNum">     541 </span>            : 
+<span class="lineNum">     542 </span>            : 
+<span class="lineNum">     543 </span>            : //
+<span class="lineNum">     544 </span>            : //
+<span class="lineNum">     545 </span>            : //      SablotGetResultArg
+<span class="lineNum">     546 </span>            : //
+<a name="547"><span class="lineNum">     547 </span>            : //</a>
+<span class="lineNum">     548 </span>            : 
+<span class="lineNum">     549 </span><span class="lineCov">       1140 : int SablotGetResultArg(void *processor_,</span>
+<span class="lineNum">     550 </span>            :                        const char *argURI,
+<span class="lineNum">     551 </span>            :                        char **argValue)
+<span class="lineNum">     552 </span>            : {
+<span class="lineNum">     553 </span>            :     char *newCopy; // GP: OK
+<span class="lineNum">     554 </span>            :     // we even obtain the index of the output buffer but won't use it
+<span class="lineNum">     555 </span>            :     int resultNdx_;
+<span class="lineNum">     556 </span><span class="lineCov">        570 :     if (argValue)</span>
+<span class="lineNum">     557 </span>            :     {
+<span class="lineNum">     558 </span><span class="lineCov">        570 :       Situation *s = P(processor_) -&gt; recallSituation();</span>
+<span class="lineNum">     559 </span><span class="lineCov">        570 :       sabassert(s); //we always should have some situation, master or internal</span>
+<span class="lineNum">     560 </span><span class="lineCov">        570 :       P(processor_) -&gt; copyArg(SIT(s), argURI, &amp;resultNdx_, newCopy);</span>
+<span class="lineNum">     561 </span>            :       // if output does not go to a buffer, newCopy is NULL
+<span class="lineNum">     562 </span><span class="lineCov">        570 :       *argValue = newCopy;</span>
+<span class="lineNum">     563 </span>            :     }
+<span class="lineNum">     564 </span><span class="lineCov">        570 :     return OK;</span>
+<span class="lineNum">     565 </span>            : }
+<span class="lineNum">     566 </span>            : 
+<span class="lineNum">     567 </span>            : 
+<span class="lineNum">     568 </span>            : //
+<span class="lineNum">     569 </span>            : //
+<span class="lineNum">     570 </span>            : //      SablotSetLog
+<span class="lineNum">     571 </span>            : //
+<a name="572"><span class="lineNum">     572 </span>            : //</a>
+<span class="lineNum">     573 </span>            : 
+<span class="lineNum">     574 </span><span class="lineNoCov">          0 : int SablotSetLog(void *processor_,</span>
+<span class="lineNum">     575 </span>            :     const char *logFilename, int logLevel)
+<span class="lineNum">     576 </span>            : {
+<span class="lineNum">     577 </span><span class="lineNoCov">          0 :     P(processor_) -&gt; recallSituation()-&gt;msgOutputFile((char *)&quot;/__stderr&quot;,(char*) logFilename);</span>
+<span class="lineNum">     578 </span>            :     // logLevel ignored so far
+<span class="lineNum">     579 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     580 </span>            : }
+<span class="lineNum">     581 </span>            : 
+<span class="lineNum">     582 </span>            : 
+<span class="lineNum">     583 </span>            : /*****************************************************************
+<span class="lineNum">     584 </span>            : SablotProcess
+<span class="lineNum">     585 </span>            : 
+<span class="lineNum">     586 </span>            :   the main function published by Sablotron. Feeds given XML
+<span class="lineNum">     587 </span>            :   input to a stylesheet. Both of these as well as the location for
+<span class="lineNum">     588 </span>            :   output are identified by a URI. One can also pass top-level
+<span class="lineNum">     589 </span>            :   stylesheet parameters and named buffers ('args').
+<span class="lineNum">     590 </span>            : ARGS
+<span class="lineNum">     591 </span>            :   sheetURI      URI of the XSLT stylesheet
+<span class="lineNum">     592 </span>            :   inputURI      URI of the XML document
+<span class="lineNum">     593 </span>            :   resultURI     URI of the output document
+<span class="lineNum">     594 </span>            :   params        a NULL-terminated array of char*'s defining the top-level
+<span class="lineNum">     595 </span>            :                 parameters to be passed, interpreted as a
+<span class="lineNum">     596 </span>            :                 sequence of (name, value) pairs. 
+<span class="lineNum">     597 </span>            :   arguments     a NULL-terminated array of char*'s defining the named
+<span class="lineNum">     598 </span>            :                 buffers to be passed, interpreted as a
+<span class="lineNum">     599 </span>            :                 sequence of (name, value) pairs. Both params and arguments
+<span class="lineNum">     600 </span>            :                 may be NULL. 
+<span class="lineNum">     601 </span>            : RETURNS
+<span class="lineNum">     602 </span>            :   .             nonzero iff error
+<span class="lineNum">     603 </span>            :   resultArg     in case output goes to a named buffer, *resultArg is set to                     
+<span class="lineNum">     604 </span>            :                 point to it (otherwise to NULL). Free it using SablotFree().
+<a name="605"><span class="lineNum">     605 </span>            : *****************************************************************/</a>
+<span class="lineNum">     606 </span>            : 
+<span class="lineNum">     607 </span><span class="lineNoCov">          0 : int SablotProcess(const char *sheetURI, const char *inputURI, </span>
+<span class="lineNum">     608 </span>            :                   const char *resultURI,
+<span class="lineNum">     609 </span>            :                   const char **params, const char **arguments, 
+<span class="lineNum">     610 </span>            :                   char **resultArg)
+<span class="lineNum">     611 </span>            : {
+<span class="lineNum">     612 </span>            :     void *theproc;
+<span class="lineNum">     613 </span><span class="lineNoCov">          0 :     EE( SablotCreateProcessor (&amp;theproc) );</span>
+<span class="lineNum">     614 </span><span class="lineNoCov">          0 :     EE_D( SablotRunProcessor(theproc,</span>
+<span class="lineNum">     615 </span>            :         sheetURI, inputURI, resultURI,
+<span class="lineNum">     616 </span>            :         params, arguments), theproc );
+<span class="lineNum">     617 </span><span class="lineNoCov">          0 :     EE_D( SablotGetResultArg(theproc, resultURI, resultArg), theproc );</span>
+<span class="lineNum">     618 </span><span class="lineNoCov">          0 :     EE( SablotDestroyProcessor(theproc) );</span>
+<span class="lineNum">     619 </span>            :     return OK;
+<span class="lineNum">     620 </span>            : };
+<span class="lineNum">     621 </span>            : 
+<span class="lineNum">     622 </span>            : 
+<span class="lineNum">     623 </span>            : /*****************************************************************
+<span class="lineNum">     624 </span>            : SablotProcessFiles
+<span class="lineNum">     625 </span>            : 
+<span class="lineNum">     626 </span>            :   calls SablotProcess to process files identified by their
+<span class="lineNum">     627 </span>            :   file names. No named buffers or params are passed. Included
+<span class="lineNum">     628 </span>            :   for backward compatibility.
+<span class="lineNum">     629 </span>            : ARGUMENTS
+<span class="lineNum">     630 </span>            :   styleSheetName, inputName, resultName
+<span class="lineNum">     631 </span>            :             file names of the stylesheet, XML input and output,
+<span class="lineNum">     632 </span>            :             respectively.
+<span class="lineNum">     633 </span>            : RETURNS
+<span class="lineNum">     634 </span>            :   .         error flag
+<span class="lineNum">     635 </span>            : *****************************************************************/
+<a name="636"><span class="lineNum">     636 </span>            : </a>
+<span class="lineNum">     637 </span>            : 
+<span class="lineNum">     638 </span><span class="lineNoCov">          0 : int SablotProcessFiles(const char *styleSheetName,</span>
+<span class="lineNum">     639 </span>            :                        const char *inputName,
+<span class="lineNum">     640 </span>            :                        const char *resultName)
+<span class="lineNum">     641 </span>            : {
+<span class="lineNum">     642 </span>            :     return SablotProcess(
+<span class="lineNum">     643 </span>            :         styleSheetName, inputName, resultName, 
+<span class="lineNum">     644 </span><span class="lineNoCov">          0 :         NULL, NULL, NULL);</span>
+<span class="lineNum">     645 </span>            : };
+<span class="lineNum">     646 </span>            : 
+<span class="lineNum">     647 </span>            : 
+<span class="lineNum">     648 </span>            : /*****************************************************************
+<span class="lineNum">     649 </span>            : SablotProcessStrings
+<span class="lineNum">     650 </span>            : 
+<span class="lineNum">     651 </span>            :   calls SablotProcess to process documents in memory, passing
+<span class="lineNum">     652 </span>            :   pointers to the documents. No named buffers or params are passed.
+<span class="lineNum">     653 </span>            :   Included for backward compatibility.
+<span class="lineNum">     654 </span>            : ARGUMENTS
+<span class="lineNum">     655 </span>            :   styleSheetStr, inputStr
+<span class="lineNum">     656 </span>            :                 text of the stylesheet and the XML input
+<span class="lineNum">     657 </span>            : RETURNS
+<span class="lineNum">     658 </span>            :   .             error flag
+<span class="lineNum">     659 </span>            :   *resultStr    pointer to the newly allocated block containing
+<a name="660"><span class="lineNum">     660 </span>            :                 the result </a>
+<span class="lineNum">     661 </span>            : *****************************************************************/
+<span class="lineNum">     662 </span><span class="lineNoCov">          0 : int SablotProcessStrings(const char *styleSheetStr,</span>
+<span class="lineNum">     663 </span>            :                          const char *inputStr,
+<span class="lineNum">     664 </span>            :                          char **resultStr)
+<span class="lineNum">     665 </span>            : {
+<span class="lineNum">     666 </span>            :   const char *argums[] =
+<span class="lineNum">     667 </span>            :   {
+<span class="lineNum">     668 </span>            :     &quot;/_stylesheet&quot;, styleSheetStr,
+<span class="lineNum">     669 </span>            :     &quot;/_xmlinput&quot;, inputStr,
+<span class="lineNum">     670 </span>            :     &quot;/_output&quot;, NULL, //was: *resultStr,
+<span class="lineNum">     671 </span>            :     NULL
+<span class="lineNum">     672 </span><span class="lineNoCov">          0 :   };</span>
+<span class="lineNum">     673 </span>            :   return SablotProcess(&quot;arg:/_stylesheet&quot;,
+<span class="lineNum">     674 </span>            :                        &quot;arg:/_xmlinput&quot;,
+<span class="lineNum">     675 </span>            :                        &quot;arg:/_output&quot;,
+<span class="lineNum">     676 </span><span class="lineNoCov">          0 :                        NULL, argums, resultStr);</span>
+<span class="lineNum">     677 </span>            : };
+<span class="lineNum">     678 </span>            : 
+<span class="lineNum">     679 </span>            : 
+<span class="lineNum">     680 </span>            : /*****************************************************************
+<span class="lineNum">     681 </span>            : SablotProcessStringsWithBase
+<span class="lineNum">     682 </span>            : 
+<span class="lineNum">     683 </span>            :     Like SablotProcessStrings but lets you pass an URI that replaces
+<span class="lineNum">     684 </span>            :     the stylesheet's URI in relative address resolution.
+<span class="lineNum">     685 </span>            : 
+<span class="lineNum">     686 </span>            : ARGUMENTS
+<span class="lineNum">     687 </span>            :   styleSheetStr, inputStr
+<span class="lineNum">     688 </span>            :                 text of the stylesheet and the XML input
+<span class="lineNum">     689 </span>            :   theHardBase   the &quot;hard base URI&quot; replacing the stylesheet's URI
+<span class="lineNum">     690 </span>            :                 in all relevant situations
+<span class="lineNum">     691 </span>            : RETURNS
+<span class="lineNum">     692 </span>            :   .             error flag
+<span class="lineNum">     693 </span>            :   *resultStr    pointer to the newly allocated block containing
+<span class="lineNum">     694 </span>            :                 the result 
+<span class="lineNum">     695 </span>            : *****************************************************************/
+<span class="lineNum">     696 </span>            : 
+<span class="lineNum">     697 </span><span class="lineNoCov">          0 : int SablotProcessStringsWithBase(const char *styleSheetStr,</span>
+<span class="lineNum">     698 </span>            :                          const char *inputStr,
+<span class="lineNum">     699 </span>            :                          char **resultStr,
+<span class="lineNum">     700 </span>            :                          const char *theHardBase)
+<span class="lineNum">     701 </span>            : {
+<span class="lineNum">     702 </span>            :     const char *argums[] =
+<span class="lineNum">     703 </span>            :     {
+<span class="lineNum">     704 </span>            :         &quot;/_stylesheet&quot;, styleSheetStr,
+<span class="lineNum">     705 </span>            :         &quot;/_xmlinput&quot;, inputStr,
+<span class="lineNum">     706 </span>            :         &quot;/_output&quot;, NULL, //was: *resultStr,
+<span class="lineNum">     707 </span>            :         NULL
+<span class="lineNum">     708 </span><span class="lineNoCov">          0 :     };</span>
+<span class="lineNum">     709 </span>            :     void *theproc;
+<span class="lineNum">     710 </span><span class="lineNoCov">          0 :     EE( SablotCreateProcessor(&amp;theproc));</span>
+<span class="lineNum">     711 </span><span class="lineNoCov">          0 :     EE_D( SablotSetBase(theproc, theHardBase), theproc );</span>
+<span class="lineNum">     712 </span><span class="lineNoCov">          0 :     EE_D( SablotRunProcessor(theproc,</span>
+<span class="lineNum">     713 </span>            :         &quot;arg:/_stylesheet&quot;,
+<span class="lineNum">     714 </span>            :         &quot;arg:/_xmlinput&quot;,
+<span class="lineNum">     715 </span>            :         &quot;arg:/_output&quot;,
+<span class="lineNum">     716 </span>            :         NULL, argums), theproc);
+<span class="lineNum">     717 </span><span class="lineNoCov">          0 :     EE_D( SablotGetResultArg(theproc,</span>
+<span class="lineNum">     718 </span>            :         &quot;arg:/_output&quot;, resultStr), theproc);
+<span class="lineNum">     719 </span><span class="lineNoCov">          0 :     EE( SablotDestroyProcessor(theproc));</span>
+<span class="lineNum">     720 </span>            :     return OK;
+<span class="lineNum">     721 </span>            : };
+<span class="lineNum">     722 </span>            : 
+<span class="lineNum">     723 </span>            : 
+<span class="lineNum">     724 </span>            : /*****************************************************************
+<span class="lineNum">     725 </span>            : SablotFree
+<span class="lineNum">     726 </span>            : 
+<span class="lineNum">     727 </span>            :   Frees the Sablotron-allocated buffer.
+<a name="728"><span class="lineNum">     728 </span>            : *****************************************************************/</a>
+<span class="lineNum">     729 </span>            : 
+<span class="lineNum">     730 </span><span class="lineNoCov">          0 : int SablotFree(char *resultStr)</span>
+<span class="lineNum">     731 </span>            : {
+<span class="lineNum">     732 </span><span class="lineNoCov">          0 :     if (resultStr)</span>
+<span class="lineNum">     733 </span><span class="lineNoCov">          0 :         delete[] resultStr;</span>
+<span class="lineNum">     734 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     735 </span>            : }
+<span class="lineNum">     736 </span>            : 
+<span class="lineNum">     737 </span>            : 
+<span class="lineNum">     738 </span>            : //
+<span class="lineNum">     739 </span>            : //
+<span class="lineNum">     740 </span>            : //      SablotFreeResultArgs
+<span class="lineNum">     741 </span>            : //      frees the result arg buffers after the have been obtained
+<span class="lineNum">     742 </span>            : //      via SablotGetResultArg()
+<span class="lineNum">     743 </span>            : //
+<a name="744"><span class="lineNum">     744 </span>            : //</a>
+<span class="lineNum">     745 </span>            : 
+<span class="lineNum">     746 </span><span class="lineCov">       2992 : int SablotFreeResultArgs(void *processor_)</span>
+<span class="lineNum">     747 </span>            : {
+<span class="lineNum">     748 </span><span class="lineCov">       5984 :     EE( P(processor_) -&gt; freeResultArgs(*(P(processor_) -&gt; recallSituation())) );</span>
+<span class="lineNum">     749 </span>            :     return OK;
+<span class="lineNum">     750 </span>            : }
+<span class="lineNum">     751 </span>            : 
+<span class="lineNum">     752 </span>            : 
+<span class="lineNum">     753 </span>            : //
+<span class="lineNum">     754 </span>            : //
+<span class="lineNum">     755 </span>            : //      SablotRegHandler
+<span class="lineNum">     756 </span>            : //
+<a name="757"><span class="lineNum">     757 </span>            : //</a>
+<span class="lineNum">     758 </span>            : 
+<span class="lineNum">     759 </span><span class="lineNoCov">          0 : int SablotRegHandler(void *processor_, </span>
+<span class="lineNum">     760 </span>            :                      /* HLR_MESSAGE, HLR_SCHEME, HLR_SAX, HLR_MISC */
+<span class="lineNum">     761 </span>            :                      HandlerType type,   
+<span class="lineNum">     762 </span>            :                      void *handler, 
+<span class="lineNum">     763 </span>            :                      void *userData)
+<span class="lineNum">     764 </span>            : {
+<span class="lineNum">     765 </span><span class="lineNoCov">          0 :     Sit S = *(P(processor_) -&gt; recallSituation());</span>
+<span class="lineNum">     766 </span><span class="lineNoCov">          0 :     EE( P(processor_) -&gt; setHandler(S, type, handler, userData) );</span>
+<span class="lineNum">     767 </span><span class="lineNoCov">          0 :     if (type == HLR_MESSAGE)</span>
+<span class="lineNum">     768 </span><span class="lineNoCov">          0 :         EE( S.closeFiles() );</span>
+<span class="lineNum">     769 </span>            :     return OK;
+<span class="lineNum">     770 </span>            : }
+<span class="lineNum">     771 </span>            : 
+<span class="lineNum">     772 </span>            : 
+<span class="lineNum">     773 </span>            : 
+<span class="lineNum">     774 </span>            : //
+<span class="lineNum">     775 </span>            : //
+<span class="lineNum">     776 </span>            : //      SablotUnregHandler
+<span class="lineNum">     777 </span>            : //
+<a name="778"><span class="lineNum">     778 </span>            : //</a>
+<span class="lineNum">     779 </span>            : 
+<span class="lineNum">     780 </span><span class="lineNoCov">          0 : int SablotUnregHandler(void *processor_, </span>
+<span class="lineNum">     781 </span>            :                        HandlerType type,   /* HLR_MESSAGE, HLR_SCHEME, HLR_SAX */
+<span class="lineNum">     782 </span>            :                        void *handler,
+<span class="lineNum">     783 </span>            :                        void *userData)
+<span class="lineNum">     784 </span>            : {
+<span class="lineNum">     785 </span><span class="lineNoCov">          0 :     Sit S = *(P(processor_) -&gt; recallSituation());</span>
+<span class="lineNum">     786 </span><span class="lineNoCov">          0 :     EE( P(processor_) -&gt; setHandler(S, type, NULL, NULL) );</span>
+<span class="lineNum">     787 </span><span class="lineNoCov">          0 :     if (type == HLR_MESSAGE)</span>
+<span class="lineNum">     788 </span><span class="lineNoCov">          0 :         EE( S.openDefaultFiles() );</span>
+<span class="lineNum">     789 </span>            :     return OK;
+<span class="lineNum">     790 </span>            : }
+<span class="lineNum">     791 </span>            : 
+<span class="lineNum">     792 </span>            : 
+<span class="lineNum">     793 </span>            : //
+<span class="lineNum">     794 </span>            : //
+<span class="lineNum">     795 </span>            : //      SablotGetMsgText
+<span class="lineNum">     796 </span>            : //
+<a name="797"><span class="lineNum">     797 </span>            : //</a>
+<span class="lineNum">     798 </span>            : 
+<span class="lineNum">     799 </span><span class="lineNoCov">          0 : const char* SablotGetMsgText(int code)</span>
+<span class="lineNum">     800 </span>            : {
+<span class="lineNum">     801 </span><span class="lineNoCov">          0 :     return GetMessage((MsgCode) code) -&gt; text;</span>
+<span class="lineNum">     802 </span>            : }
+<span class="lineNum">     803 </span>            : 
+<span class="lineNum">     804 </span>            : //
+<span class="lineNum">     805 </span>            : //
+<span class="lineNum">     806 </span>            : //      SablotClearError
+<span class="lineNum">     807 </span>            : //
+<a name="808"><span class="lineNum">     808 </span>            : //</a>
+<span class="lineNum">     809 </span>            : 
+<span class="lineNum">     810 </span><span class="lineNoCov">          0 : int SablotClearError(void *processor_)</span>
+<span class="lineNum">     811 </span>            : {
+<span class="lineNum">     812 </span><span class="lineNoCov">          0 :     P(processor_) -&gt; recallSituation() -&gt; clear();</span>
+<span class="lineNum">     813 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     814 </span>            : }
+<span class="lineNum">     815 </span>            : 
+<span class="lineNum">     816 </span>            : //
+<span class="lineNum">     817 </span>            : //
+<span class="lineNum">     818 </span>            : //      SablotSetInstanceData
+<span class="lineNum">     819 </span>            : //
+<a name="820"><span class="lineNum">     820 </span>            : //</a>
+<span class="lineNum">     821 </span>            : 
+<span class="lineNum">     822 </span><span class="lineNoCov">          0 : void SablotSetInstanceData(void *processor_, void *idata)</span>
+<span class="lineNum">     823 </span>            : {
+<span class="lineNum">     824 </span><span class="lineNoCov">          0 :     P(processor_) -&gt; setInstanceData(idata);</span>
+<span class="lineNum">     825 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">     826 </span>            : 
+<span class="lineNum">     827 </span>            : //
+<span class="lineNum">     828 </span>            : //
+<span class="lineNum">     829 </span>            : //      SablotGetInstanceData
+<span class="lineNum">     830 </span>            : //
+<a name="831"><span class="lineNum">     831 </span>            : //</a>
+<span class="lineNum">     832 </span>            : 
+<span class="lineNum">     833 </span><span class="lineNoCov">          0 : void* SablotGetInstanceData(void *processor_)</span>
+<span class="lineNum">     834 </span>            : {
+<span class="lineNum">     835 </span><span class="lineNoCov">          0 :     return P(processor_) -&gt; getInstanceData();</span>
+<span class="lineNum">     836 </span>            : }
+<span class="lineNum">     837 </span>            : 
+<span class="lineNum">     838 </span>            : //
+<span class="lineNum">     839 </span>            : //
+<span class="lineNum">     840 </span>            : //      SablotSetEncoding
+<span class="lineNum">     841 </span>            : //      sets the output encoding to be used regardless of the encoding
+<span class="lineNum">     842 </span>            : //      specified by the stylesheet
+<span class="lineNum">     843 </span>            : //      To unset, call with encoding_ NULL.
+<span class="lineNum">     844 </span>            : //
+<a name="845"><span class="lineNum">     845 </span>            : //</a>
+<span class="lineNum">     846 </span>            : 
+<span class="lineNum">     847 </span><span class="lineNoCov">          0 : void SablotSetEncoding(void *processor_, char *encoding_)</span>
+<span class="lineNum">     848 </span>            : {
+<span class="lineNum">     849 </span>            :     P(processor_) -&gt; setHardEncoding(
+<span class="lineNum">     850 </span><span class="lineNoCov">          0 :         encoding_ ? encoding_ : (const char*) &quot;&quot;);</span>
+<span class="lineNum">     851 </span><span class="lineNoCov">          0 : }</span>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

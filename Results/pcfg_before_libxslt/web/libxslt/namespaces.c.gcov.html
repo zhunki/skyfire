@@ -1,0 +1,929 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - libxslt/namespaces.c</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">libxslt</a> - namespaces.c<span style="font-size: 80%;"> (source / <a href="namespaces.c.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">127</td>
+            <td class="headerCovTableEntry">170</td>
+            <td class="headerCovTableEntryLo">74.7 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-10-18</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">5</td>
+            <td class="headerCovTableEntry">7</td>
+            <td class="headerCovTableEntryLo">71.4 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /*</a>
+<span class="lineNum">       2 </span>            :  * namespaces.c: Implementation of the XSLT namespaces handling
+<span class="lineNum">       3 </span>            :  *
+<span class="lineNum">       4 </span>            :  * Reference:
+<span class="lineNum">       5 </span>            :  *   http://www.w3.org/TR/1999/REC-xslt-19991116
+<span class="lineNum">       6 </span>            :  *
+<span class="lineNum">       7 </span>            :  * See Copyright for the status of this software.
+<span class="lineNum">       8 </span>            :  *
+<span class="lineNum">       9 </span>            :  * daniel@veillard.com
+<span class="lineNum">      10 </span>            :  */
+<span class="lineNum">      11 </span>            : 
+<span class="lineNum">      12 </span>            : #define IN_LIBXSLT
+<span class="lineNum">      13 </span>            : #include &quot;libxslt.h&quot;
+<span class="lineNum">      14 </span>            : 
+<span class="lineNum">      15 </span>            : #include &lt;string.h&gt;
+<span class="lineNum">      16 </span>            : 
+<span class="lineNum">      17 </span>            : #ifdef HAVE_SYS_TYPES_H
+<span class="lineNum">      18 </span>            : #include &lt;sys/types.h&gt;
+<span class="lineNum">      19 </span>            : #endif
+<span class="lineNum">      20 </span>            : #ifdef HAVE_MATH_H
+<span class="lineNum">      21 </span>            : #include &lt;math.h&gt;
+<span class="lineNum">      22 </span>            : #endif
+<span class="lineNum">      23 </span>            : #ifdef HAVE_FLOAT_H
+<span class="lineNum">      24 </span>            : #include &lt;float.h&gt;
+<span class="lineNum">      25 </span>            : #endif
+<span class="lineNum">      26 </span>            : #ifdef HAVE_IEEEFP_H
+<span class="lineNum">      27 </span>            : #include &lt;ieeefp.h&gt;
+<span class="lineNum">      28 </span>            : #endif
+<span class="lineNum">      29 </span>            : #ifdef HAVE_NAN_H
+<span class="lineNum">      30 </span>            : #include &lt;nan.h&gt;
+<span class="lineNum">      31 </span>            : #endif
+<span class="lineNum">      32 </span>            : #ifdef HAVE_CTYPE_H
+<span class="lineNum">      33 </span>            : #include &lt;ctype.h&gt;
+<span class="lineNum">      34 </span>            : #endif
+<span class="lineNum">      35 </span>            : #ifndef XSLT_NEED_TRIO
+<span class="lineNum">      36 </span>            : #include &lt;stdio.h&gt;
+<span class="lineNum">      37 </span>            : #else
+<span class="lineNum">      38 </span>            : #include &lt;trio.h&gt;
+<span class="lineNum">      39 </span>            : #endif
+<span class="lineNum">      40 </span>            : 
+<span class="lineNum">      41 </span>            : #include &lt;libxml/xmlmemory.h&gt;
+<span class="lineNum">      42 </span>            : #include &lt;libxml/tree.h&gt;
+<span class="lineNum">      43 </span>            : #include &lt;libxml/hash.h&gt;
+<span class="lineNum">      44 </span>            : #include &lt;libxml/xmlerror.h&gt;
+<span class="lineNum">      45 </span>            : #include &lt;libxml/uri.h&gt;
+<span class="lineNum">      46 </span>            : #include &quot;xslt.h&quot;
+<span class="lineNum">      47 </span>            : #include &quot;xsltInternals.h&quot;
+<span class="lineNum">      48 </span>            : #include &quot;xsltutils.h&quot;
+<span class="lineNum">      49 </span>            : #include &quot;namespaces.h&quot;
+<span class="lineNum">      50 </span>            : #include &quot;imports.h&quot;
+<span class="lineNum">      51 </span>            : 
+<span class="lineNum">      52 </span>            : /************************************************************************
+<span class="lineNum">      53 </span>            :  *                                                                      *
+<span class="lineNum">      54 </span>            :  *                      Module interfaces                               *
+<span class="lineNum">      55 </span>            :  *                                                                      *
+<span class="lineNum">      56 </span>            :  ************************************************************************/
+<span class="lineNum">      57 </span>            : 
+<span class="lineNum">      58 </span>            : #ifdef XSLT_REFACTORED
+<span class="lineNum">      59 </span>            : static xsltNsAliasPtr
+<span class="lineNum">      60 </span>            : xsltNewNsAlias(xsltCompilerCtxtPtr cctxt)
+<span class="lineNum">      61 </span>            : {
+<span class="lineNum">      62 </span>            :     xsltNsAliasPtr ret;
+<span class="lineNum">      63 </span>            : 
+<span class="lineNum">      64 </span>            :     if (cctxt == NULL)
+<span class="lineNum">      65 </span>            :         return(NULL);
+<span class="lineNum">      66 </span>            : 
+<span class="lineNum">      67 </span>            :     ret = (xsltNsAliasPtr) xmlMalloc(sizeof(xsltNsAlias));
+<span class="lineNum">      68 </span>            :     if (ret == NULL) {
+<span class="lineNum">      69 </span>            :         xsltTransformError(NULL, cctxt-&gt;style, NULL,
+<span class="lineNum">      70 </span>            :             &quot;Internal error in xsltNewNsAlias(): Memory allocation failed.\n&quot;);
+<span class="lineNum">      71 </span>            :         cctxt-&gt;style-&gt;errors++;
+<span class="lineNum">      72 </span>            :         return(NULL);
+<span class="lineNum">      73 </span>            :     }
+<span class="lineNum">      74 </span>            :     memset(ret, 0, sizeof(xsltNsAlias));
+<span class="lineNum">      75 </span>            :     /*
+<span class="lineNum">      76 </span>            :     * TODO: Store the item at current stylesheet-level.
+<span class="lineNum">      77 </span>            :     */
+<span class="lineNum">      78 </span>            :     ret-&gt;next = cctxt-&gt;nsAliases;
+<span class="lineNum">      79 </span>            :     cctxt-&gt;nsAliases = ret;
+<span class="lineNum">      80 </span>            : 
+<span class="lineNum">      81 </span>            :     return(ret);
+<span class="lineNum">      82 </span>            : }
+<span class="lineNum">      83 </span>            : #endif /* XSLT_REFACTORED */
+<span class="lineNum">      84 </span>            : /**
+<span class="lineNum">      85 </span>            :  * xsltNamespaceAlias:
+<span class="lineNum">      86 </span>            :  * @style:  the XSLT stylesheet
+<span class="lineNum">      87 </span>            :  * @node:  the xsl:namespace-alias node
+<span class="lineNum">      88 </span>            :  *
+<span class="lineNum">      89 </span>            :  * Read the stylesheet-prefix and result-prefix attributes, register
+<span class="lineNum">      90 </span>            :  * them as well as the corresponding namespace.
+<a name="91"><span class="lineNum">      91 </span>            :  */</a>
+<span class="lineNum">      92 </span>            : void
+<span class="lineNum">      93 </span><span class="lineCov">        235 : xsltNamespaceAlias(xsltStylesheetPtr style, xmlNodePtr node)</span>
+<span class="lineNum">      94 </span>            : {
+<span class="lineNum">      95 </span><span class="lineCov">        235 :     xmlChar *resultPrefix = NULL;</span>
+<span class="lineNum">      96 </span><span class="lineCov">        235 :     xmlChar *stylePrefix = NULL;</span>
+<span class="lineNum">      97 </span><span class="lineCov">        235 :     xmlNsPtr literalNs = NULL;</span>
+<span class="lineNum">      98 </span><span class="lineCov">        235 :     xmlNsPtr targetNs = NULL;</span>
+<span class="lineNum">      99 </span>            : 
+<span class="lineNum">     100 </span>            : #ifdef XSLT_REFACTORED
+<span class="lineNum">     101 </span>            :     xsltNsAliasPtr alias;
+<span class="lineNum">     102 </span>            : 
+<span class="lineNum">     103 </span>            :     if ((style == NULL) || (node == NULL))
+<span class="lineNum">     104 </span>            :         return;
+<span class="lineNum">     105 </span>            : 
+<span class="lineNum">     106 </span>            :     /*
+<span class="lineNum">     107 </span>            :     * SPEC XSLT 1.0:
+<span class="lineNum">     108 </span>            :     *  &quot;If a namespace URI is declared to be an alias for multiple
+<span class="lineNum">     109 </span>            :     *  different namespace URIs, then the declaration with the highest
+<span class="lineNum">     110 </span>            :     *  import precedence is used. It is an error if there is more than
+<span class="lineNum">     111 </span>            :     *  one such declaration. An XSLT processor may signal the error;
+<span class="lineNum">     112 </span>            :     *  if it does not signal the error, it must recover by choosing,
+<span class="lineNum">     113 </span>            :     *  from amongst the declarations with the highest import precedence,
+<span class="lineNum">     114 </span>            :     *  the one that occurs last in the stylesheet.&quot;
+<span class="lineNum">     115 </span>            :     *
+<span class="lineNum">     116 </span>            :     * SPEC TODO: Check for the errors mentioned above.
+<span class="lineNum">     117 </span>            :     */
+<span class="lineNum">     118 </span>            :     /*
+<span class="lineNum">     119 </span>            :     * NOTE that the XSLT 2.0 also *does* use the NULL namespace if
+<span class="lineNum">     120 </span>            :     *  &quot;#default&quot; is used and there's no default namespace is scope.
+<span class="lineNum">     121 </span>            :     *  I.e., this is *not* an error.
+<span class="lineNum">     122 </span>            :     *  Most XSLT 1.0 implementations work this way.
+<span class="lineNum">     123 </span>            :     *  The XSLT 1.0 spec has nothing to say on the subject.
+<span class="lineNum">     124 </span>            :     */
+<span class="lineNum">     125 </span>            :     /*
+<span class="lineNum">     126 </span>            :     * Attribute &quot;stylesheet-prefix&quot;.
+<span class="lineNum">     127 </span>            :     */
+<span class="lineNum">     128 </span>            :     stylePrefix = xmlGetNsProp(node, (const xmlChar *)&quot;stylesheet-prefix&quot;, NULL);
+<span class="lineNum">     129 </span>            :     if (stylePrefix == NULL) {
+<span class="lineNum">     130 </span>            :         xsltTransformError(NULL, style, node,
+<span class="lineNum">     131 </span>            :             &quot;The attribute 'stylesheet-prefix' is missing.\n&quot;);
+<span class="lineNum">     132 </span>            :         return;
+<span class="lineNum">     133 </span>            :     }
+<span class="lineNum">     134 </span>            :     if (xmlStrEqual(stylePrefix, (const xmlChar *)&quot;#default&quot;))
+<span class="lineNum">     135 </span>            :         literalNs = xmlSearchNs(node-&gt;doc, node, NULL);
+<span class="lineNum">     136 </span>            :     else {
+<span class="lineNum">     137 </span>            :         literalNs = xmlSearchNs(node-&gt;doc, node, stylePrefix);
+<span class="lineNum">     138 </span>            :         if (literalNs == NULL) {
+<span class="lineNum">     139 </span>            :             xsltTransformError(NULL, style, node,
+<span class="lineNum">     140 </span>            :                 &quot;Attribute 'stylesheet-prefix': There's no namespace &quot;
+<span class="lineNum">     141 </span>            :                 &quot;declaration in scope for the prefix '%s'.\n&quot;,
+<span class="lineNum">     142 </span>            :                     stylePrefix);
+<span class="lineNum">     143 </span>            :             goto error;
+<span class="lineNum">     144 </span>            :         }
+<span class="lineNum">     145 </span>            :     }
+<span class="lineNum">     146 </span>            :     /*
+<span class="lineNum">     147 </span>            :     * Attribute &quot;result-prefix&quot;.
+<span class="lineNum">     148 </span>            :     */
+<span class="lineNum">     149 </span>            :     resultPrefix = xmlGetNsProp(node, (const xmlChar *)&quot;result-prefix&quot;, NULL);
+<span class="lineNum">     150 </span>            :     if (resultPrefix == NULL) {
+<span class="lineNum">     151 </span>            :         xsltTransformError(NULL, style, node,
+<span class="lineNum">     152 </span>            :             &quot;The attribute 'result-prefix' is missing.\n&quot;);
+<span class="lineNum">     153 </span>            :         goto error;
+<span class="lineNum">     154 </span>            :     }
+<span class="lineNum">     155 </span>            :     if (xmlStrEqual(resultPrefix, (const xmlChar *)&quot;#default&quot;))
+<span class="lineNum">     156 </span>            :         targetNs = xmlSearchNs(node-&gt;doc, node, NULL);
+<span class="lineNum">     157 </span>            :     else {
+<span class="lineNum">     158 </span>            :         targetNs = xmlSearchNs(node-&gt;doc, node, resultPrefix);
+<span class="lineNum">     159 </span>            : 
+<span class="lineNum">     160 </span>            :         if (targetNs == NULL) {
+<span class="lineNum">     161 </span>            :            xsltTransformError(NULL, style, node,
+<span class="lineNum">     162 </span>            :                 &quot;Attribute 'result-prefix': There's no namespace &quot;
+<span class="lineNum">     163 </span>            :                 &quot;declaration in scope for the prefix '%s'.\n&quot;,
+<span class="lineNum">     164 </span>            :                     stylePrefix);
+<span class="lineNum">     165 </span>            :             goto error;
+<span class="lineNum">     166 </span>            :         }
+<span class="lineNum">     167 </span>            :     }
+<span class="lineNum">     168 </span>            :     /*
+<span class="lineNum">     169 </span>            :      *
+<span class="lineNum">     170 </span>            :      * Same alias for multiple different target namespace URIs:
+<span class="lineNum">     171 </span>            :      *  TODO: The one with the highest import precedence is used.
+<span class="lineNum">     172 </span>            :      *  Example:
+<span class="lineNum">     173 </span>            :      *  &lt;xsl:namespace-alias stylesheet-prefix=&quot;foo&quot;
+<span class="lineNum">     174 </span>            :      *                       result-prefix=&quot;bar&quot;/&gt;
+<span class="lineNum">     175 </span>            :      *
+<span class="lineNum">     176 </span>            :      *  &lt;xsl:namespace-alias stylesheet-prefix=&quot;foo&quot;
+<span class="lineNum">     177 </span>            :      *                       result-prefix=&quot;zar&quot;/&gt;
+<span class="lineNum">     178 </span>            :      *
+<span class="lineNum">     179 </span>            :      * Same target namespace URI for multiple different aliases:
+<span class="lineNum">     180 </span>            :      *  All alias-definitions will be used.
+<span class="lineNum">     181 </span>            :      *  Example:
+<span class="lineNum">     182 </span>            :      *  &lt;xsl:namespace-alias stylesheet-prefix=&quot;bar&quot;
+<span class="lineNum">     183 </span>            :      *                       result-prefix=&quot;foo&quot;/&gt;
+<span class="lineNum">     184 </span>            :      *
+<span class="lineNum">     185 </span>            :      *  &lt;xsl:namespace-alias stylesheet-prefix=&quot;zar&quot;
+<span class="lineNum">     186 </span>            :      *                       result-prefix=&quot;foo&quot;/&gt;
+<span class="lineNum">     187 </span>            :      * Cases using #default:
+<span class="lineNum">     188 </span>            :      *  &lt;xsl:namespace-alias stylesheet-prefix=&quot;#default&quot;
+<span class="lineNum">     189 </span>            :      *                       result-prefix=&quot;#default&quot;/&gt;
+<span class="lineNum">     190 </span>            :      *  TODO: Has this an effect at all?
+<span class="lineNum">     191 </span>            :      *
+<span class="lineNum">     192 </span>            :      *  &lt;xsl:namespace-alias stylesheet-prefix=&quot;foo&quot;
+<span class="lineNum">     193 </span>            :      *                       result-prefix=&quot;#default&quot;/&gt;
+<span class="lineNum">     194 </span>            :      *  From namespace to no namespace.
+<span class="lineNum">     195 </span>            :      *
+<span class="lineNum">     196 </span>            :      *  &lt;xsl:namespace-alias stylesheet-prefix=&quot;#default&quot;
+<span class="lineNum">     197 </span>            :      *                       result-prefix=&quot;foo&quot;/&gt;
+<span class="lineNum">     198 </span>            :      *  From no namespace to namespace.
+<span class="lineNum">     199 </span>            :      */
+<span class="lineNum">     200 </span>            : 
+<span class="lineNum">     201 </span>            : 
+<span class="lineNum">     202 </span>            :      /*
+<span class="lineNum">     203 </span>            :      * Store the ns-node in the alias-object.
+<span class="lineNum">     204 </span>            :     */
+<span class="lineNum">     205 </span>            :     alias = xsltNewNsAlias(XSLT_CCTXT(style));
+<span class="lineNum">     206 </span>            :     if (alias == NULL)
+<span class="lineNum">     207 </span>            :         return;
+<span class="lineNum">     208 </span>            :     alias-&gt;literalNs = literalNs;
+<span class="lineNum">     209 </span>            :     alias-&gt;targetNs = targetNs;
+<span class="lineNum">     210 </span>            :     XSLT_CCTXT(style)-&gt;hasNsAliases = 1;
+<span class="lineNum">     211 </span>            : 
+<span class="lineNum">     212 </span>            : 
+<span class="lineNum">     213 </span>            : #else /* XSLT_REFACTORED */
+<span class="lineNum">     214 </span>            :     const xmlChar *literalNsName;
+<span class="lineNum">     215 </span>            :     const xmlChar *targetNsName;
+<span class="lineNum">     216 </span>            : 
+<span class="lineNum">     217 </span>            : 
+<span class="lineNum">     218 </span><span class="lineCov">        235 :     if ((style == NULL) || (node == NULL))</span>
+<span class="lineNum">     219 </span>            :         return;
+<span class="lineNum">     220 </span>            : 
+<span class="lineNum">     221 </span><span class="lineCov">        235 :     stylePrefix = xmlGetNsProp(node, (const xmlChar *)&quot;stylesheet-prefix&quot;, NULL);</span>
+<span class="lineNum">     222 </span><span class="lineCov">        235 :     if (stylePrefix == NULL) {</span>
+<span class="lineNum">     223 </span><span class="lineCov">          2 :         xsltTransformError(NULL, style, node,</span>
+<span class="lineNum">     224 </span>            :             &quot;namespace-alias: stylesheet-prefix attribute missing\n&quot;);
+<span class="lineNum">     225 </span><span class="lineCov">          2 :         return;</span>
+<span class="lineNum">     226 </span>            :     }
+<span class="lineNum">     227 </span><span class="lineCov">        233 :     resultPrefix = xmlGetNsProp(node, (const xmlChar *)&quot;result-prefix&quot;, NULL);</span>
+<span class="lineNum">     228 </span><span class="lineCov">        233 :     if (resultPrefix == NULL) {</span>
+<span class="lineNum">     229 </span><span class="lineCov">          2 :         xsltTransformError(NULL, style, node,</span>
+<span class="lineNum">     230 </span>            :             &quot;namespace-alias: result-prefix attribute missing\n&quot;);
+<span class="lineNum">     231 </span><span class="lineCov">          2 :         goto error;</span>
+<span class="lineNum">     232 </span>            :     }
+<span class="lineNum">     233 </span>            : 
+<span class="lineNum">     234 </span><span class="lineCov">        231 :     if (xmlStrEqual(stylePrefix, (const xmlChar *)&quot;#default&quot;)) {</span>
+<span class="lineNum">     235 </span><span class="lineCov">         48 :         literalNs = xmlSearchNs(node-&gt;doc, node, NULL);</span>
+<span class="lineNum">     236 </span><span class="lineCov">         48 :         if (literalNs == NULL) {</span>
+<span class="lineNum">     237 </span>            :             literalNsName = NULL;
+<span class="lineNum">     238 </span>            :         } else
+<span class="lineNum">     239 </span><span class="lineCov">          2 :             literalNsName = literalNs-&gt;href; /* Yes - set for nsAlias table */</span>
+<span class="lineNum">     240 </span>            :     } else {
+<span class="lineNum">     241 </span><span class="lineCov">        183 :         literalNs = xmlSearchNs(node-&gt;doc, node, stylePrefix);</span>
+<span class="lineNum">     242 </span>            : 
+<span class="lineNum">     243 </span><span class="lineCov">        183 :         if ((literalNs == NULL) || (literalNs-&gt;href == NULL)) {</span>
+<span class="lineNum">     244 </span><span class="lineCov">          6 :             xsltTransformError(NULL, style, node,</span>
+<span class="lineNum">     245 </span>            :                 &quot;namespace-alias: prefix %s not bound to any namespace\n&quot;,
+<span class="lineNum">     246 </span>            :                                         stylePrefix);
+<span class="lineNum">     247 </span><span class="lineCov">          6 :             goto error;</span>
+<span class="lineNum">     248 </span>            :         } else
+<span class="lineNum">     249 </span>            :             literalNsName = literalNs-&gt;href;
+<span class="lineNum">     250 </span>            :     }
+<span class="lineNum">     251 </span>            : 
+<span class="lineNum">     252 </span>            :     /*
+<span class="lineNum">     253 </span>            :      * When &quot;#default&quot; is used for result, if a default namespace has not
+<span class="lineNum">     254 </span>            :      * been explicitly declared the special value UNDEFINED_DEFAULT_NS is
+<span class="lineNum">     255 </span>            :      * put into the nsAliases table
+<span class="lineNum">     256 </span>            :      */
+<span class="lineNum">     257 </span><span class="lineCov">        225 :     if (xmlStrEqual(resultPrefix, (const xmlChar *)&quot;#default&quot;)) {</span>
+<span class="lineNum">     258 </span><span class="lineCov">         12 :         targetNs = xmlSearchNs(node-&gt;doc, node, NULL);</span>
+<span class="lineNum">     259 </span><span class="lineCov">         12 :         if (targetNs == NULL) {</span>
+<span class="lineNum">     260 </span>            :             targetNsName = UNDEFINED_DEFAULT_NS;
+<span class="lineNum">     261 </span>            :         } else
+<span class="lineNum">     262 </span><span class="lineCov">         10 :             targetNsName = targetNs-&gt;href;</span>
+<span class="lineNum">     263 </span>            :     } else {
+<span class="lineNum">     264 </span><span class="lineCov">        213 :         targetNs = xmlSearchNs(node-&gt;doc, node, resultPrefix);</span>
+<span class="lineNum">     265 </span>            : 
+<span class="lineNum">     266 </span><span class="lineCov">        213 :         if ((targetNs == NULL) || (targetNs-&gt;href == NULL)) {</span>
+<span class="lineNum">     267 </span><span class="lineCov">         48 :             xsltTransformError(NULL, style, node,</span>
+<span class="lineNum">     268 </span>            :                 &quot;namespace-alias: prefix %s not bound to any namespace\n&quot;,
+<span class="lineNum">     269 </span>            :                                         resultPrefix);
+<span class="lineNum">     270 </span><span class="lineCov">         48 :             goto error;</span>
+<span class="lineNum">     271 </span>            :         } else
+<span class="lineNum">     272 </span>            :             targetNsName = targetNs-&gt;href;
+<span class="lineNum">     273 </span>            :     }
+<span class="lineNum">     274 </span>            :     /*
+<span class="lineNum">     275 </span>            :      * Special case: if #default is used for
+<span class="lineNum">     276 </span>            :      *  the stylesheet-prefix (literal namespace) and there's no default
+<span class="lineNum">     277 </span>            :      *  namespace in scope, we'll use style-&gt;defaultAlias for this.
+<span class="lineNum">     278 </span>            :      */
+<span class="lineNum">     279 </span><span class="lineCov">        177 :     if (literalNsName == NULL) {</span>
+<span class="lineNum">     280 </span><span class="lineNoCov">          0 :         if (targetNs != NULL) {</span>
+<span class="lineNum">     281 </span>            :             /*
+<span class="lineNum">     282 </span>            :             * BUG TODO: Is it not sufficient to have only 1 field for
+<span class="lineNum">     283 </span>            :             *  this, since subsequently alias declarations will
+<span class="lineNum">     284 </span>            :             *  overwrite this.
+<span class="lineNum">     285 </span>            :             *  Example:
+<span class="lineNum">     286 </span>            :             *   &lt;xsl:namespace-alias result-prefix=&quot;foo&quot;
+<span class="lineNum">     287 </span>            :             *                        stylesheet-prefix=&quot;#default&quot;/&gt;
+<span class="lineNum">     288 </span>            :             *   &lt;xsl:namespace-alias result-prefix=&quot;bar&quot;
+<span class="lineNum">     289 </span>            :             *                        stylesheet-prefix=&quot;#default&quot;/&gt;
+<span class="lineNum">     290 </span>            :             *  The mapping for &quot;foo&quot; won't be visible anymore.
+<span class="lineNum">     291 </span>            :             */
+<span class="lineNum">     292 </span><span class="lineNoCov">          0 :             style-&gt;defaultAlias = targetNs-&gt;href;</span>
+<span class="lineNum">     293 </span>            :         }
+<span class="lineNum">     294 </span>            :     } else {
+<span class="lineNum">     295 </span><span class="lineCov">        177 :         if (style-&gt;nsAliases == NULL)</span>
+<span class="lineNum">     296 </span><span class="lineCov">        177 :             style-&gt;nsAliases = xmlHashCreate(10);</span>
+<span class="lineNum">     297 </span><span class="lineCov">        177 :         if (style-&gt;nsAliases == NULL) {</span>
+<span class="lineNum">     298 </span><span class="lineNoCov">          0 :             xsltTransformError(NULL, style, node,</span>
+<span class="lineNum">     299 </span>            :                 &quot;namespace-alias: cannot create hash table\n&quot;);
+<span class="lineNum">     300 </span><span class="lineNoCov">          0 :             goto error;</span>
+<span class="lineNum">     301 </span>            :         }
+<span class="lineNum">     302 </span><span class="lineCov">        177 :         xmlHashAddEntry((xmlHashTablePtr) style-&gt;nsAliases,</span>
+<span class="lineNum">     303 </span>            :             literalNsName, (void *) targetNsName);
+<span class="lineNum">     304 </span>            :     }
+<span class="lineNum">     305 </span>            : #endif /* else of XSLT_REFACTORED */
+<span class="lineNum">     306 </span>            : 
+<span class="lineNum">     307 </span>            : error:
+<span class="lineNum">     308 </span><span class="lineCov">        233 :     if (stylePrefix != NULL)</span>
+<span class="lineNum">     309 </span><span class="lineCov">        233 :         xmlFree(stylePrefix);</span>
+<span class="lineNum">     310 </span><span class="lineCov">        233 :     if (resultPrefix != NULL)</span>
+<span class="lineNum">     311 </span><span class="lineCov">        231 :         xmlFree(resultPrefix);</span>
+<span class="lineNum">     312 </span>            : }
+<span class="lineNum">     313 </span>            : 
+<span class="lineNum">     314 </span>            : /**
+<span class="lineNum">     315 </span>            :  * xsltGetSpecialNamespace:
+<span class="lineNum">     316 </span>            :  * @ctxt:  the transformation context
+<span class="lineNum">     317 </span>            :  * @invocNode: the invoking node; e.g. a literal result element/attr;
+<span class="lineNum">     318 </span>            :  *             only used for error reports
+<span class="lineNum">     319 </span>            :  * @nsName:  the namespace name (or NULL)
+<span class="lineNum">     320 </span>            :  * @nsPrefix:  the suggested namespace prefix (or NULL)
+<span class="lineNum">     321 </span>            :  * @target:  the result element on which to anchor a namespace
+<span class="lineNum">     322 </span>            :  *
+<span class="lineNum">     323 </span>            :  * Find a matching (prefix and ns-name) ns-declaration
+<span class="lineNum">     324 </span>            :  * for the requested @nsName and @nsPrefix in the result tree.
+<span class="lineNum">     325 </span>            :  * If none is found then a new ns-declaration will be
+<span class="lineNum">     326 </span>            :  * added to @resultElem. If, in this case, the given prefix is
+<span class="lineNum">     327 </span>            :  * already in use, then a ns-declaration with a modified ns-prefix
+<span class="lineNum">     328 </span>            :  * be we created. Note that this function's priority is to
+<span class="lineNum">     329 </span>            :  * preserve ns-prefixes; it will only change a prefix if there's
+<span class="lineNum">     330 </span>            :  * a namespace clash.
+<span class="lineNum">     331 </span>            :  * If both @nsName and @nsPrefix are NULL, then this will try to
+<span class="lineNum">     332 </span>            :  * &quot;undeclare&quot; a default namespace by declaring an xmlns=&quot;&quot;.
+<span class="lineNum">     333 </span>            :  *
+<span class="lineNum">     334 </span>            :  * Returns a namespace declaration or NULL.
+<a name="335"><span class="lineNum">     335 </span>            :  */</a>
+<span class="lineNum">     336 </span>            : xmlNsPtr
+<span class="lineNum">     337 </span><span class="lineCov">     130484 : xsltGetSpecialNamespace(xsltTransformContextPtr ctxt, xmlNodePtr invocNode,</span>
+<span class="lineNum">     338 </span>            :                 const xmlChar *nsName, const xmlChar *nsPrefix,
+<span class="lineNum">     339 </span>            :                 xmlNodePtr target)
+<span class="lineNum">     340 </span>            : {
+<span class="lineNum">     341 </span>            :     xmlNsPtr ns;
+<span class="lineNum">     342 </span><span class="lineCov">     130484 :     int prefixOccupied = 0;</span>
+<span class="lineNum">     343 </span>            : 
+<span class="lineNum">     344 </span><span class="lineCov">     260968 :     if ((ctxt == NULL) || (target == NULL) ||</span>
+<span class="lineNum">     345 </span><span class="lineCov">     130484 :         (target-&gt;type != XML_ELEMENT_NODE))</span>
+<span class="lineNum">     346 </span>            :         return(NULL);
+<span class="lineNum">     347 </span>            : 
+<span class="lineNum">     348 </span>            :     /*
+<span class="lineNum">     349 </span>            :     * NOTE: Namespace exclusion and ns-aliasing is performed at
+<span class="lineNum">     350 </span>            :     *  compilation-time in the refactored code; so this need not be done
+<span class="lineNum">     351 </span>            :     *  here (it was in the old code).
+<span class="lineNum">     352 </span>            :     * NOTE: @invocNode was named @cur in the old code and was documented to
+<span class="lineNum">     353 </span>            :     *  be an input node; since it was only used to anchor an error report
+<span class="lineNum">     354 </span>            :     *  somewhere, we can safely change this to @invocNode, which now
+<span class="lineNum">     355 </span>            :     *  will be the XSLT instruction (also a literal result element/attribute),
+<span class="lineNum">     356 </span>            :     *  which was responsible for this call.
+<span class="lineNum">     357 </span>            :     */
+<span class="lineNum">     358 </span>            :     /*
+<span class="lineNum">     359 </span>            :     * OPTIMIZE TODO: This all could be optimized by keeping track of
+<span class="lineNum">     360 </span>            :     *  the ns-decls currently in-scope via a specialized context.
+<span class="lineNum">     361 </span>            :     */
+<span class="lineNum">     362 </span><span class="lineCov">     130484 :     if ((nsPrefix == NULL) &amp;&amp; ((nsName == NULL) || (nsName[0] == 0))) {</span>
+<span class="lineNum">     363 </span>            :         /*
+<span class="lineNum">     364 </span>            :         * NOTE: the &quot;undeclaration&quot; of the default namespace was
+<span class="lineNum">     365 </span>            :         * part of the logic of the old xsltGetSpecialNamespace() code,
+<span class="lineNum">     366 </span>            :         * so we'll keep that mechanism.
+<span class="lineNum">     367 </span>            :         * Related to the old code: bug #302020:
+<span class="lineNum">     368 </span>            :         */
+<span class="lineNum">     369 </span>            :         /*
+<span class="lineNum">     370 </span>            :         * OPTIMIZE TODO: This all could be optimized by keeping track of
+<span class="lineNum">     371 </span>            :         *  the ns-decls currently in-scope via a specialized context.
+<span class="lineNum">     372 </span>            :         */
+<span class="lineNum">     373 </span>            :         /*
+<span class="lineNum">     374 </span>            :         * Search on the result element itself.
+<span class="lineNum">     375 </span>            :         */
+<span class="lineNum">     376 </span><span class="lineCov">        361 :         if (target-&gt;nsDef != NULL) {</span>
+<span class="lineNum">     377 </span>            :             ns = target-&gt;nsDef;
+<span class="lineNum">     378 </span>            :             do {
+<span class="lineNum">     379 </span><span class="lineCov">         77 :                 if (ns-&gt;prefix == NULL) {</span>
+<span class="lineNum">     380 </span><span class="lineCov">         77 :                     if ((ns-&gt;href != NULL) &amp;&amp; (ns-&gt;href[0] != 0)) {</span>
+<span class="lineNum">     381 </span>            :                         /*
+<span class="lineNum">     382 </span>            :                         * Raise a namespace normalization error.
+<span class="lineNum">     383 </span>            :                         */
+<span class="lineNum">     384 </span><span class="lineNoCov">          0 :                         xsltTransformError(ctxt, NULL, invocNode,</span>
+<span class="lineNum">     385 </span>            :                             &quot;Namespace normalization error: Cannot undeclare &quot;
+<span class="lineNum">     386 </span>            :                             &quot;the default namespace, since the default namespace &quot;
+<span class="lineNum">     387 </span>            :                             &quot;'%s' is already declared on the result element &quot;
+<span class="lineNum">     388 </span>            :                             &quot;'%s'.\n&quot;, ns-&gt;href, target-&gt;name);
+<span class="lineNum">     389 </span><span class="lineNoCov">          0 :                         return(NULL);</span>
+<span class="lineNum">     390 </span>            :                     } else {
+<span class="lineNum">     391 </span>            :                         /*
+<span class="lineNum">     392 </span>            :                         * The default namespace was undeclared on the
+<span class="lineNum">     393 </span>            :                         * result element.
+<span class="lineNum">     394 </span>            :                         */
+<span class="lineNum">     395 </span>            :                         return(NULL);
+<span class="lineNum">     396 </span>            :                     }
+<span class="lineNum">     397 </span>            :                     break;
+<span class="lineNum">     398 </span>            :                 }
+<span class="lineNum">     399 </span><span class="lineNoCov">          0 :                 ns = ns-&gt;next;</span>
+<span class="lineNum">     400 </span><span class="lineNoCov">          0 :             } while (ns != NULL);</span>
+<span class="lineNum">     401 </span>            :         }
+<span class="lineNum">     402 </span><span class="lineCov">        568 :         if ((target-&gt;parent != NULL) &amp;&amp;</span>
+<span class="lineNum">     403 </span><span class="lineCov">        284 :             (target-&gt;parent-&gt;type == XML_ELEMENT_NODE))</span>
+<span class="lineNum">     404 </span>            :         {
+<span class="lineNum">     405 </span>            :             /*
+<span class="lineNum">     406 </span>            :             * The parent element is in no namespace, so assume
+<span class="lineNum">     407 </span>            :             * that there is no default namespace in scope.
+<span class="lineNum">     408 </span>            :             */
+<span class="lineNum">     409 </span><span class="lineCov">        284 :             if (target-&gt;parent-&gt;ns == NULL)</span>
+<span class="lineNum">     410 </span>            :                 return(NULL);
+<span class="lineNum">     411 </span>            : 
+<span class="lineNum">     412 </span><span class="lineCov">        284 :             ns = xmlSearchNs(target-&gt;doc, target-&gt;parent,</span>
+<span class="lineNum">     413 </span>            :                 NULL);
+<span class="lineNum">     414 </span>            :             /*
+<span class="lineNum">     415 </span>            :             * Fine if there's no default ns is scope, or if the
+<span class="lineNum">     416 </span>            :             * default ns was undeclared.
+<span class="lineNum">     417 </span>            :             */
+<span class="lineNum">     418 </span><span class="lineCov">        284 :             if ((ns == NULL) || (ns-&gt;href == NULL) || (ns-&gt;href[0] == 0))</span>
+<span class="lineNum">     419 </span>            :                 return(NULL);
+<span class="lineNum">     420 </span>            : 
+<span class="lineNum">     421 </span>            :             /*
+<span class="lineNum">     422 </span>            :             * Undeclare the default namespace.
+<span class="lineNum">     423 </span>            :             */
+<span class="lineNum">     424 </span><span class="lineCov">        143 :             xmlNewNs(target, BAD_CAST &quot;&quot;, NULL);</span>
+<span class="lineNum">     425 </span>            :             /* TODO: Check result */
+<span class="lineNum">     426 </span><span class="lineCov">        143 :             return(NULL);</span>
+<span class="lineNum">     427 </span>            :         }
+<span class="lineNum">     428 </span>            :         return(NULL);
+<span class="lineNum">     429 </span>            :     }
+<span class="lineNum">     430 </span>            :     /*
+<span class="lineNum">     431 </span>            :     * Handle the XML namespace.
+<span class="lineNum">     432 </span>            :     * QUESTION: Is this faster than using xmlStrEqual() anyway?
+<span class="lineNum">     433 </span>            :     */
+<span class="lineNum">     434 </span><span class="lineCov">     188262 :     if ((nsPrefix != NULL) &amp;&amp;</span>
+<span class="lineNum">     435 </span><span class="lineCov">      59630 :         (nsPrefix[0] == 'x') &amp;&amp; (nsPrefix[1] == 'm') &amp;&amp;</span>
+<span class="lineNum">     436 </span><span class="lineCov">        711 :         (nsPrefix[2] == 'l') &amp;&amp; (nsPrefix[3] == 0))</span>
+<span class="lineNum">     437 </span>            :     {
+<span class="lineNum">     438 </span><span class="lineCov">        355 :         return(xmlSearchNs(target-&gt;doc, target, nsPrefix));</span>
+<span class="lineNum">     439 </span>            :     }
+<span class="lineNum">     440 </span>            :     /*
+<span class="lineNum">     441 </span>            :     * First: search on the result element itself.
+<span class="lineNum">     442 </span>            :     */
+<span class="lineNum">     443 </span><span class="lineCov">     129768 :     if (target-&gt;nsDef != NULL) {</span>
+<span class="lineNum">     444 </span>            :         ns = target-&gt;nsDef;
+<span class="lineNum">     445 </span>            :         do {
+<span class="lineNum">     446 </span><span class="lineCov">       1718 :             if ((ns-&gt;prefix == NULL) == (nsPrefix == NULL)) {</span>
+<span class="lineNum">     447 </span><span class="lineCov">       1554 :                 if (ns-&gt;prefix == nsPrefix) {</span>
+<span class="lineNum">     448 </span><span class="lineCov">       1244 :                     if (xmlStrEqual(ns-&gt;href, nsName))</span>
+<span class="lineNum">     449 </span>            :                         return(ns);
+<span class="lineNum">     450 </span>            :                     prefixOccupied = 1;
+<span class="lineNum">     451 </span>            :                     break;
+<span class="lineNum">     452 </span><span class="lineCov">        310 :                 } else if (xmlStrEqual(ns-&gt;prefix, nsPrefix)) {</span>
+<span class="lineNum">     453 </span><span class="lineCov">        235 :                     if (xmlStrEqual(ns-&gt;href, nsName))</span>
+<span class="lineNum">     454 </span>            :                         return(ns);
+<span class="lineNum">     455 </span>            :                     prefixOccupied = 1;
+<span class="lineNum">     456 </span>            :                     break;
+<span class="lineNum">     457 </span>            :                 }
+<span class="lineNum">     458 </span>            :             }
+<span class="lineNum">     459 </span><span class="lineCov">        239 :             ns = ns-&gt;next;</span>
+<span class="lineNum">     460 </span><span class="lineCov">        239 :         } while (ns != NULL);</span>
+<span class="lineNum">     461 </span>            :     }
+<span class="lineNum">     462 </span><span class="lineCov">     128289 :     if (prefixOccupied) {</span>
+<span class="lineNum">     463 </span>            :         /*
+<span class="lineNum">     464 </span>            :         * If the ns-prefix is occupied by an other ns-decl on the
+<span class="lineNum">     465 </span>            :         * result element, then this means:
+<span class="lineNum">     466 </span>            :         * 1) The desired prefix is shadowed
+<span class="lineNum">     467 </span>            :         * 2) There's no way around changing the prefix
+<span class="lineNum">     468 </span>            :         *
+<span class="lineNum">     469 </span>            :         * Try a desperate search for an in-scope ns-decl
+<span class="lineNum">     470 </span>            :         * with a matching ns-name before we use the last option,
+<span class="lineNum">     471 </span>            :         * which is to recreate the ns-decl with a modified prefix.
+<span class="lineNum">     472 </span>            :         */
+<span class="lineNum">     473 </span><span class="lineNoCov">          0 :         ns = xmlSearchNsByHref(target-&gt;doc, target, nsName);</span>
+<span class="lineNum">     474 </span><span class="lineNoCov">          0 :         if (ns != NULL)</span>
+<span class="lineNum">     475 </span>            :             return(ns);
+<span class="lineNum">     476 </span>            : 
+<span class="lineNum">     477 </span>            :         /*
+<span class="lineNum">     478 </span>            :         * Fallback to changing the prefix.
+<span class="lineNum">     479 </span>            :         */
+<span class="lineNum">     480 </span><span class="lineCov">     256578 :     } else if ((target-&gt;parent != NULL) &amp;&amp;</span>
+<span class="lineNum">     481 </span><span class="lineCov">     128289 :         (target-&gt;parent-&gt;type == XML_ELEMENT_NODE))</span>
+<span class="lineNum">     482 </span>            :     {
+<span class="lineNum">     483 </span>            :         /*
+<span class="lineNum">     484 </span>            :         * Try to find a matching ns-decl in the ancestor-axis.
+<span class="lineNum">     485 </span>            :         *
+<span class="lineNum">     486 </span>            :         * Check the common case: The parent element of the current
+<span class="lineNum">     487 </span>            :         * result element is in the same namespace (with an equal ns-prefix).
+<span class="lineNum">     488 </span>            :         */
+<span class="lineNum">     489 </span><span class="lineCov">     253123 :         if ((target-&gt;parent-&gt;ns != NULL) &amp;&amp;</span>
+<span class="lineNum">     490 </span><span class="lineCov">     126445 :             ((target-&gt;parent-&gt;ns-&gt;prefix != NULL) == (nsPrefix != NULL)))</span>
+<span class="lineNum">     491 </span>            :         {
+<span class="lineNum">     492 </span><span class="lineCov">     125957 :             ns = target-&gt;parent-&gt;ns;</span>
+<span class="lineNum">     493 </span>            : 
+<span class="lineNum">     494 </span><span class="lineCov">     125957 :             if (nsPrefix == NULL) {</span>
+<span class="lineNum">     495 </span><span class="lineCov">      71063 :                 if (xmlStrEqual(ns-&gt;href, nsName))</span>
+<span class="lineNum">     496 </span>            :                     return(ns);
+<span class="lineNum">     497 </span><span class="lineCov">     109714 :             } else if (xmlStrEqual(ns-&gt;prefix, nsPrefix) &amp;&amp;</span>
+<span class="lineNum">     498 </span><span class="lineCov">      54820 :                 xmlStrEqual(ns-&gt;href, nsName))</span>
+<span class="lineNum">     499 </span>            :             {
+<span class="lineNum">     500 </span>            :                 return(ns);
+<span class="lineNum">     501 </span>            :             }
+<span class="lineNum">     502 </span>            :         }
+<span class="lineNum">     503 </span>            :         /*
+<span class="lineNum">     504 </span>            :         * Lookup the remaining in-scope namespaces.
+<span class="lineNum">     505 </span>            :         */
+<span class="lineNum">     506 </span><span class="lineCov">        816 :         ns = xmlSearchNs(target-&gt;doc, target-&gt;parent, nsPrefix);</span>
+<span class="lineNum">     507 </span><span class="lineCov">        816 :         if (ns != NULL) {</span>
+<span class="lineNum">     508 </span><span class="lineCov">        753 :             if (xmlStrEqual(ns-&gt;href, nsName))</span>
+<span class="lineNum">     509 </span>            :                 return(ns);
+<span class="lineNum">     510 </span>            :             /*
+<span class="lineNum">     511 </span>            :             * Now check for a nasty case: We need to ensure that the new
+<span class="lineNum">     512 </span>            :             * ns-decl won't shadow a prefix in-use by an existing attribute.
+<span class="lineNum">     513 </span>            :             * &lt;foo xmlns:a=&quot;urn:test:a&quot;&gt;
+<span class="lineNum">     514 </span>            :             *   &lt;bar a:a=&quot;val-a&quot;&gt;
+<span class="lineNum">     515 </span>            :             *     &lt;xsl:attribute xmlns:a=&quot;urn:test:b&quot; name=&quot;a:b&quot;&gt;
+<span class="lineNum">     516 </span>            :             *        val-b&lt;/xsl:attribute&gt;
+<span class="lineNum">     517 </span>            :             *   &lt;/bar&gt;
+<span class="lineNum">     518 </span>            :             * &lt;/foo&gt;
+<span class="lineNum">     519 </span>            :             */
+<span class="lineNum">     520 </span><span class="lineCov">         21 :             if (target-&gt;properties) {</span>
+<span class="lineNum">     521 </span>            :                 xmlAttrPtr attr = target-&gt;properties;
+<span class="lineNum">     522 </span>            :                 do {
+<span class="lineNum">     523 </span><span class="lineNoCov">          0 :                     if ((attr-&gt;ns) &amp;&amp;</span>
+<span class="lineNum">     524 </span><span class="lineNoCov">          0 :                         xmlStrEqual(attr-&gt;ns-&gt;prefix, nsPrefix))</span>
+<span class="lineNum">     525 </span>            :                     {
+<span class="lineNum">     526 </span>            :                         /*
+<span class="lineNum">     527 </span>            :                         * Bad, this prefix is already in use.
+<span class="lineNum">     528 </span>            :                         * Since we'll change the prefix anyway, try
+<span class="lineNum">     529 </span>            :                         * a search for a matching ns-decl based on the
+<span class="lineNum">     530 </span>            :                         * namespace name.
+<span class="lineNum">     531 </span>            :                         */
+<span class="lineNum">     532 </span><span class="lineNoCov">          0 :                         ns = xmlSearchNsByHref(target-&gt;doc, target, nsName);</span>
+<span class="lineNum">     533 </span><span class="lineNoCov">          0 :                         if (ns != NULL)</span>
+<span class="lineNum">     534 </span>            :                             return(ns);
+<span class="lineNum">     535 </span>            :                         goto declare_new_prefix;
+<span class="lineNum">     536 </span>            :                     }
+<span class="lineNum">     537 </span><span class="lineNoCov">          0 :                     attr = attr-&gt;next;</span>
+<span class="lineNum">     538 </span><span class="lineNoCov">          0 :                 } while (attr != NULL);</span>
+<span class="lineNum">     539 </span>            :             }
+<span class="lineNum">     540 </span>            :         } else {
+<span class="lineNum">     541 </span>            :             /*
+<span class="lineNum">     542 </span>            :             * Either no matching ns-prefix was found or the namespace is
+<span class="lineNum">     543 </span>            :             * shadowed.
+<span class="lineNum">     544 </span>            :             * Create a new ns-decl on the current result element.
+<span class="lineNum">     545 </span>            :             *
+<span class="lineNum">     546 </span>            :             * Hmm, we could also try to reuse an in-scope
+<span class="lineNum">     547 </span>            :             * namespace with a matching ns-name but a different
+<span class="lineNum">     548 </span>            :             * ns-prefix.
+<span class="lineNum">     549 </span>            :             * What has higher priority?
+<span class="lineNum">     550 </span>            :             *  1) If keeping the prefix: create a new ns-decl.
+<span class="lineNum">     551 </span>            :             *  2) If reusal: first lookup ns-names; then fallback
+<span class="lineNum">     552 </span>            :             *     to creation of a new ns-decl.
+<span class="lineNum">     553 </span>            :             * REVISIT: this currently uses case 1) although
+<span class="lineNum">     554 </span>            :             *  the old way was use xmlSearchNsByHref() and to let change
+<span class="lineNum">     555 </span>            :             *  the prefix.
+<span class="lineNum">     556 </span>            :             */
+<span class="lineNum">     557 </span>            : #if 0
+<span class="lineNum">     558 </span>            :             ns = xmlSearchNsByHref(target-&gt;doc, target, nsName);
+<span class="lineNum">     559 </span>            :             if (ns != NULL)
+<span class="lineNum">     560 </span>            :                 return(ns);
+<span class="lineNum">     561 </span>            : #endif
+<span class="lineNum">     562 </span>            :         }
+<span class="lineNum">     563 </span>            :         /*
+<span class="lineNum">     564 </span>            :         * Create the ns-decl on the current result element.
+<span class="lineNum">     565 </span>            :         */
+<span class="lineNum">     566 </span><span class="lineCov">         84 :         ns = xmlNewNs(target, nsName, nsPrefix);</span>
+<span class="lineNum">     567 </span>            :         /* TODO: check errors */
+<span class="lineNum">     568 </span><span class="lineCov">         84 :         return(ns);</span>
+<span class="lineNum">     569 </span>            :     } else {
+<span class="lineNum">     570 </span>            :         /*
+<span class="lineNum">     571 </span>            :         * This is either the root of the tree or something weird is going on.
+<span class="lineNum">     572 </span>            :         */
+<span class="lineNum">     573 </span><span class="lineCov">       1611 :         ns = xmlNewNs(target, nsName, nsPrefix);</span>
+<span class="lineNum">     574 </span>            :         /* TODO: Check result */
+<span class="lineNum">     575 </span><span class="lineCov">       1611 :         return(ns);</span>
+<span class="lineNum">     576 </span>            :     }
+<span class="lineNum">     577 </span>            : 
+<span class="lineNum">     578 </span>            : declare_new_prefix:
+<span class="lineNum">     579 </span>            :     /*
+<span class="lineNum">     580 </span>            :     * Fallback: we need to generate a new prefix and declare the namespace
+<span class="lineNum">     581 </span>            :     * on the result element.
+<span class="lineNum">     582 </span>            :     */
+<span class="lineNum">     583 </span>            :     {
+<span class="lineNum">     584 </span>            :         xmlChar pref[30];
+<span class="lineNum">     585 </span><span class="lineNoCov">          0 :         int counter = 1;</span>
+<span class="lineNum">     586 </span>            : 
+<span class="lineNum">     587 </span><span class="lineNoCov">          0 :         if (nsPrefix == NULL) {</span>
+<span class="lineNum">     588 </span><span class="lineNoCov">          0 :             nsPrefix = BAD_CAST &quot;ns&quot;;</span>
+<span class="lineNum">     589 </span>            :         }
+<span class="lineNum">     590 </span>            : 
+<span class="lineNum">     591 </span>            :         do {
+<span class="lineNum">     592 </span><span class="lineNoCov">          0 :             snprintf((char *) pref, 30, &quot;%s_%d&quot;, nsPrefix, counter++);</span>
+<span class="lineNum">     593 </span><span class="lineNoCov">          0 :             ns = xmlSearchNs(target-&gt;doc, target, BAD_CAST pref);</span>
+<span class="lineNum">     594 </span><span class="lineNoCov">          0 :             if (counter &gt; 1000) {</span>
+<span class="lineNum">     595 </span><span class="lineNoCov">          0 :                 xsltTransformError(ctxt, NULL, invocNode,</span>
+<span class="lineNum">     596 </span>            :                     &quot;Internal error in xsltAcquireResultInScopeNs(): &quot;
+<span class="lineNum">     597 </span>            :                     &quot;Failed to compute a unique ns-prefix for the &quot;
+<span class="lineNum">     598 </span>            :                     &quot;generated element&quot;);
+<span class="lineNum">     599 </span><span class="lineNoCov">          0 :                 return(NULL);</span>
+<span class="lineNum">     600 </span>            :             }
+<span class="lineNum">     601 </span><span class="lineNoCov">          0 :         } while (ns != NULL);</span>
+<span class="lineNum">     602 </span><span class="lineNoCov">          0 :         ns = xmlNewNs(target, nsName, BAD_CAST pref);</span>
+<span class="lineNum">     603 </span>            :         /* TODO: Check result */
+<span class="lineNum">     604 </span><span class="lineNoCov">          0 :         return(ns);</span>
+<span class="lineNum">     605 </span>            :     }
+<span class="lineNum">     606 </span>            :     return(NULL);
+<span class="lineNum">     607 </span>            : }
+<span class="lineNum">     608 </span>            : 
+<span class="lineNum">     609 </span>            : /**
+<span class="lineNum">     610 </span>            :  * xsltGetNamespace:
+<span class="lineNum">     611 </span>            :  * @ctxt:  a transformation context
+<span class="lineNum">     612 </span>            :  * @cur:  the input node
+<span class="lineNum">     613 </span>            :  * @ns:  the namespace
+<span class="lineNum">     614 </span>            :  * @out:  the output node (or its parent)
+<span class="lineNum">     615 </span>            :  *
+<span class="lineNum">     616 </span>            :  * Find a matching (prefix and ns-name) ns-declaration
+<span class="lineNum">     617 </span>            :  * for the requested @ns-&gt;prefix and @ns-&gt;href in the result tree.
+<span class="lineNum">     618 </span>            :  * If none is found then a new ns-declaration will be
+<span class="lineNum">     619 </span>            :  * added to @resultElem. If, in this case, the given prefix is
+<span class="lineNum">     620 </span>            :  * already in use, then a ns-declaration with a modified ns-prefix
+<span class="lineNum">     621 </span>            :  * be we created.
+<span class="lineNum">     622 </span>            :  *
+<span class="lineNum">     623 </span>            :  * Called by:
+<span class="lineNum">     624 </span>            :  *  - xsltCopyPropList() (*not*  anymore)
+<span class="lineNum">     625 </span>            :  *  - xsltShallowCopyElement()
+<span class="lineNum">     626 </span>            :  *  - xsltCopyTreeInternal() (*not*  anymore)
+<span class="lineNum">     627 </span>            :  *  - xsltApplySequenceConstructor() (*not* in the refactored code),
+<span class="lineNum">     628 </span>            :  *  - xsltElement() (*not* anymore)
+<span class="lineNum">     629 </span>            :  *
+<span class="lineNum">     630 </span>            :  * Returns a namespace declaration or NULL in case of
+<span class="lineNum">     631 </span>            :  *         namespace fixup failures or API or internal errors.
+<a name="632"><span class="lineNum">     632 </span>            :  */</a>
+<span class="lineNum">     633 </span>            : xmlNsPtr
+<span class="lineNum">     634 </span><span class="lineCov">     115839 : xsltGetNamespace(xsltTransformContextPtr ctxt, xmlNodePtr cur, xmlNsPtr ns,</span>
+<span class="lineNum">     635 </span>            :                  xmlNodePtr out)
+<span class="lineNum">     636 </span>            : {
+<span class="lineNum">     637 </span>            : 
+<span class="lineNum">     638 </span><span class="lineCov">     115839 :     if (ns == NULL)</span>
+<span class="lineNum">     639 </span>            :         return(NULL);
+<span class="lineNum">     640 </span>            : 
+<span class="lineNum">     641 </span>            : #ifdef XSLT_REFACTORED
+<span class="lineNum">     642 </span>            :     /*
+<span class="lineNum">     643 </span>            :     * Namespace exclusion and ns-aliasing is performed at
+<span class="lineNum">     644 </span>            :     * compilation-time in the refactored code.
+<span class="lineNum">     645 </span>            :     * Additionally, aliasing is not intended for non Literal
+<span class="lineNum">     646 </span>            :     * Result Elements.
+<span class="lineNum">     647 </span>            :     */
+<span class="lineNum">     648 </span>            :     return(xsltGetSpecialNamespace(ctxt, cur, ns-&gt;href, ns-&gt;prefix, out));
+<span class="lineNum">     649 </span>            : #else
+<span class="lineNum">     650 </span>            :     {
+<span class="lineNum">     651 </span>            :         xsltStylesheetPtr style;
+<span class="lineNum">     652 </span><span class="lineCov">     115839 :         const xmlChar *URI = NULL; /* the replacement URI */</span>
+<span class="lineNum">     653 </span>            : 
+<span class="lineNum">     654 </span><span class="lineCov">     115839 :         if ((ctxt == NULL) || (cur == NULL) || (out == NULL))</span>
+<span class="lineNum">     655 </span>            :             return(NULL);
+<span class="lineNum">     656 </span>            : 
+<span class="lineNum">     657 </span><span class="lineCov">     115839 :         style = ctxt-&gt;style;</span>
+<span class="lineNum">     658 </span><span class="lineCov">     345938 :         while (style != NULL) {</span>
+<span class="lineNum">     659 </span><span class="lineCov">     115839 :             if (style-&gt;nsAliases != NULL)</span>
+<span class="lineNum">     660 </span><span class="lineCov">      26697 :                 URI = (const xmlChar *)</span>
+<span class="lineNum">     661 </span><span class="lineCov">      26697 :                 xmlHashLookup(style-&gt;nsAliases, ns-&gt;href);</span>
+<span class="lineNum">     662 </span><span class="lineCov">     115839 :             if (URI != NULL)</span>
+<span class="lineNum">     663 </span>            :                 break;
+<span class="lineNum">     664 </span>            : 
+<span class="lineNum">     665 </span><span class="lineCov">     114260 :             style = xsltNextImport(style);</span>
+<span class="lineNum">     666 </span>            :         }
+<span class="lineNum">     667 </span>            : 
+<span class="lineNum">     668 </span>            : 
+<span class="lineNum">     669 </span><span class="lineCov">     115839 :         if (URI == UNDEFINED_DEFAULT_NS) {</span>
+<span class="lineNum">     670 </span><span class="lineNoCov">          0 :             return(xsltGetSpecialNamespace(ctxt, cur, NULL, NULL, out));</span>
+<span class="lineNum">     671 </span>            : #if 0
+<span class="lineNum">     672 </span>            :             /*
+<span class="lineNum">     673 </span>            :             * TODO: Removed, since wrong. If there was no default
+<span class="lineNum">     674 </span>            :             * namespace in the stylesheet then this must resolve to
+<span class="lineNum">     675 </span>            :             * the NULL namespace.
+<span class="lineNum">     676 </span>            :             */
+<span class="lineNum">     677 </span>            :             xmlNsPtr dflt;
+<span class="lineNum">     678 </span>            :             dflt = xmlSearchNs(cur-&gt;doc, cur, NULL);
+<span class="lineNum">     679 </span>            :             if (dflt != NULL)
+<span class="lineNum">     680 </span>            :                 URI = dflt-&gt;href;
+<span class="lineNum">     681 </span>            :             else
+<span class="lineNum">     682 </span>            :                 return NULL;
+<span class="lineNum">     683 </span>            : #endif
+<span class="lineNum">     684 </span><span class="lineCov">     115839 :         } else if (URI == NULL)</span>
+<span class="lineNum">     685 </span><span class="lineCov">     114260 :             URI = ns-&gt;href;</span>
+<span class="lineNum">     686 </span>            : 
+<span class="lineNum">     687 </span><span class="lineCov">     115839 :         return(xsltGetSpecialNamespace(ctxt, cur, URI, ns-&gt;prefix, out));</span>
+<span class="lineNum">     688 </span>            :     }
+<span class="lineNum">     689 </span>            : #endif
+<span class="lineNum">     690 </span>            : }
+<span class="lineNum">     691 </span>            : 
+<span class="lineNum">     692 </span>            : /**
+<span class="lineNum">     693 </span>            :  * xsltGetPlainNamespace:
+<span class="lineNum">     694 </span>            :  * @ctxt:  a transformation context
+<span class="lineNum">     695 </span>            :  * @cur:  the input node
+<span class="lineNum">     696 </span>            :  * @ns:  the namespace
+<span class="lineNum">     697 </span>            :  * @out:  the result element
+<span class="lineNum">     698 </span>            :  *
+<span class="lineNum">     699 </span>            :  * Obsolete.
+<span class="lineNum">     700 </span>            :  * *Not* called by any Libxslt/Libexslt function.
+<span class="lineNum">     701 </span>            :  * Exaclty the same as xsltGetNamespace().
+<span class="lineNum">     702 </span>            :  *
+<span class="lineNum">     703 </span>            :  * Returns a namespace declaration or NULL in case of
+<span class="lineNum">     704 </span>            :  *         namespace fixup failures or API or internal errors.
+<a name="705"><span class="lineNum">     705 </span>            :  */</a>
+<span class="lineNum">     706 </span>            : xmlNsPtr
+<span class="lineNum">     707 </span><span class="lineNoCov">          0 : xsltGetPlainNamespace(xsltTransformContextPtr ctxt, xmlNodePtr cur,</span>
+<span class="lineNum">     708 </span>            :                       xmlNsPtr ns, xmlNodePtr out)
+<span class="lineNum">     709 </span>            : {
+<span class="lineNum">     710 </span><span class="lineNoCov">          0 :     return(xsltGetNamespace(ctxt, cur, ns, out));</span>
+<span class="lineNum">     711 </span>            : }
+<span class="lineNum">     712 </span>            : 
+<span class="lineNum">     713 </span>            : /**
+<span class="lineNum">     714 </span>            :  * xsltCopyNamespaceList:
+<span class="lineNum">     715 </span>            :  * @ctxt:  a transformation context
+<span class="lineNum">     716 </span>            :  * @node:  the target node
+<span class="lineNum">     717 </span>            :  * @cur:  the first namespace
+<span class="lineNum">     718 </span>            :  *
+<span class="lineNum">     719 </span>            :  * Do a copy of an namespace list. If @node is non-NULL the
+<span class="lineNum">     720 </span>            :  * new namespaces are added automatically. This handles namespaces
+<span class="lineNum">     721 </span>            :  * aliases.
+<span class="lineNum">     722 </span>            :  * This function is intended only for *internal* use at
+<span class="lineNum">     723 </span>            :  * transformation-time for copying ns-declarations of Literal
+<span class="lineNum">     724 </span>            :  * Result Elements.
+<span class="lineNum">     725 </span>            :  *
+<span class="lineNum">     726 </span>            :  * Called by:
+<span class="lineNum">     727 </span>            :  *   xsltCopyTreeInternal() (transform.c)
+<span class="lineNum">     728 </span>            :  *   xsltShallowCopyElem() (transform.c)
+<span class="lineNum">     729 </span>            :  *
+<span class="lineNum">     730 </span>            :  * REVISIT: This function won't be used in the refactored code.
+<span class="lineNum">     731 </span>            :  *
+<span class="lineNum">     732 </span>            :  * Returns: a new xmlNsPtr, or NULL in case of error.
+<a name="733"><span class="lineNum">     733 </span>            :  */</a>
+<span class="lineNum">     734 </span>            : xmlNsPtr
+<span class="lineNum">     735 </span><span class="lineCov">       4540 : xsltCopyNamespaceList(xsltTransformContextPtr ctxt, xmlNodePtr node,</span>
+<span class="lineNum">     736 </span>            :                       xmlNsPtr cur) {
+<span class="lineNum">     737 </span><span class="lineCov">       4540 :     xmlNsPtr ret = NULL, tmp;</span>
+<span class="lineNum">     738 </span><span class="lineCov">       4540 :     xmlNsPtr p = NULL,q;</span>
+<span class="lineNum">     739 </span>            : 
+<span class="lineNum">     740 </span><span class="lineCov">       4540 :     if (cur == NULL)</span>
+<span class="lineNum">     741 </span>            :         return(NULL);
+<span class="lineNum">     742 </span><span class="lineCov">       4540 :     if (cur-&gt;type != XML_NAMESPACE_DECL)</span>
+<span class="lineNum">     743 </span>            :         return(NULL);
+<span class="lineNum">     744 </span>            : 
+<span class="lineNum">     745 </span>            :     /*
+<span class="lineNum">     746 </span>            :      * One can add namespaces only on element nodes
+<span class="lineNum">     747 </span>            :      */
+<span class="lineNum">     748 </span><span class="lineCov">       4540 :     if ((node != NULL) &amp;&amp; (node-&gt;type != XML_ELEMENT_NODE))</span>
+<span class="lineNum">     749 </span><span class="lineNoCov">          0 :         node = NULL;</span>
+<span class="lineNum">     750 </span>            : 
+<span class="lineNum">     751 </span><span class="lineCov">       9163 :     while (cur != NULL) {</span>
+<span class="lineNum">     752 </span><span class="lineCov">       4623 :         if (cur-&gt;type != XML_NAMESPACE_DECL)</span>
+<span class="lineNum">     753 </span>            :             break;
+<span class="lineNum">     754 </span>            : 
+<span class="lineNum">     755 </span>            :         /*
+<span class="lineNum">     756 </span>            :          * Avoid duplicating namespace declarations in the tree if
+<span class="lineNum">     757 </span>            :          * a matching declaration is in scope.
+<span class="lineNum">     758 </span>            :          */
+<span class="lineNum">     759 </span><span class="lineCov">       4623 :         if (node != NULL) {</span>
+<span class="lineNum">     760 </span><span class="lineCov">       4623 :             if ((node-&gt;ns != NULL) &amp;&amp;</span>
+<span class="lineNum">     761 </span><span class="lineNoCov">          0 :                 (xmlStrEqual(node-&gt;ns-&gt;prefix, cur-&gt;prefix)) &amp;&amp;</span>
+<span class="lineNum">     762 </span><span class="lineNoCov">          0 :         (xmlStrEqual(node-&gt;ns-&gt;href, cur-&gt;href))) {</span>
+<span class="lineNum">     763 </span><span class="lineNoCov">          0 :                 cur = cur-&gt;next;</span>
+<span class="lineNum">     764 </span><span class="lineNoCov">          0 :                 continue;</span>
+<span class="lineNum">     765 </span>            :             }
+<span class="lineNum">     766 </span><span class="lineCov">       4623 :             tmp = xmlSearchNs(node-&gt;doc, node, cur-&gt;prefix);</span>
+<span class="lineNum">     767 </span><span class="lineCov">       4623 :             if ((tmp != NULL) &amp;&amp; (xmlStrEqual(tmp-&gt;href, cur-&gt;href))) {</span>
+<span class="lineNum">     768 </span><span class="lineCov">       4094 :                 cur = cur-&gt;next;</span>
+<span class="lineNum">     769 </span><span class="lineCov">       4094 :                 continue;</span>
+<span class="lineNum">     770 </span>            :             }
+<span class="lineNum">     771 </span>            :         }
+<span class="lineNum">     772 </span>            : #ifdef XSLT_REFACTORED
+<span class="lineNum">     773 </span>            :         /*
+<span class="lineNum">     774 </span>            :         * Namespace exclusion and ns-aliasing is performed at
+<span class="lineNum">     775 </span>            :         * compilation-time in the refactored code.
+<span class="lineNum">     776 </span>            :         */
+<span class="lineNum">     777 </span>            :         q = xmlNewNs(node, cur-&gt;href, cur-&gt;prefix);
+<span class="lineNum">     778 </span>            :         if (p == NULL) {
+<span class="lineNum">     779 </span>            :             ret = p = q;
+<span class="lineNum">     780 </span>            :         } else {
+<span class="lineNum">     781 </span>            :             p-&gt;next = q;
+<span class="lineNum">     782 </span>            :             p = q;
+<span class="lineNum">     783 </span>            :         }
+<span class="lineNum">     784 </span>            : #else
+<span class="lineNum">     785 </span>            :         /*
+<span class="lineNum">     786 </span>            :         * TODO: Remove this if the refactored code gets enabled.
+<span class="lineNum">     787 </span>            :         */
+<span class="lineNum">     788 </span><span class="lineCov">        529 :         if (!xmlStrEqual(cur-&gt;href, XSLT_NAMESPACE)) {</span>
+<span class="lineNum">     789 </span>            :             const xmlChar *URI;
+<span class="lineNum">     790 </span>            :             /* TODO apply cascading */
+<span class="lineNum">     791 </span><span class="lineCov">        526 :             URI = (const xmlChar *) xmlHashLookup(ctxt-&gt;style-&gt;nsAliases,</span>
+<span class="lineNum">     792 </span>            :                                                   cur-&gt;href);
+<span class="lineNum">     793 </span><span class="lineCov">        526 :             if (URI == UNDEFINED_DEFAULT_NS) {</span>
+<span class="lineNum">     794 </span><span class="lineNoCov">          0 :                 cur = cur-&gt;next;</span>
+<span class="lineNum">     795 </span><span class="lineNoCov">          0 :                 continue;</span>
+<span class="lineNum">     796 </span>            :             }
+<span class="lineNum">     797 </span><span class="lineCov">        526 :             if (URI != NULL) {</span>
+<span class="lineNum">     798 </span><span class="lineNoCov">          0 :                 q = xmlNewNs(node, URI, cur-&gt;prefix);</span>
+<span class="lineNum">     799 </span>            :             } else {
+<span class="lineNum">     800 </span><span class="lineCov">        526 :                 q = xmlNewNs(node, cur-&gt;href, cur-&gt;prefix);</span>
+<span class="lineNum">     801 </span>            :             }
+<span class="lineNum">     802 </span><span class="lineCov">        526 :             if (p == NULL) {</span>
+<span class="lineNum">     803 </span>            :                 ret = p = q;
+<span class="lineNum">     804 </span>            :             } else {
+<span class="lineNum">     805 </span><span class="lineCov">         83 :                 p-&gt;next = q;</span>
+<span class="lineNum">     806 </span><span class="lineCov">         83 :                 p = q;</span>
+<span class="lineNum">     807 </span>            :             }
+<span class="lineNum">     808 </span>            :         }
+<span class="lineNum">     809 </span>            : #endif
+<span class="lineNum">     810 </span><span class="lineCov">        529 :         cur = cur-&gt;next;</span>
+<span class="lineNum">     811 </span>            :     }
+<span class="lineNum">     812 </span>            :     return(ret);
+<span class="lineNum">     813 </span>            : }
+<span class="lineNum">     814 </span>            : 
+<span class="lineNum">     815 </span>            : /**
+<span class="lineNum">     816 </span>            :  * xsltCopyNamespace:
+<span class="lineNum">     817 </span>            :  * @ctxt:  a transformation context
+<span class="lineNum">     818 </span>            :  * @elem:  the target element node
+<span class="lineNum">     819 </span>            :  * @ns:  the namespace node
+<span class="lineNum">     820 </span>            :  *
+<span class="lineNum">     821 </span>            :  * Copies a namespace node (declaration). If @elem is not NULL,
+<span class="lineNum">     822 </span>            :  * then the new namespace will be declared on @elem.
+<span class="lineNum">     823 </span>            :  *
+<span class="lineNum">     824 </span>            :  * Returns: a new xmlNsPtr, or NULL in case of an error.
+<a name="825"><span class="lineNum">     825 </span>            :  */</a>
+<span class="lineNum">     826 </span>            : xmlNsPtr
+<span class="lineNum">     827 </span><span class="lineNoCov">          0 : xsltCopyNamespace(xsltTransformContextPtr ctxt ATTRIBUTE_UNUSED,</span>
+<span class="lineNum">     828 </span>            :                   xmlNodePtr elem, xmlNsPtr ns)
+<span class="lineNum">     829 </span>            : {
+<span class="lineNum">     830 </span><span class="lineNoCov">          0 :     if ((ns == NULL) || (ns-&gt;type != XML_NAMESPACE_DECL))</span>
+<span class="lineNum">     831 </span>            :         return(NULL);
+<span class="lineNum">     832 </span>            :     /*
+<span class="lineNum">     833 </span>            :      * One can add namespaces only on element nodes
+<span class="lineNum">     834 </span>            :      */
+<span class="lineNum">     835 </span><span class="lineNoCov">          0 :     if ((elem != NULL) &amp;&amp; (elem-&gt;type != XML_ELEMENT_NODE))</span>
+<span class="lineNum">     836 </span><span class="lineNoCov">          0 :         return(xmlNewNs(NULL, ns-&gt;href, ns-&gt;prefix));</span>
+<span class="lineNum">     837 </span>            :     else
+<span class="lineNum">     838 </span><span class="lineNoCov">          0 :         return(xmlNewNs(elem, ns-&gt;href, ns-&gt;prefix));</span>
+<span class="lineNum">     839 </span>            : }
+<span class="lineNum">     840 </span>            : 
+<span class="lineNum">     841 </span>            : 
+<span class="lineNum">     842 </span>            : /**
+<span class="lineNum">     843 </span>            :  * xsltFreeNamespaceAliasHashes:
+<span class="lineNum">     844 </span>            :  * @style: an XSLT stylesheet
+<span class="lineNum">     845 </span>            :  *
+<span class="lineNum">     846 </span>            :  * Free up the memory used by namespaces aliases
+<a name="847"><span class="lineNum">     847 </span>            :  */</a>
+<span class="lineNum">     848 </span>            : void
+<span class="lineNum">     849 </span><span class="lineCov">      16915 : xsltFreeNamespaceAliasHashes(xsltStylesheetPtr style) {</span>
+<span class="lineNum">     850 </span><span class="lineCov">      16915 :     if (style-&gt;nsAliases != NULL)</span>
+<span class="lineNum">     851 </span><span class="lineCov">        177 :         xmlHashFree((xmlHashTablePtr) style-&gt;nsAliases, NULL);</span>
+<span class="lineNum">     852 </span><span class="lineCov">      16915 :     style-&gt;nsAliases = NULL;</span>
+<span class="lineNum">     853 </span><span class="lineCov">      16915 : }</span>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

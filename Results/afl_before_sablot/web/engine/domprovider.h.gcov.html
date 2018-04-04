@@ -1,0 +1,459 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - engine/domprovider.h</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">engine</a> - domprovider.h<span style="font-size: 80%;"> (source / <a href="domprovider.h.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">10</td>
+            <td class="headerCovTableEntry">119</td>
+            <td class="headerCovTableEntryLo">8.4 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-10-13</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">4</td>
+            <td class="headerCovTableEntry">52</td>
+            <td class="headerCovTableEntryLo">7.7 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* </a>
+<span class="lineNum">       2 </span>            :  * The contents of this file are subject to the Mozilla Public
+<span class="lineNum">       3 </span>            :  * License Version 1.1 (the &quot;License&quot;); you may not use this file
+<span class="lineNum">       4 </span>            :  * except in compliance with the License. You may obtain a copy of
+<span class="lineNum">       5 </span>            :  * the License at http://www.mozilla.org/MPL/
+<span class="lineNum">       6 </span>            :  * 
+<span class="lineNum">       7 </span>            :  * Software distributed under the License is distributed on an &quot;AS
+<span class="lineNum">       8 </span>            :  * IS&quot; basis, WITHOUT WARRANTY OF ANY KIND, either express or
+<span class="lineNum">       9 </span>            :  * implied. See the License for the specific language governing
+<span class="lineNum">      10 </span>            :  * rights and limitations under the License.
+<span class="lineNum">      11 </span>            :  * 
+<span class="lineNum">      12 </span>            :  * The Original Code is the Sablotron XSLT Processor.
+<span class="lineNum">      13 </span>            :  * 
+<span class="lineNum">      14 </span>            :  * The Initial Developer of the Original Code is Ginger Alliance Ltd.
+<span class="lineNum">      15 </span>            :  * Portions created by Ginger Alliance are Copyright (C) 2000-2002
+<span class="lineNum">      16 </span>            :  * Ginger Alliance Ltd. All Rights Reserved.
+<span class="lineNum">      17 </span>            :  * 
+<span class="lineNum">      18 </span>            :  * Contributor(s):
+<span class="lineNum">      19 </span>            :  * 
+<span class="lineNum">      20 </span>            :  * Alternatively, the contents of this file may be used under the
+<span class="lineNum">      21 </span>            :  * terms of the GNU General Public License Version 2 or later (the
+<span class="lineNum">      22 </span>            :  * &quot;GPL&quot;), in which case the provisions of the GPL are applicable 
+<span class="lineNum">      23 </span>            :  * instead of those above.  If you wish to allow use of your 
+<span class="lineNum">      24 </span>            :  * version of this file only under the terms of the GPL and not to
+<span class="lineNum">      25 </span>            :  * allow others to use your version of this file under the MPL,
+<span class="lineNum">      26 </span>            :  * indicate your decision by deleting the provisions above and
+<span class="lineNum">      27 </span>            :  * replace them with the notice and other provisions required by
+<span class="lineNum">      28 </span>            :  * the GPL.  If you do not delete the provisions above, a recipient
+<span class="lineNum">      29 </span>            :  * may use your version of this file under either the MPL or the
+<span class="lineNum">      30 </span>            :  * GPL.
+<span class="lineNum">      31 </span>            :  */
+<span class="lineNum">      32 </span>            : 
+<span class="lineNum">      33 </span>            : #ifndef DomProviderHIncl
+<span class="lineNum">      34 </span>            : #define DomProviderHIncl
+<span class="lineNum">      35 </span>            : 
+<span class="lineNum">      36 </span>            : #include &quot;base.h&quot;
+<span class="lineNum">      37 </span>            : #include &quot;sxpath.h&quot;
+<span class="lineNum">      38 </span>            : 
+<span class="lineNum">      39 </span>            : class OutputterObj;
+<span class="lineNum">      40 </span>            : class Expression;
+<a name="41"><span class="lineNum">      41 </span>            : class Context;</a>
+<span class="lineNum">      42 </span>            : 
+<span class="lineNum">      43 </span><span class="lineCov">       1156 : class DOMProvider</span>
+<span class="lineNum">      44 </span>            : {
+<span class="lineNum">      45 </span>            : public:
+<span class="lineNum">      46 </span>            :     virtual SXP_NodeType getNodeType(SXP_Node n) = 0;
+<span class="lineNum">      47 </span>            :     virtual const SXP_char* getNodeName(SXP_Node n) = 0;
+<span class="lineNum">      48 </span>            :     virtual const SXP_char* getNodeNameURI(SXP_Node n) = 0;
+<span class="lineNum">      49 </span>            :     virtual const SXP_char* getNodeNameLocal(SXP_Node n) = 0;
+<span class="lineNum">      50 </span>            :     virtual const SXP_char* getNodeValue(SXP_Node n) = 0;
+<span class="lineNum">      51 </span>            :     virtual SXP_Node     getNextSibling(SXP_Node n) = 0;
+<span class="lineNum">      52 </span>            :     virtual SXP_Node     getPreviousSibling(SXP_Node n) = 0;
+<span class="lineNum">      53 </span>            :     virtual SXP_Node     getNextAttrNS(SXP_Node n) = 0;
+<span class="lineNum">      54 </span>            :     virtual SXP_Node     getPreviousAttrNS(SXP_Node n) = 0;
+<span class="lineNum">      55 </span>            :     virtual int          getChildCount(SXP_Node n) = 0;
+<span class="lineNum">      56 </span>            :     virtual int          getAttributeCount(SXP_Node n) = 0;
+<span class="lineNum">      57 </span>            :     virtual int          getNamespaceCount(SXP_Node n) = 0;
+<span class="lineNum">      58 </span>            :     virtual SXP_Node     getChildNo(SXP_Node n, int ndx) = 0;
+<span class="lineNum">      59 </span>            :     virtual SXP_Node     getAttributeNo(SXP_Node n, int ndx) = 0;
+<span class="lineNum">      60 </span>            :     virtual SXP_Node     getNamespaceNo(SXP_Node n, int ndx) = 0;
+<span class="lineNum">      61 </span>            :     virtual SXP_Node     getParent(SXP_Node n) = 0;
+<span class="lineNum">      62 </span>            :     virtual SXP_Document getOwnerDocument(SXP_Node n) = 0;    
+<span class="lineNum">      63 </span>            :     virtual int          compareNodes(SXP_Node n1, SXP_Node n2) = 0;
+<span class="lineNum">      64 </span>            :     virtual SXP_Document retrieveDocument(const SXP_char* uri, const SXP_char* baseUri) = 0;    
+<span class="lineNum">      65 </span>            :     void                 constructStringValue(SXP_Node n, DStr &amp;result);
+<span class="lineNum">      66 </span>            :     SXP_Node             getFirstChild(SXP_Node n);
+<span class="lineNum">      67 </span>            :     virtual SXP_Node     getNodeWithID(SXP_Document doc, 
+<span class="lineNum">      68 </span>            :                                        const SXP_char* id) = 0;
+<span class="lineNum">      69 </span>            :     //extended function
+<span class="lineNum">      70 </span>            :     virtual void         freeName(NodeHandle n, char* buff);
+<span class="lineNum">      71 </span>            :     virtual void         freeValue(NodeHandle n, char* buff);
+<span class="lineNum">      72 </span>            :     //special functions for processing
+<span class="lineNum">      73 </span>            :     virtual eFlag startCopy(Sit S, NodeHandle n, OutputterObj &amp;outputter);
+<span class="lineNum">      74 </span>            :     virtual eFlag endCopy(Sit S, NodeHandle n, OutputterObj &amp;outputter);
+<span class="lineNum">      75 </span>            :     virtual eFlag copyNode(Sit S, NodeHandle n, OutputterObj &amp;outputter);
+<span class="lineNum">      76 </span>            :     virtual eFlag getMatchingList(Sit S, NodeHandle n, 
+<span class="lineNum">      77 </span>            :                                   Expression &amp;match, Context &amp;result);
+<span class="lineNum">      78 </span>            : };
+<span class="lineNum">      79 </span>            : 
+<span class="lineNum">      80 </span><span class="lineCov">       1156 : class DOMProviderStandard : public DOMProvider</span>
+<span class="lineNum">      81 </span>            : {
+<span class="lineNum">      82 </span>            : public:
+<span class="lineNum">      83 </span>            :     virtual SXP_NodeType getNodeType(SXP_Node n);
+<span class="lineNum">      84 </span>            :     virtual const SXP_char* getNodeName(SXP_Node n);
+<span class="lineNum">      85 </span>            :     virtual const SXP_char* getNodeNameURI(SXP_Node n);
+<span class="lineNum">      86 </span>            :     virtual const SXP_char* getNodeNameLocal(SXP_Node n);
+<span class="lineNum">      87 </span>            :     virtual const SXP_char* getNodeValue(SXP_Node n);
+<span class="lineNum">      88 </span>            :     virtual SXP_Node     getNextSibling(SXP_Node n);
+<span class="lineNum">      89 </span>            :     virtual SXP_Node     getPreviousSibling(SXP_Node n);
+<span class="lineNum">      90 </span>            :     virtual SXP_Node     getNextAttrNS(SXP_Node n);
+<span class="lineNum">      91 </span>            :     virtual SXP_Node     getPreviousAttrNS(SXP_Node n);
+<span class="lineNum">      92 </span>            :     virtual int          getChildCount(SXP_Node n);
+<span class="lineNum">      93 </span>            :     virtual int          getAttributeCount(SXP_Node n);
+<span class="lineNum">      94 </span>            :     virtual int          getNamespaceCount(SXP_Node n);
+<span class="lineNum">      95 </span>            :     virtual SXP_Node     getChildNo(SXP_Node n, int ndx);
+<span class="lineNum">      96 </span>            :     virtual SXP_Node     getAttributeNo(SXP_Node n, int ndx);
+<span class="lineNum">      97 </span>            :     virtual SXP_Node     getNamespaceNo(SXP_Node n, int ndx);
+<span class="lineNum">      98 </span>            :     virtual SXP_Node     getParent(SXP_Node n);
+<span class="lineNum">      99 </span>            :     virtual SXP_Document getOwnerDocument(SXP_Node n);    
+<span class="lineNum">     100 </span>            :     virtual int          compareNodes(SXP_Node n1, SXP_Node n2);
+<span class="lineNum">     101 </span>            :     virtual SXP_Document retrieveDocument(const SXP_char* uri, const SXP_char* baseUri);    
+<span class="lineNum">     102 </span>            :     virtual SXP_Node     getNodeWithID(SXP_Document doc, 
+<a name="103"><span class="lineNum">     103 </span>            :                                        const SXP_char* id);</a>
+<span class="lineNum">     104 </span>            :     //extras
+<a name="105"><span class="lineNum">     105 </span><span class="lineNoCov">          0 :     virtual void freeName(NodeHandle n, char *buff)</span></a>
+<span class="lineNum">     106 </span><span class="lineNoCov">          0 :       { delete[] buff; }</span>
+<span class="lineNum">     107 </span><span class="lineNoCov">          0 :     virtual void freeValue(NodeHandle n, char *buff)</span>
+<span class="lineNum">     108 </span><span class="lineNoCov">          0 :       { /*does nothing */}</span>
+<span class="lineNum">     109 </span>            : };
+<span class="lineNum">     110 </span>            : 
+<span class="lineNum">     111 </span>            : #define NHC(nh) ((unsigned long)nh)
+<span class="lineNum">     112 </span>            : #define SXP_EXTERNAL(nh) (NHC(nh) &amp; 1)
+<span class="lineNum">     113 </span>            : #define SXP_CLEAR(nh) (NHC(nh) &amp; ~1)
+<span class="lineNum">     114 </span>            : #define SXP_MASK_LEVEL(nh,level) (NodeHandle)(((NHC(nh) &amp; 1) &lt;&lt; (level)) | (NHC(nh) &amp; ~(1 &lt;&lt; (level))) | 1)
+<span class="lineNum">     115 </span>            : #define SXP_UNMASK_LEVEL(nh,level) (NodeHandle)((((NHC(nh) &gt;&gt; (level)) &amp; 1) | NHC(nh) &amp; ~1) &amp; ~(1 &lt;&lt; (level)))
+<span class="lineNum">     116 </span>            : #define SXP_MASK(nh) SXP_MASK_LEVEL((nh),sxpMask)
+<span class="lineNum">     117 </span>            : #define SXP_UNMASK(nh) SXP_UNMASK_LEVEL((nh),sxpMask)
+<span class="lineNum">     118 </span>            : 
+<span class="lineNum">     119 </span>            : //handy macros used in comon code
+<span class="lineNum">     120 </span>            : #define nhNull(nh) (!SXP_CLEAR(nh))
+<span class="lineNum">     121 </span>            : 
+<span class="lineNum">     122 </span>            : class DOMProviderExternal : public DOMProvider
+<span class="lineNum">     123 </span>            : {
+<span class="lineNum">     124 </span>            : public:
+<a name="125"><span class="lineNum">     125 </span><span class="lineNoCov">          0 :     DOMProviderExternal(DOMHandler *domh_, void* udata_) </span></a>
+<span class="lineNum">     126 </span><span class="lineNoCov">          0 :         : domh(domh_), udata(udata_), sxpMask(0), options(0) {};</span>
+<span class="lineNum">     127 </span><span class="lineNoCov">          0 :         virtual SXP_NodeType getNodeType(SXP_Node n)</span>
+<span class="lineNum">     128 </span>            :           { return domh -&gt; getNodeType 
+<span class="lineNum">     129 </span><span class="lineNoCov">          0 :                   ? domh -&gt; getNodeType(SXP_UNMASK(n)) </span>
+<a name="130"><span class="lineNum">     130 </span><span class="lineNoCov">          0 :                   : domh -&gt; getNodeTypeExt(SXP_UNMASK(n), udata); }</span></a>
+<span class="lineNum">     131 </span>            : 
+<span class="lineNum">     132 </span><span class="lineNoCov">          0 :     virtual const SXP_char* getNodeName(SXP_Node n)</span>
+<span class="lineNum">     133 </span>            :           { return domh -&gt; getNodeName 
+<span class="lineNum">     134 </span><span class="lineNoCov">          0 :                   ? domh -&gt; getNodeName(SXP_UNMASK(n)) </span>
+<a name="135"><span class="lineNum">     135 </span><span class="lineNoCov">          0 :                   :     domh -&gt; getNodeNameExt(SXP_UNMASK(n), udata);}</span></a>
+<span class="lineNum">     136 </span>            : 
+<span class="lineNum">     137 </span><span class="lineNoCov">          0 :     virtual const SXP_char* getNodeNameURI(SXP_Node n)</span>
+<span class="lineNum">     138 </span>            :           { return domh -&gt; getNodeNameURI 
+<span class="lineNum">     139 </span><span class="lineNoCov">          0 :                   ? domh -&gt; getNodeNameURI(SXP_UNMASK(n)) </span>
+<a name="140"><span class="lineNum">     140 </span><span class="lineNoCov">          0 :                   :     domh -&gt; getNodeNameURIExt(SXP_UNMASK(n), udata); }</span></a>
+<span class="lineNum">     141 </span>            : 
+<span class="lineNum">     142 </span><span class="lineNoCov">          0 :     virtual const SXP_char* getNodeNameLocal(SXP_Node n)</span>
+<span class="lineNum">     143 </span>            :           { return domh -&gt; getNodeNameLocal 
+<span class="lineNum">     144 </span><span class="lineNoCov">          0 :                   ? domh -&gt; getNodeNameLocal(SXP_UNMASK(n)) </span>
+<a name="145"><span class="lineNum">     145 </span><span class="lineNoCov">          0 :                   :     domh -&gt; getNodeNameLocalExt(SXP_UNMASK(n), udata); }</span></a>
+<span class="lineNum">     146 </span>            : 
+<span class="lineNum">     147 </span><span class="lineNoCov">          0 :     virtual const SXP_char* getNodeValue(SXP_Node n)</span>
+<span class="lineNum">     148 </span>            :           { return domh -&gt; getNodeValue 
+<span class="lineNum">     149 </span><span class="lineNoCov">          0 :                   ? domh -&gt; getNodeValue(SXP_UNMASK(n)) </span>
+<a name="150"><span class="lineNum">     150 </span><span class="lineNoCov">          0 :                   :     domh -&gt; getNodeValueExt(SXP_UNMASK(n), udata); }</span></a>
+<span class="lineNum">     151 </span>            : 
+<span class="lineNum">     152 </span><span class="lineNoCov">          0 :     virtual SXP_Node     getNextSibling(SXP_Node n)</span>
+<span class="lineNum">     153 </span>            :           { return domh -&gt; getNextSibling  
+<span class="lineNum">     154 </span><span class="lineNoCov">          0 :                   ? SXP_MASK( domh -&gt; getNextSibling(SXP_UNMASK(n)) )</span>
+<a name="155"><span class="lineNum">     155 </span><span class="lineNoCov">          0 :                   : SXP_MASK( domh -&gt; getNextSiblingExt(SXP_UNMASK(n), udata) ); }</span></a>
+<span class="lineNum">     156 </span>            : 
+<span class="lineNum">     157 </span><span class="lineNoCov">          0 :     virtual SXP_Node     getPreviousSibling(SXP_Node n)</span>
+<span class="lineNum">     158 </span>            :           { return domh -&gt; getPreviousSibling 
+<span class="lineNum">     159 </span><span class="lineNoCov">          0 :                   ? SXP_MASK( domh -&gt; getPreviousSibling(SXP_UNMASK(n)) ) </span>
+<a name="160"><span class="lineNum">     160 </span><span class="lineNoCov">          0 :                   : SXP_MASK( domh -&gt; getPreviousSiblingExt(SXP_UNMASK(n), udata) ); }</span></a>
+<span class="lineNum">     161 </span>            : 
+<span class="lineNum">     162 </span><span class="lineNoCov">          0 :     virtual SXP_Node     getNextAttrNS(SXP_Node n)</span>
+<span class="lineNum">     163 </span>            :           { return domh -&gt; getNextAttrNS 
+<span class="lineNum">     164 </span><span class="lineNoCov">          0 :                   ? SXP_MASK( domh -&gt; getNextAttrNS(SXP_UNMASK(n)) )</span>
+<a name="165"><span class="lineNum">     165 </span><span class="lineNoCov">          0 :                   : SXP_MASK( domh -&gt; getNextAttrNSExt(SXP_UNMASK(n), udata) ); }</span></a>
+<span class="lineNum">     166 </span>            : 
+<span class="lineNum">     167 </span><span class="lineNoCov">          0 :     virtual SXP_Node     getPreviousAttrNS(SXP_Node n)</span>
+<span class="lineNum">     168 </span>            :           { return domh -&gt; getPreviousAttrNS 
+<span class="lineNum">     169 </span><span class="lineNoCov">          0 :                   ? SXP_MASK( domh -&gt; getPreviousAttrNS(SXP_UNMASK(n)) )</span>
+<a name="170"><span class="lineNum">     170 </span><span class="lineNoCov">          0 :                   : SXP_MASK( domh -&gt; getPreviousAttrNSExt(SXP_UNMASK(n), udata) ); }</span></a>
+<span class="lineNum">     171 </span>            : 
+<span class="lineNum">     172 </span><span class="lineNoCov">          0 :     virtual int          getChildCount(SXP_Node n)</span>
+<span class="lineNum">     173 </span>            :           { return domh -&gt; getChildCount 
+<span class="lineNum">     174 </span><span class="lineNoCov">          0 :                   ? domh -&gt; getChildCount(SXP_UNMASK(n)) </span>
+<a name="175"><span class="lineNum">     175 </span><span class="lineNoCov">          0 :                   : domh -&gt; getChildCountExt(SXP_UNMASK(n), udata); }</span></a>
+<span class="lineNum">     176 </span>            : 
+<span class="lineNum">     177 </span><span class="lineNoCov">          0 :     virtual int          getAttributeCount(SXP_Node n)</span>
+<span class="lineNum">     178 </span>            :           { return domh -&gt; getAttributeCount 
+<span class="lineNum">     179 </span><span class="lineNoCov">          0 :                   ? domh -&gt; getAttributeCount(SXP_UNMASK(n)) </span>
+<a name="180"><span class="lineNum">     180 </span><span class="lineNoCov">          0 :                   : domh -&gt; getAttributeCountExt(SXP_UNMASK(n), udata); }</span></a>
+<span class="lineNum">     181 </span>            : 
+<span class="lineNum">     182 </span><span class="lineNoCov">          0 :     virtual int          getNamespaceCount(SXP_Node n)</span>
+<span class="lineNum">     183 </span>            :           { return domh -&gt; getNamespaceCount 
+<span class="lineNum">     184 </span><span class="lineNoCov">          0 :                   ? domh -&gt; getNamespaceCount(SXP_UNMASK(n)) </span>
+<a name="185"><span class="lineNum">     185 </span><span class="lineNoCov">          0 :                   : domh -&gt; getNamespaceCountExt(SXP_UNMASK(n), udata); }</span></a>
+<span class="lineNum">     186 </span>            : 
+<span class="lineNum">     187 </span><span class="lineNoCov">          0 :     virtual SXP_Node     getChildNo(SXP_Node n, int ndx)</span>
+<span class="lineNum">     188 </span>            :           { return domh -&gt; getChildNo 
+<span class="lineNum">     189 </span><span class="lineNoCov">          0 :                   ? SXP_MASK( domh -&gt; getChildNo(SXP_UNMASK(n), ndx) )</span>
+<a name="190"><span class="lineNum">     190 </span><span class="lineNoCov">          0 :                   : SXP_MASK( domh -&gt; getChildNoExt(SXP_UNMASK(n), ndx, udata) ); }</span></a>
+<span class="lineNum">     191 </span>            : 
+<span class="lineNum">     192 </span><span class="lineNoCov">          0 :     virtual SXP_Node     getAttributeNo(SXP_Node n, int ndx)</span>
+<span class="lineNum">     193 </span>            :           { return domh -&gt; getAttributeNo 
+<span class="lineNum">     194 </span><span class="lineNoCov">          0 :                   ? SXP_MASK( domh -&gt; getAttributeNo(SXP_UNMASK(n), ndx) )</span>
+<a name="195"><span class="lineNum">     195 </span><span class="lineNoCov">          0 :                   :SXP_MASK(  domh -&gt; getAttributeNoExt(SXP_UNMASK(n), ndx, udata) ); }</span></a>
+<span class="lineNum">     196 </span>            : 
+<span class="lineNum">     197 </span><span class="lineNoCov">          0 :     virtual SXP_Node     getNamespaceNo(SXP_Node n, int ndx)</span>
+<span class="lineNum">     198 </span>            :           { return domh -&gt; getNamespaceNo 
+<span class="lineNum">     199 </span><span class="lineNoCov">          0 :                   ? SXP_MASK( domh -&gt; getNamespaceNo(SXP_UNMASK(n), ndx) )</span>
+<a name="200"><span class="lineNum">     200 </span><span class="lineNoCov">          0 :                   : SXP_MASK( domh -&gt; getNamespaceNoExt(SXP_UNMASK(n), ndx, udata) ); }</span></a>
+<span class="lineNum">     201 </span>            : 
+<span class="lineNum">     202 </span><span class="lineNoCov">          0 :     virtual SXP_Node     getParent(SXP_Node n)</span>
+<span class="lineNum">     203 </span>            :           { return domh -&gt; getParent 
+<span class="lineNum">     204 </span><span class="lineNoCov">          0 :                   ? SXP_MASK( domh -&gt; getParent(SXP_UNMASK(n)) )</span>
+<a name="205"><span class="lineNum">     205 </span><span class="lineNoCov">          0 :                   : SXP_MASK( domh -&gt; getParentExt(SXP_UNMASK(n), udata) ); }</span></a>
+<span class="lineNum">     206 </span>            : 
+<span class="lineNum">     207 </span><span class="lineNoCov">          0 :     virtual SXP_Document getOwnerDocument(SXP_Node n)</span>
+<span class="lineNum">     208 </span>            :           { return domh -&gt; getOwnerDocument
+<span class="lineNum">     209 </span><span class="lineNoCov">          0 :                   ? SXP_MASK( domh -&gt; getOwnerDocument(SXP_UNMASK(n)) )</span>
+<a name="210"><span class="lineNum">     210 </span><span class="lineNoCov">          0 :                   : SXP_MASK( domh -&gt; getOwnerDocumentExt(SXP_UNMASK(n), udata) ); }</span></a>
+<span class="lineNum">     211 </span>            : 
+<span class="lineNum">     212 </span><span class="lineNoCov">          0 :     virtual int          compareNodes(SXP_Node n1, SXP_Node n2)</span>
+<span class="lineNum">     213 </span>            :           { return domh -&gt; compareNodes 
+<span class="lineNum">     214 </span><span class="lineNoCov">          0 :                   ? domh -&gt; compareNodes(SXP_UNMASK(n1), SXP_UNMASK(n2)) </span>
+<span class="lineNum">     215 </span><span class="lineNoCov">          0 :                   : domh -&gt; compareNodesExt(SXP_UNMASK(n1), SXP_UNMASK(n2), udata); }</span>
+<a name="216"><span class="lineNum">     216 </span>            : </a>
+<span class="lineNum">     217 </span>            : 
+<span class="lineNum">     218 </span><span class="lineNoCov">          0 :     virtual SXP_Document retrieveDocument(const SXP_char* uri, const SXP_char* baseUri)</span>
+<span class="lineNum">     219 </span>            :           { return domh -&gt; retrieveDocument
+<span class="lineNum">     220 </span><span class="lineNoCov">          0 :                   ? SXP_MASK( domh -&gt; retrieveDocument(uri, udata) )</span>
+<a name="221"><span class="lineNum">     221 </span><span class="lineNoCov">          0 :                   : SXP_MASK( domh -&gt; retrieveDocumentExt(uri, baseUri, udata) ); }</span></a>
+<span class="lineNum">     222 </span>            : 
+<span class="lineNum">     223 </span><span class="lineNoCov">          0 :     virtual SXP_Node     getNodeWithID(SXP_Document doc, const SXP_char* id)</span>
+<span class="lineNum">     224 </span>            :           { return domh -&gt; getNodeWithID 
+<span class="lineNum">     225 </span><span class="lineNoCov">          0 :                   ? SXP_MASK( domh -&gt; getNodeWithID(SXP_UNMASK(doc), id) )</span>
+<a name="226"><span class="lineNum">     226 </span><span class="lineNoCov">          0 :                   : SXP_MASK( domh -&gt; getNodeWithIDExt(SXP_UNMASK(doc), id, udata) ); }</span></a>
+<span class="lineNum">     227 </span>            :     //extras
+<span class="lineNum">     228 </span><span class="lineNoCov">          0 :     virtual void freeName(NodeHandle n, char *buff)</span>
+<span class="lineNum">     229 </span><span class="lineNoCov">          0 :       { if (options &amp; SXPF_DISPOSE_NAMES) </span>
+<span class="lineNum">     230 </span>            :                 domh -&gt; freeBuffer 
+<span class="lineNum">     231 </span><span class="lineNoCov">          0 :                   ? domh -&gt; freeBuffer((SXP_char*)buff) </span>
+<a name="232"><span class="lineNum">     232 </span><span class="lineNoCov">          0 :                   : domh -&gt; freeBufferExt(SXP_UNMASK(n), (SXP_char*)buff, udata); }</span></a>
+<span class="lineNum">     233 </span>            : 
+<span class="lineNum">     234 </span><span class="lineNoCov">          0 :     virtual void freeValue(NodeHandle n, char *buff)</span>
+<span class="lineNum">     235 </span><span class="lineNoCov">          0 :       { if (options &amp; SXPF_DISPOSE_VALUES) </span>
+<span class="lineNum">     236 </span>            :                 domh -&gt; freeBuffer 
+<span class="lineNum">     237 </span><span class="lineNoCov">          0 :                   ? domh -&gt; freeBuffer((SXP_char*)buff) </span>
+<span class="lineNum">     238 </span><span class="lineNoCov">          0 :                   : domh -&gt; freeBufferExt(SXP_UNMASK(n), (SXP_char*)buff, udata); }</span>
+<span class="lineNum">     239 </span>            : 
+<span class="lineNum">     240 </span>            :     //functions for processor
+<span class="lineNum">     241 </span>            :     virtual eFlag startCopy(Sit S, NodeHandle n, OutputterObj &amp;outputter);
+<span class="lineNum">     242 </span>            :     virtual eFlag endCopy(Sit S, NodeHandle n, OutputterObj &amp;outputter);
+<a name="243"><span class="lineNum">     243 </span>            :     virtual eFlag copyNode(Sit S, NodeHandle n, OutputterObj &amp;outputter);</a>
+<a name="244"><span class="lineNum">     244 </span>            :     //others</a>
+<span class="lineNum">     245 </span><span class="lineNoCov">          0 :     void setSXPMask(int mask) { sxpMask = mask; }</span>
+<span class="lineNum">     246 </span><span class="lineNoCov">          0 :     void setOptions(unsigned long opt) { options = opt; }</span>
+<span class="lineNum">     247 </span>            : private:
+<span class="lineNum">     248 </span>            :     DOMHandler *domh;
+<span class="lineNum">     249 </span>            :     void* udata;
+<span class="lineNum">     250 </span>            :     int sxpMask;
+<span class="lineNum">     251 </span>            :     unsigned long options;
+<span class="lineNum">     252 </span>            :     void getNodeEName(NodeHandle n, EQName &amp;ename);
+<span class="lineNum">     253 </span>            : };
+<span class="lineNum">     254 </span>            : 
+<span class="lineNum">     255 </span>            : #define SXP_REDIRECT_NH(name,nh) ((NHC(nh) &amp; 1) ? NZ(external)-&gt;get##name(nh) : standard-&gt;get##name(nh))
+<span class="lineNum">     256 </span>            : #define SXP_REDIRECT_NH1(name,nh,arg1) ((NHC(nh) &amp; 1) ? NZ(external)-&gt;get##name(nh,arg1) : standard-&gt;get##name(nh,arg1))
+<span class="lineNum">     257 </span>            : 
+<span class="lineNum">     258 </span>            : class DOMProviderUniversal : public DOMProvider
+<span class="lineNum">     259 </span>            : {
+<span class="lineNum">     260 </span>            :  public:
+<span class="lineNum">     261 </span>            :   DOMProviderUniversal();
+<span class="lineNum">     262 </span>            :   virtual ~DOMProviderUniversal();
+<span class="lineNum">     263 </span>            :   void setExtProvider(DOMHandler *domh, void* data);
+<a name="264"><span class="lineNum">     264 </span><span class="lineNoCov">          0 :   void setOptions(unsigned long options_)</span></a>
+<span class="lineNum">     265 </span><span class="lineNoCov">          0 :     { options = options_; if (external) external-&gt;setOptions(options); }</span>
+<a name="266"><span class="lineNum">     266 </span><span class="lineNoCov">          0 :   unsigned long getOptions() { return options; }</span></a>
+<span class="lineNum">     267 </span>            :   //virtuals
+<span class="lineNum">     268 </span><span class="lineCov">       5610 :   virtual SXP_NodeType getNodeType(SXP_Node n)</span>
+<a name="269"><span class="lineNum">     269 </span><span class="lineCov">       5610 :     { return SXP_REDIRECT_NH(NodeType, n); }</span></a>
+<span class="lineNum">     270 </span>            : 
+<span class="lineNum">     271 </span><span class="lineNoCov">          0 :   virtual const SXP_char* getNodeName(SXP_Node n)</span>
+<a name="272"><span class="lineNum">     272 </span><span class="lineNoCov">          0 :     { return SXP_REDIRECT_NH(NodeName, n); }</span></a>
+<span class="lineNum">     273 </span>            : 
+<span class="lineNum">     274 </span><span class="lineNoCov">          0 :   virtual const SXP_char* getNodeNameURI(SXP_Node n)</span>
+<a name="275"><span class="lineNum">     275 </span><span class="lineNoCov">          0 :     { return SXP_REDIRECT_NH(NodeNameURI, n); }</span></a>
+<span class="lineNum">     276 </span>            : 
+<span class="lineNum">     277 </span><span class="lineNoCov">          0 :   virtual const SXP_char* getNodeNameLocal(SXP_Node n)</span>
+<a name="278"><span class="lineNum">     278 </span><span class="lineNoCov">          0 :     { return SXP_REDIRECT_NH(NodeNameLocal, n); }</span></a>
+<span class="lineNum">     279 </span>            : 
+<span class="lineNum">     280 </span><span class="lineCov">        990 :   virtual const SXP_char* getNodeValue(SXP_Node n)</span>
+<a name="281"><span class="lineNum">     281 </span><span class="lineCov">        990 :     { return SXP_REDIRECT_NH(NodeValue, n); }</span></a>
+<span class="lineNum">     282 </span>            : 
+<span class="lineNum">     283 </span><span class="lineCov">       1584 :   virtual SXP_Node     getNextSibling(SXP_Node n)</span>
+<a name="284"><span class="lineNum">     284 </span><span class="lineCov">       1584 :     { return SXP_REDIRECT_NH(NextSibling, n); }</span></a>
+<span class="lineNum">     285 </span>            : 
+<span class="lineNum">     286 </span><span class="lineNoCov">          0 :   virtual SXP_Node     getPreviousSibling(SXP_Node n)</span>
+<a name="287"><span class="lineNum">     287 </span><span class="lineNoCov">          0 :     { return SXP_REDIRECT_NH(PreviousSibling, n); }</span></a>
+<span class="lineNum">     288 </span>            : 
+<span class="lineNum">     289 </span><span class="lineNoCov">          0 :   virtual SXP_Node     getNextAttrNS(SXP_Node n)</span>
+<a name="290"><span class="lineNum">     290 </span><span class="lineNoCov">          0 :     { return SXP_REDIRECT_NH(NextAttrNS, n); }</span></a>
+<span class="lineNum">     291 </span>            : 
+<span class="lineNum">     292 </span><span class="lineNoCov">          0 :   virtual SXP_Node     getPreviousAttrNS(SXP_Node n)</span>
+<a name="293"><span class="lineNum">     293 </span><span class="lineNoCov">          0 :     { return SXP_REDIRECT_NH(PreviousAttrNS, n); }</span></a>
+<span class="lineNum">     294 </span>            : 
+<span class="lineNum">     295 </span><span class="lineNoCov">          0 :   virtual int          getChildCount(SXP_Node n)</span>
+<a name="296"><span class="lineNum">     296 </span><span class="lineNoCov">          0 :     { return SXP_REDIRECT_NH(ChildCount, n); }</span></a>
+<span class="lineNum">     297 </span>            : 
+<span class="lineNum">     298 </span><span class="lineNoCov">          0 :   virtual int          getAttributeCount(SXP_Node n)</span>
+<a name="299"><span class="lineNum">     299 </span><span class="lineNoCov">          0 :     { return SXP_REDIRECT_NH(AttributeCount, n); }</span></a>
+<span class="lineNum">     300 </span>            : 
+<span class="lineNum">     301 </span><span class="lineNoCov">          0 :   virtual int          getNamespaceCount(SXP_Node n)</span>
+<a name="302"><span class="lineNum">     302 </span><span class="lineNoCov">          0 :     { return SXP_REDIRECT_NH(NamespaceCount, n); }</span></a>
+<span class="lineNum">     303 </span>            : 
+<span class="lineNum">     304 </span><span class="lineCov">        594 :   virtual SXP_Node     getChildNo(SXP_Node n, int ndx)</span>
+<a name="305"><span class="lineNum">     305 </span><span class="lineCov">        594 :     { return SXP_REDIRECT_NH1(ChildNo, n, ndx); }</span></a>
+<span class="lineNum">     306 </span>            : 
+<span class="lineNum">     307 </span><span class="lineNoCov">          0 :   virtual SXP_Node     getAttributeNo(SXP_Node n, int ndx)</span>
+<a name="308"><span class="lineNum">     308 </span><span class="lineNoCov">          0 :     { return SXP_REDIRECT_NH1(AttributeNo, n, ndx); }</span></a>
+<span class="lineNum">     309 </span>            : 
+<span class="lineNum">     310 </span><span class="lineNoCov">          0 :   virtual SXP_Node     getNamespaceNo(SXP_Node n, int ndx)</span>
+<a name="311"><span class="lineNum">     311 </span><span class="lineNoCov">          0 :     { return SXP_REDIRECT_NH1(NamespaceNo, n, ndx); }</span></a>
+<span class="lineNum">     312 </span>            : 
+<span class="lineNum">     313 </span><span class="lineNoCov">          0 :   virtual SXP_Node     getParent(SXP_Node n)</span>
+<a name="314"><span class="lineNum">     314 </span><span class="lineNoCov">          0 :     { return SXP_REDIRECT_NH(Parent, n); }</span></a>
+<span class="lineNum">     315 </span>            : 
+<span class="lineNum">     316 </span><span class="lineNoCov">          0 :   virtual SXP_Document getOwnerDocument(SXP_Node n)</span>
+<span class="lineNum">     317 </span><span class="lineNoCov">          0 :     { return SXP_REDIRECT_NH(OwnerDocument, n); }</span>
+<span class="lineNum">     318 </span>            : 
+<span class="lineNum">     319 </span>            :   virtual int compareNodes(SXP_Node n1, SXP_Node n2);
+<span class="lineNum">     320 </span>            : 
+<a name="321"><span class="lineNum">     321 </span>            :   virtual SXP_Document retrieveDocument(const SXP_char* uri, const SXP_char* baseUri);</a>
+<span class="lineNum">     322 </span>            : 
+<span class="lineNum">     323 </span><span class="lineNoCov">          0 :   virtual SXP_Node     getNodeWithID(SXP_Document doc, </span>
+<span class="lineNum">     324 </span>            :                                      const SXP_char* id)
+<span class="lineNum">     325 </span><span class="lineNoCov">          0 :     { return SXP_REDIRECT_NH1(NodeWithID, doc, id); }</span>
+<span class="lineNum">     326 </span>            :   //extras
+<span class="lineNum">     327 </span>            :   virtual void freeName(NodeHandle n, char *buff);
+<span class="lineNum">     328 </span>            :   virtual void freeValue(NodeHandle n, char *buff);
+<span class="lineNum">     329 </span>            :   //function for processor
+<span class="lineNum">     330 </span>            :   virtual eFlag startCopy(Sit S, NodeHandle n, OutputterObj &amp;outputter);
+<span class="lineNum">     331 </span>            :   virtual eFlag endCopy(Sit S, NodeHandle n, OutputterObj &amp;outputter);
+<span class="lineNum">     332 </span>            :   virtual eFlag copyNode(Sit S, NodeHandle n, OutputterObj &amp;outputter);
+<span class="lineNum">     333 </span>            :   //others
+<span class="lineNum">     334 </span>            :   void setMaskBit(int mask);
+<span class="lineNum">     335 </span>            :   int getMaskBit();
+<span class="lineNum">     336 </span>            :  private:
+<span class="lineNum">     337 </span>            :   unsigned long options;
+<span class="lineNum">     338 </span>            :   int maskBit;
+<span class="lineNum">     339 </span>            :   DOMProviderExternal *external;
+<span class="lineNum">     340 </span>            :   DOMProviderStandard *standard;
+<span class="lineNum">     341 </span>            : };
+<span class="lineNum">     342 </span>            : 
+<span class="lineNum">     343 </span>            : class Context;
+<span class="lineNum">     344 </span>            : class Number;
+<span class="lineNum">     345 </span>            : class Str;
+<span class="lineNum">     346 </span>            : class Element;
+<span class="lineNum">     347 </span>            : class Tree;
+<span class="lineNum">     348 </span>            : class Processor;
+<span class="lineNum">     349 </span>            : 
+<span class="lineNum">     350 </span>            : class QueryContextClass
+<span class="lineNum">     351 </span>            : {
+<span class="lineNum">     352 </span>            : public:
+<span class="lineNum">     353 </span>            :     QueryContextClass(Sit S);
+<span class="lineNum">     354 </span>            :     ~QueryContextClass();
+<span class="lineNum">     355 </span>            :     eFlag query(const SXP_char* queryText,
+<span class="lineNum">     356 </span>            :                 SXP_Node n,
+<span class="lineNum">     357 </span>            :                 int contextPosition,
+<span class="lineNum">     358 </span>            :                 int contextSize);
+<span class="lineNum">     359 </span>            :     eFlag addVariableExpr(const SXP_char* name, Expression *value);         
+<span class="lineNum">     360 </span>            :     eFlag addVariableBinding(const SXP_char* name, QueryContextClass &amp;source);
+<span class="lineNum">     361 </span>            :     eFlag addNamespaceDeclaration(const SXP_char* prefix, 
+<span class="lineNum">     362 </span>            :                                   const SXP_char* uri);
+<span class="lineNum">     363 </span>            :     SXP_ExpressionType getType();
+<span class="lineNum">     364 </span>            :     const Number* getNumber();
+<span class="lineNum">     365 </span>            :     const Str* getString();
+<span class="lineNum">     366 </span>            :     Bool getBoolean();
+<a name="367"><span class="lineNum">     367 </span>            :     const Context* getNodeset();        </a>
+<a name="368"><span class="lineNum">     368 </span>            :     Expression* getNewExpr();</a>
+<span class="lineNum">     369 </span><span class="lineNoCov">          0 :     int getError() {return NZ(theSituation) -&gt; getError();} </span>
+<span class="lineNum">     370 </span><span class="lineNoCov">          0 :     Situation &amp;getSituation() { return *theSituation; };</span>
+<span class="lineNum">     371 </span>            : private:
+<span class="lineNum">     372 </span>            :     void cleanupAfterQuery();
+<span class="lineNum">     373 </span>            :     Tree *baseTree;
+<span class="lineNum">     374 </span>            :     Expression *queryExpression, *resultExpression;
+<span class="lineNum">     375 </span>            :     Str* stringValue;
+<span class="lineNum">     376 </span>            :     Number *numberValue;
+<span class="lineNum">     377 </span>            :     Situation *theSituation;
+<span class="lineNum">     378 </span>            :     Expression* getExpression_() const;
+<span class="lineNum">     379 </span>            :     Processor *proc;
+<span class="lineNum">     380 </span>            :     Bool mustKillProc;
+<span class="lineNum">     381 </span>            : };
+<span class="lineNum">     382 </span>            : 
+<span class="lineNum">     383 </span>            : #endif // DomProviderHIncl
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

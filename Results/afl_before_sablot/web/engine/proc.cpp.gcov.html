@@ -1,0 +1,1561 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - engine/proc.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">engine</a> - proc.cpp<span style="font-size: 80%;"> (source / <a href="proc.cpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">225</td>
+            <td class="headerCovTableEntry">546</td>
+            <td class="headerCovTableEntryLo">41.2 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-10-13</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">29</td>
+            <td class="headerCovTableEntry">80</td>
+            <td class="headerCovTableEntryLo">36.2 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* </a>
+<span class="lineNum">       2 </span>            :  * The contents of this file are subject to the Mozilla Public
+<span class="lineNum">       3 </span>            :  * License Version 1.1 (the &quot;License&quot;); you may not use this file
+<span class="lineNum">       4 </span>            :  * except in compliance with the License. You may obtain a copy of
+<span class="lineNum">       5 </span>            :  * the License at http://www.mozilla.org/MPL/
+<span class="lineNum">       6 </span>            :  * 
+<span class="lineNum">       7 </span>            :  * Software distributed under the License is distributed on an &quot;AS
+<span class="lineNum">       8 </span>            :  * IS&quot; basis, WITHOUT WARRANTY OF ANY KIND, either express or
+<span class="lineNum">       9 </span>            :  * implied. See the License for the specific language governing
+<span class="lineNum">      10 </span>            :  * rights and limitations under the License.
+<span class="lineNum">      11 </span>            :  * 
+<span class="lineNum">      12 </span>            :  * The Original Code is the Sablotron XSLT Processor.
+<span class="lineNum">      13 </span>            :  * 
+<span class="lineNum">      14 </span>            :  * The Initial Developer of the Original Code is Ginger Alliance Ltd.
+<span class="lineNum">      15 </span>            :  * Portions created by Ginger Alliance are Copyright (C) 2000-2002
+<span class="lineNum">      16 </span>            :  * Ginger Alliance Ltd. All Rights Reserved.
+<span class="lineNum">      17 </span>            :  * 
+<span class="lineNum">      18 </span>            :  * Contributor(s):
+<span class="lineNum">      19 </span>            :  * 
+<span class="lineNum">      20 </span>            :  * Alternatively, the contents of this file may be used under the
+<span class="lineNum">      21 </span>            :  * terms of the GNU General Public License Version 2 or later (the
+<span class="lineNum">      22 </span>            :  * &quot;GPL&quot;), in which case the provisions of the GPL are applicable 
+<span class="lineNum">      23 </span>            :  * instead of those above.  If you wish to allow use of your 
+<span class="lineNum">      24 </span>            :  * version of this file only under the terms of the GPL and not to
+<span class="lineNum">      25 </span>            :  * allow others to use your version of this file under the MPL,
+<span class="lineNum">      26 </span>            :  * indicate your decision by deleting the provisions above and
+<span class="lineNum">      27 </span>            :  * replace them with the notice and other provisions required by
+<span class="lineNum">      28 </span>            :  * the GPL.  If you do not delete the provisions above, a recipient
+<span class="lineNum">      29 </span>            :  * may use your version of this file under either the MPL or the
+<span class="lineNum">      30 </span>            :  * GPL.
+<span class="lineNum">      31 </span>            :  */
+<span class="lineNum">      32 </span>            : 
+<span class="lineNum">      33 </span>            : #include &quot;base.h&quot;
+<span class="lineNum">      34 </span>            : #include &quot;proc.h&quot;
+<span class="lineNum">      35 </span>            : #include &quot;expr.h&quot;
+<span class="lineNum">      36 </span>            : #include &quot;tree.h&quot;
+<span class="lineNum">      37 </span>            : #include &quot;context.h&quot;
+<span class="lineNum">      38 </span>            : #include &quot;vars.h&quot;
+<span class="lineNum">      39 </span>            : // #include &quot;xmlparse.h&quot; - moved to parser.h
+<span class="lineNum">      40 </span>            : #include &quot;parser.h&quot;
+<span class="lineNum">      41 </span>            : #include &quot;guard.h&quot;
+<span class="lineNum">      42 </span>            : #include &quot;key.h&quot;
+<span class="lineNum">      43 </span>            : #include &quot;domprovider.h&quot;
+<span class="lineNum">      44 </span>            : 
+<span class="lineNum">      45 </span>            : #ifdef HAVE_CONFIG_H
+<span class="lineNum">      46 </span>            : #include &lt;config.h&gt;
+<span class="lineNum">      47 </span>            : #endif
+<span class="lineNum">      48 </span>            : 
+<span class="lineNum">      49 </span>            : #ifdef SABLOT_DEBUGGER
+<span class="lineNum">      50 </span>            : #include &quot;debugger.h&quot;
+<span class="lineNum">      51 </span>            : #endif
+<span class="lineNum">      52 </span>            : 
+<span class="lineNum">      53 </span>            : // GP: clean
+<span class="lineNum">      54 </span>            : 
+<span class="lineNum">      55 </span>            : /*****************************************************************
+<span class="lineNum">      56 </span>            : R u l e I t e m   methods
+<a name="57"><span class="lineNum">      57 </span>            : *****************************************************************/</a>
+<span class="lineNum">      58 </span>            : 
+<span class="lineNum">      59 </span><span class="lineCov">        523 : RuleItem::RuleItem(XSLElement *arule,double aprio, QName &amp;_name,</span>
+<span class="lineNum">      60 </span>            :                    QName *_mode)
+<span class="lineNum">      61 </span>            : :
+<span class="lineNum">      62 </span><span class="lineCov">        523 : rule(arule), priority(aprio), name(_name), mode(_mode)</span>
+<span class="lineNum">      63 </span>            : {
+<span class="lineNum">      64 </span><span class="lineCov">        523 :   match = rule -&gt; atts.find(XSLA_MATCH);</span>
+<span class="lineNum">      65 </span><span class="lineCov">        523 : };</span>
+<span class="lineNum">      66 </span>            : 
+<span class="lineNum">      67 </span>            : 
+<span class="lineNum">      68 </span>            : //
+<span class="lineNum">      69 </span>            : //  ~RuleItem
+<a name="70"><span class="lineNum">      70 </span>            : //  has to dispose of the mode</a>
+<span class="lineNum">      71 </span>            : //
+<span class="lineNum">      72 </span><span class="lineNoCov">          0 : RuleItem::~RuleItem()</span>
+<span class="lineNum">      73 </span>            : {
+<span class="lineNum">      74 </span><span class="lineCov">        523 :     cdelete(mode);</span>
+<span class="lineNum">      75 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">      76 </span>            : 
+<span class="lineNum">      77 </span>            : 
+<span class="lineNum">      78 </span>            : /*****************************************************************
+<span class="lineNum">      79 </span>            : R u l e S L i s t   methods
+<span class="lineNum">      80 </span>            : *****************************************************************/
+<span class="lineNum">      81 </span>            : 
+<span class="lineNum">      82 </span><span class="lineCov">       1374 : RuleSList::RuleSList()</span>
+<span class="lineNum">      83 </span>            : :
+<span class="lineNum">      84 </span><span class="lineCov">       2748 : SList&lt;RuleItem*&gt;(LIST_SIZE_LARGE)</span>
+<a name="85"><span class="lineNum">      85 </span><span class="lineCov">       1374 : {};</span></a>
+<span class="lineNum">      86 </span>            : 
+<span class="lineNum">      87 </span><span class="lineCov">       2748 : RuleSList::~RuleSList()</span>
+<span class="lineNum">      88 </span>            : {
+<span class="lineNum">      89 </span><span class="lineCov">       1374 :     freeall(FALSE);</span>
+<a name="90"><span class="lineNum">      90 </span><span class="lineCov">       1374 : }</span></a>
+<span class="lineNum">      91 </span>            : 
+<span class="lineNum">      92 </span><span class="lineCov">        346 : int RuleSList::compare(int first, int second, void *data)</span>
+<span class="lineNum">      93 </span>            : {
+<span class="lineNum">      94 </span><span class="lineCov">        346 :     return fcomp((*this)[first] -&gt; priority, (*this)[second] -&gt; priority);</span>
+<span class="lineNum">      95 </span>            : };
+<a name="96"><span class="lineNum">      96 </span>            : </a>
+<span class="lineNum">      97 </span>            : 
+<span class="lineNum">      98 </span><span class="lineCov">        524 : XSLElement* RuleSList::findByName(const Tree&amp; t, const QName &amp;what) const</span>
+<span class="lineNum">      99 </span>            : {
+<span class="lineNum">     100 </span><span class="lineCov">        873 :     int theNumber = number();</span>
+<span class="lineNum">     101 </span><span class="lineCov">        871 :     for (int i=0; i &lt; theNumber; i++)</span>
+<span class="lineNum">     102 </span><span class="lineCov">        696 :         if (t.cmpQNames((*this)[i] -&gt; name, what))</span>
+<span class="lineNum">     103 </span><span class="lineCov">          2 :             return (*this)[i] -&gt; rule;</span>
+<span class="lineNum">     104 </span>            :     return NULL;
+<span class="lineNum">     105 </span>            : }
+<span class="lineNum">     106 </span>            : 
+<span class="lineNum">     107 </span>            : /*****************************************************************
+<span class="lineNum">     108 </span>            : 
+<span class="lineNum">     109 </span>            :   DataLineItem
+<span class="lineNum">     110 </span>            : 
+<a name="111"><span class="lineNum">     111 </span>            : *****************************************************************/</a>
+<a name="112"><span class="lineNum">     112 </span>            : </a>
+<span class="lineNum">     113 </span><span class="lineNoCov">          0 : DataLineItem::DataLineItem(Sit S_)</span>
+<span class="lineNum">     114 </span><span class="lineCov">        327 : : situation(S_)</span>
+<span class="lineNum">     115 </span>            : {
+<a name="116"><span class="lineNum">     116 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     117 </span>            : 
+<span class="lineNum">     118 </span><span class="lineCov">        327 : DataLineItem::~DataLineItem()</span>
+<span class="lineNum">     119 </span>            : {
+<span class="lineNum">     120 </span>            :     // the following close should be checked for error!!
+<span class="lineNum">     121 </span><span class="lineCov">        327 :     if (_dataline &amp;&amp; _dataline -&gt; mode != DLMODE_CLOSED)</span>
+<span class="lineNum">     122 </span><span class="lineCov">        109 :         _dataline -&gt; close(situation);</span>
+<span class="lineNum">     123 </span><span class="lineCov">        327 :     cdelete(_dataline);</span>
+<span class="lineNum">     124 </span><span class="lineCov">        327 :     if (!_preparsedTree)</span>
+<span class="lineNum">     125 </span><span class="lineCov">        327 :         cdelete(_tree);</span>
+<span class="lineNum">     126 </span><span class="lineCov">        327 : }</span>
+<span class="lineNum">     127 </span>            : 
+<span class="lineNum">     128 </span>            : /*****************************************************************
+<span class="lineNum">     129 </span>            : 
+<span class="lineNum">     130 </span>            :   DataLinesList
+<span class="lineNum">     131 </span>            : 
+<a name="132"><span class="lineNum">     132 </span>            : *****************************************************************/</a>
+<span class="lineNum">     133 </span>            : 
+<span class="lineNum">     134 </span><span class="lineCov">        796 : int DataLinesList::findNum(Str &amp;absoluteURI, Bool _isXSL,</span>
+<span class="lineNum">     135 </span>            :     DLAccessMode _mode)
+<span class="lineNum">     136 </span>            : {
+<span class="lineNum">     137 </span><span class="lineCov">       1123 :     int theNumber = number();</span>
+<span class="lineNum">     138 </span><span class="lineCov">       1123 :     for (int i = 0; i &lt; theNumber; i++)</span>
+<span class="lineNum">     139 </span>            :     {
+<span class="lineNum">     140 </span><span class="lineCov">        654 :         DataLineItem* item = (*this)[i];</span>
+<span class="lineNum">     141 </span><span class="lineCov">        654 :         if ((item-&gt;_dataline -&gt; fullUri == absoluteURI) &amp;&amp;</span>
+<span class="lineNum">     142 </span><span class="lineCov">        327 :             (item-&gt;_isXSL == _isXSL) &amp;&amp; </span>
+<span class="lineNum">     143 </span><span class="lineNoCov">          0 :             (item-&gt; _dataline -&gt; mode == _mode || </span>
+<span class="lineNum">     144 </span>            :                  item-&gt; _dataline -&gt; mode == DLMODE_CLOSED))
+<span class="lineNum">     145 </span>            :         return i;
+<span class="lineNum">     146 </span>            :     }
+<span class="lineNum">     147 </span>            :     return -1;
+<a name="148"><span class="lineNum">     148 </span>            : }</a>
+<span class="lineNum">     149 </span>            : 
+<span class="lineNum">     150 </span><span class="lineCov">        796 : Tree* DataLinesList::getTree(Str &amp;absoluteURI, Bool _isXSL, </span>
+<span class="lineNum">     151 </span>            :     DLAccessMode _mode)
+<span class="lineNum">     152 </span>            : {
+<span class="lineNum">     153 </span>            :     int n;
+<span class="lineNum">     154 </span><span class="lineCov">        796 :     if ((n = findNum(absoluteURI, _isXSL, _mode)) != -1)</span>
+<span class="lineNum">     155 </span><span class="lineNoCov">          0 :         return (*this)[n] -&gt; _tree;</span>
+<span class="lineNum">     156 </span>            :     else
+<span class="lineNum">     157 </span>            :         return NULL;
+<span class="lineNum">     158 </span>            : }
+<span class="lineNum">     159 </span>            : 
+<span class="lineNum">     160 </span><span class="lineNoCov">          0 : eFlag DataLinesList::addLine(Sit S, DataLine *d, Tree *t, Bool isXSL,</span>
+<span class="lineNum">     161 </span>            :     Bool preparsedTree /* = FALSE */)
+<span class="lineNum">     162 </span>            : {
+<span class="lineNum">     163 </span><span class="lineCov">        654 :     DataLineItem *item = new DataLineItem(S);</span>
+<span class="lineNum">     164 </span><span class="lineCov">        327 :     item -&gt; _dataline = d;</span>
+<span class="lineNum">     165 </span><span class="lineCov">        327 :     item -&gt; _tree = t;</span>
+<span class="lineNum">     166 </span><span class="lineCov">        327 :     item -&gt; _isXSL = isXSL;</span>
+<span class="lineNum">     167 </span><span class="lineCov">        327 :     item -&gt; _preparsedTree = preparsedTree;</span>
+<span class="lineNum">     168 </span><span class="lineCov">        327 :     append(item);</span>
+<span class="lineNum">     169 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     170 </span>            : }
+<span class="lineNum">     171 </span>            : 
+<span class="lineNum">     172 </span>            : /*****************************************************************
+<span class="lineNum">     173 </span>            : *                                                                *
+<span class="lineNum">     174 </span>            : *   P r o c e s s o r   methods                                  *
+<span class="lineNum">     175 </span>            : *                                                                *
+<span class="lineNum">     176 </span>            : *****************************************************************/
+<span class="lineNum">     177 </span>            : 
+<span class="lineNum">     178 </span>            : // disable the MSVC warning &quot;'this' used in the initializer list&quot;
+<span class="lineNum">     179 </span>            : 
+<span class="lineNum">     180 </span>            : #ifdef WIN32
+<span class="lineNum">     181 </span>            : #pragma warning( disable : 4355 )
+<span class="lineNum">     182 </span>            : #endif
+<span class="lineNum">     183 </span>            : 
+<span class="lineNum">     184 </span><span class="lineCov">        578 : Processor::Processor() </span>
+<span class="lineNum">     185 </span>            : : 
+<span class="lineNum">     186 </span><span class="lineCov">       5202 :   theArena(PROC_ARENA_SIZE)</span>
+<span class="lineNum">     187 </span>            : #ifdef ENABLE_JS
+<span class="lineNum">     188 </span>            :   , jscontexts(this)
+<span class="lineNum">     189 </span>            : #endif
+<span class="lineNum">     190 </span>            : 
+<span class="lineNum">     191 </span>            : #ifdef WIN32
+<span class="lineNum">     192 </span>            : #pragma warning( default : 4355 )
+<span class="lineNum">     193 </span>            : #endif
+<span class="lineNum">     194 </span>            : 
+<span class="lineNum">     195 </span>            : {
+<span class="lineNum">     196 </span>            : //    pushNewHandler();
+<span class="lineNum">     197 </span><span class="lineCov">        578 :     theSchemeHandler = NULL;</span>
+<span class="lineNum">     198 </span><span class="lineCov">        578 :     theMessageHandler = NULL;</span>
+<span class="lineNum">     199 </span><span class="lineCov">        578 :     theSAXHandler = NULL;</span>
+<span class="lineNum">     200 </span><span class="lineCov">        578 :     theMiscHandler = NULL;</span>
+<span class="lineNum">     201 </span><span class="lineCov">        578 :     theEncHandler = NULL;</span>
+<span class="lineNum">     202 </span>            :     theSchemeUserData = theMessageUserData = 
+<span class="lineNum">     203 </span><span class="lineCov">        578 :         theSAXUserData = theMiscUserData = theEncUserData = NULL;    </span>
+<span class="lineNum">     204 </span><span class="lineCov">        578 :     instanceData = NULL;</span>
+<span class="lineNum">     205 </span><span class="lineCov">        578 :     instanceSituation = NULL;</span>
+<span class="lineNum">     206 </span><span class="lineCov">        578 :     addedFlag = FALSE;</span>
+<span class="lineNum">     207 </span><span class="lineCov">        578 :     vars = NULL;</span>
+<span class="lineNum">     208 </span><span class="lineCov">        578 :     input = styleSheet = NULL;</span>
+<span class="lineNum">     209 </span><span class="lineCov">        578 :     keys = NULL;</span>
+<span class="lineNum">     210 </span><span class="lineCov">        578 :     nsUnique = 1;</span>
+<span class="lineNum">     211 </span><span class="lineCov">        578 :     hasMasterSituation = FALSE;</span>
+<span class="lineNum">     212 </span><span class="lineCov">        578 :     runsOnExternal = FALSE;</span>
+<a name="213"><span class="lineNum">     213 </span><span class="lineCov">        578 : };</span></a>
+<span class="lineNum">     214 </span>            : 
+<span class="lineNum">     215 </span><span class="lineCov">        578 : void Processor::prepareForRun()</span>
+<span class="lineNum">     216 </span>            : {
+<span class="lineNum">     217 </span>            :     // do this in open():
+<span class="lineNum">     218 </span>            :     // vars = new VarsList();
+<span class="lineNum">     219 </span><span class="lineCov">        578 :     input = styleSheet = NULL;</span>
+<span class="lineNum">     220 </span><span class="lineCov">        578 :     decimals().initialize();</span>
+<a name="221"><span class="lineNum">     221 </span><span class="lineCov">        578 : }</span></a>
+<span class="lineNum">     222 </span>            : 
+<span class="lineNum">     223 </span><span class="lineCov">        578 : void Processor::freeNonArgDatalines()</span>
+<span class="lineNum">     224 </span>            : {
+<span class="lineNum">     225 </span><span class="lineCov">        578 :     int i = 0;</span>
+<span class="lineNum">     226 </span><span class="lineCov">       2388 :     while(i &lt; datalines.number())</span>
+<span class="lineNum">     227 </span>            :     {
+<span class="lineNum">     228 </span><span class="lineCov">       1232 :         if (datalines[i] -&gt; _dataline -&gt; scheme != URI_ARG)</span>
+<span class="lineNum">     229 </span>            :             {
+<span class="lineNum">     230 </span><span class="lineCov">        327 :             datalines.freerm(i, FALSE);</span>
+<span class="lineNum">     231 </span>            :             }
+<span class="lineNum">     232 </span>            :         else
+<span class="lineNum">     233 </span>            :         {
+<span class="lineNum">     234 </span>            :             // removing the tree here because the arena gets disposed
+<span class="lineNum">     235 </span>            :             // in cleanupAfterRun(). So only the arg buffers remain.
+<span class="lineNum">     236 </span>            :                 // only remove the tree if not preparsed
+<span class="lineNum">     237 </span><span class="lineNoCov">          0 :                     if (!datalines[i] -&gt; _preparsedTree)</span>
+<span class="lineNum">     238 </span><span class="lineNoCov">          0 :                 cdelete(datalines[i] -&gt; _tree);</span>
+<span class="lineNum">     239 </span>            :                 // don't move the following line out of the else!
+<span class="lineNum">     240 </span><span class="lineNoCov">          0 :             i++;                </span>
+<span class="lineNum">     241 </span>            :         };
+<span class="lineNum">     242 </span>            :     }
+<span class="lineNum">     243 </span><span class="lineCov">        578 :     addedFlag = FALSE;</span>
+<a name="244"><span class="lineNum">     244 </span><span class="lineCov">        578 : }</span></a>
+<span class="lineNum">     245 </span>            : 
+<span class="lineNum">     246 </span><span class="lineCov">        578 : void Processor::cleanupAfterRun(Situation *Sp)</span>
+<span class="lineNum">     247 </span>            : {
+<span class="lineNum">     248 </span>            : /*
+<span class="lineNum">     249 </span>            : These deletes are now subsumed in &quot;datalines.freeall()&quot;:
+<span class="lineNum">     250 </span>            :     cdelete(input);
+<span class="lineNum">     251 </span>            :     cdelete(result);
+<span class="lineNum">     252 </span>            :     cdelete(styleSheet);
+<span class="lineNum">     253 </span>            : */
+<span class="lineNum">     254 </span>            : 
+<span class="lineNum">     255 </span><span class="lineCov">        578 :   styleSheet = input = NULL;</span>
+<span class="lineNum">     256 </span><span class="lineCov">        578 :     cdelete(vars);</span>
+<span class="lineNum">     257 </span><span class="lineCov">        578 :     cdelete(keys);</span>
+<span class="lineNum">     258 </span><span class="lineCov">        578 :     decimals().freeall(FALSE);</span>
+<span class="lineNum">     259 </span>            : #ifdef ENABLE_JS
+<span class="lineNum">     260 </span>            :     jscontexts.freeall(FALSE);
+<span class="lineNum">     261 </span>            : #endif
+<span class="lineNum">     262 </span>            : 
+<span class="lineNum">     263 </span><span class="lineCov">        578 :     outputDocuments.freeall(FALSE);</span>
+<span class="lineNum">     264 </span><span class="lineCov">        578 :     outputDocumentURIs.freeall(FALSE);</span>
+<span class="lineNum">     265 </span>            : 
+<span class="lineNum">     266 </span><span class="lineCov">        578 :     freeNonArgDatalines();</span>
+<span class="lineNum">     267 </span><span class="lineCov">        578 :     if (Sp &amp;&amp; !Sp -&gt; isError())</span>
+<span class="lineNum">     268 </span>            :       {
+<span class="lineNum">     269 </span><span class="lineCov">        109 :         sabassert(modes.isEmpty());</span>
+<span class="lineNum">     270 </span><span class="lineCov">        109 :         sabassert(outputters_.isEmpty());</span>
+<span class="lineNum">     271 </span>            :       }
+<span class="lineNum">     272 </span>            :     else
+<span class="lineNum">     273 </span>            :       {
+<span class="lineNum">     274 </span><span class="lineCov">        469 :         modes.freeall(FALSE);</span>
+<span class="lineNum">     275 </span><span class="lineCov">        469 :         outputters_.freeall(FALSE);</span>
+<span class="lineNum">     276 </span>            :       };
+<span class="lineNum">     277 </span><span class="lineCov">        578 :     if (Sp)</span>
+<span class="lineNum">     278 </span><span class="lineCov">        578 :         Sp -&gt; clear();</span>
+<span class="lineNum">     279 </span>            :     // hope this works:
+<span class="lineNum">     280 </span>            :     //DETACH: move to Tree
+<span class="lineNum">     281 </span>            :     // dictionary.destroy();
+<span class="lineNum">     282 </span><span class="lineCov">        578 :     theArena.dispose();</span>
+<span class="lineNum">     283 </span><span class="lineCov">        578 :     runsOnExternal = FALSE;</span>
+<span class="lineNum">     284 </span><span class="lineCov">        578 : }</span>
+<span class="lineNum">     285 </span>            : 
+<span class="lineNum">     286 </span><span class="lineCov">       5780 : Processor::~Processor()</span>
+<span class="lineNum">     287 </span>            : {
+<span class="lineNum">     288 </span>            : //    popNewHandler();
+<span class="lineNum">     289 </span><span class="lineCov">        578 :     baseURIMappings.freeall(FALSE);</span>
+<span class="lineNum">     290 </span>            :     // FIXME: MUST clear theRecoder but got no situation
+<span class="lineNum">     291 </span>            : //    theRecoder.clear();
+<a name="292"><span class="lineNum">     292 </span><span class="lineCov">        578 : };</span></a>
+<span class="lineNum">     293 </span>            : 
+<span class="lineNum">     294 </span><span class="lineCov">        578 : eFlag Processor::open(Sit S, const char *sheetURI, const char *inputURI)</span>
+<span class="lineNum">     295 </span>            : {
+<span class="lineNum">     296 </span><span class="lineCov">        578 :     Str temp;</span>
+<span class="lineNum">     297 </span><span class="lineCov">       1156 :     DStr theBase;</span>
+<span class="lineNum">     298 </span>            : 
+<span class="lineNum">     299 </span><span class="lineCov">        578 :     my_getcwd(theBase);</span>
+<span class="lineNum">     300 </span><span class="lineCov">        578 :     theBase = findBaseURI(S, Str(&quot;file://&quot;) + theBase);</span>
+<span class="lineNum">     301 </span>            : 
+<span class="lineNum">     302 </span><span class="lineCov">        578 :     E( readTreeFromURI(S, styleSheet, temp = sheetURI, theBase, TRUE) );</span>
+<span class="lineNum">     303 </span>            :     //styleSheet -&gt; speakDebug();
+<span class="lineNum">     304 </span><span class="lineCov">        109 :     if ( S.hasFlag(SAB_DUMP_SHEET_STRUCTURE) )</span>
+<span class="lineNum">     305 </span><span class="lineNoCov">          0 :       styleSheet -&gt; dumpStructure(S);</span>
+<span class="lineNum">     306 </span>            : 
+<span class="lineNum">     307 </span>            : #ifdef SABLOT_DEBUGGER
+<span class="lineNum">     308 </span>            :     if (debugger) debugger -&gt; setBreakpoints(S, styleSheet);
+<span class="lineNum">     309 </span>            : #endif
+<span class="lineNum">     310 </span>            : 
+<span class="lineNum">     311 </span><span class="lineCov">        109 :     runsOnExternal = !inputURI;</span>
+<span class="lineNum">     312 </span><span class="lineCov">        109 :     if (inputURI)</span>
+<span class="lineNum">     313 </span><span class="lineCov">        109 :       E( readTreeFromURI(S, input, temp = inputURI, theBase, FALSE) );</span>
+<span class="lineNum">     314 </span><span class="lineCov">        109 :     vars = new VarsList (*styleSheet);</span>
+<span class="lineNum">     315 </span><span class="lineCov">        109 :     keys = new KeySet;</span>
+<span class="lineNum">     316 </span><span class="lineCov">        687 :     return OK;</span>
+<a name="317"><span class="lineNum">     317 </span>            : }</a>
+<span class="lineNum">     318 </span>            : 
+<span class="lineNum">     319 </span><span class="lineCov">        109 : eFlag Processor::run(Sit S, const char* resultURI, NodeHandle doc /*= NULL */)</span>
+<span class="lineNum">     320 </span>            : {
+<span class="lineNum">     321 </span><span class="lineCov">        109 :     Str temp;</span>
+<span class="lineNum">     322 </span><span class="lineCov">        218 :     DStr theBase;</span>
+<span class="lineNum">     323 </span><span class="lineCov">        109 :     my_getcwd(theBase);</span>
+<span class="lineNum">     324 </span><span class="lineCov">        109 :     theBase = findBaseURI(S, Str(&quot;file://&quot;) + theBase);</span>
+<span class="lineNum">     325 </span>            : 
+<span class="lineNum">     326 </span>            :     //strip spaces from the document
+<span class="lineNum">     327 </span><span class="lineCov">        218 :     if (input) E( stripTree(S, *input) )</span>
+<span class="lineNum">     328 </span>            : 
+<span class="lineNum">     329 </span><span class="lineCov">        436 :     Log1(S, L1_EXECUTING, styleSheet -&gt; getURI());</span>
+<span class="lineNum">     330 </span><span class="lineCov">        109 :     double time_was = getMillisecs();</span>
+<span class="lineNum">     331 </span><span class="lineCov">        109 :     E( pushOutputterForURI(S, temp = resultURI, theBase) );</span>
+<span class="lineNum">     332 </span><span class="lineCov">        109 :     E( outputter() -&gt; eventBeginOutput(S) );</span>
+<span class="lineNum">     333 </span>            : 
+<span class="lineNum">     334 </span><span class="lineCov">        327 :     inputRoot = !nhNull(doc) ? doc : (NodeHandle)&amp;(NZ(input) -&gt; getRoot());</span>
+<span class="lineNum">     335 </span><span class="lineCov">        109 :     GP( Context ) c = new Context(inputRoot);</span>
+<span class="lineNum">     336 </span><span class="lineCov">        218 :     (*c).set(inputRoot);</span>
+<span class="lineNum">     337 </span>            : 
+<span class="lineNum">     338 </span>            :     /*
+<span class="lineNum">     339 </span>            :         in vars, global prebindings go to call level 0,
+<span class="lineNum">     340 </span>            :         global bindings to call level 1
+<span class="lineNum">     341 </span>            :     */
+<span class="lineNum">     342 </span><span class="lineCov">        109 :     vars -&gt; startCall();</span>
+<span class="lineNum">     343 </span>            :     // start by resolving all globals
+<span class="lineNum">     344 </span>            :     //E( resolveGlobals(S, c) ); It has been done twice (XSLElement::execute)
+<span class="lineNum">     345 </span><span class="lineCov">        327 :     E( styleSheet -&gt; getRoot().execute(S, c, FALSE) );</span>
+<span class="lineNum">     346 </span><span class="lineCov">        109 :     vars -&gt; endCall();</span>
+<span class="lineNum">     347 </span><span class="lineCov">        109 :     c.del();</span>
+<span class="lineNum">     348 </span>            : 
+<span class="lineNum">     349 </span><span class="lineCov">        109 :     E( outputter() -&gt; eventTrailingNewline(S) );</span>
+<span class="lineNum">     350 </span><span class="lineCov">        109 :     E( outputter() -&gt; eventEndOutput(S) );</span>
+<span class="lineNum">     351 </span>            : 
+<span class="lineNum">     352 </span>            :     //done all outputetrs
+<span class="lineNum">     353 </span>            :     //E( outputDocuments.finish(S) );
+<span class="lineNum">     354 </span>            :         
+<span class="lineNum">     355 </span>            :     // report info about the output document to the MiscHandler
+<span class="lineNum">     356 </span>            :     void *miscUserData;
+<span class="lineNum">     357 </span><span class="lineCov">        109 :     OutputDefinition *outDef = &amp;(styleSheet -&gt; outputDef);</span>
+<span class="lineNum">     358 </span><span class="lineCov">        109 :     MiscHandler *miscHlr = getMiscHandler(&amp;miscUserData);</span>
+<span class="lineNum">     359 </span><span class="lineCov">        109 :     if (miscHlr)</span>
+<span class="lineNum">     360 </span>            :         miscHlr -&gt; documentInfo(
+<span class="lineNum">     361 </span>            :             miscUserData,
+<span class="lineNum">     362 </span>            :             this,   // processor
+<span class="lineNum">     363 </span><span class="lineNoCov">          0 :             outDef -&gt; getValueStr(XSLA_MEDIA_TYPE), </span>
+<span class="lineNum">     364 </span><span class="lineNoCov">          0 :             outDef -&gt; getValueStr(XSLA_ENCODING));</span>
+<span class="lineNum">     365 </span>            : 
+<span class="lineNum">     366 </span>            :     E( popOutputter(S) );
+<span class="lineNum">     367 </span>            :     
+<span class="lineNum">     368 </span>            :     //check statuses
+<span class="lineNum">     369 </span>            :     //this is not needed, 
+<span class="lineNum">     370 </span>            :     //cleanupAfterRun takes care in the case of error
+<span class="lineNum">     371 </span>            :     //sabassert(!outputters_.number());
+<span class="lineNum">     372 </span>            : 
+<span class="lineNum">     373 </span><span class="lineCov">        218 :     Log1(S, L1_EXECUTION_DONE, getMillisecsDiff(time_was));</span>
+<span class="lineNum">     374 </span><span class="lineCov">        218 :     return OK;</span>
+<span class="lineNum">     375 </span>            : }
+<span class="lineNum">     376 </span>            : 
+<span class="lineNum">     377 </span>            : 
+<span class="lineNum">     378 </span>            : 
+<span class="lineNum">     379 </span>            : /*================================================================
+<span class="lineNum">     380 </span>            : getVarBinding 
+<span class="lineNum">     381 </span>            :     finds the current binding for the variable with the given name.
+<span class="lineNum">     382 </span>            :     The binding is an expression. If none is present, returns NULL.
+<a name="383"><span class="lineNum">     383 </span>            : ================================================================*/</a>
+<span class="lineNum">     384 </span>            : 
+<span class="lineNum">     385 </span><span class="lineNoCov">          0 : Expression* Processor::getVarBinding(QName &amp;which)</span>
+<span class="lineNum">     386 </span>            : {
+<span class="lineNum">     387 </span><span class="lineNoCov">          0 :     return vars -&gt; getBinding(which);</span>
+<span class="lineNum">     388 </span>            : }
+<span class="lineNum">     389 </span>            : 
+<span class="lineNum">     390 </span>            : /*================================================================
+<span class="lineNum">     391 </span>            : execute
+<span class="lineNum">     392 </span>            : both flavours DEALLOCATE the context and set the pointer to NULL
+<a name="393"><span class="lineNum">     393 </span>            : ================================================================*/</a>
+<span class="lineNum">     394 </span>            : 
+<span class="lineNum">     395 </span><span class="lineCov">        660 : eFlag Processor::execute(Sit S, Vertex *IP, Context *&amp;c, Bool resolvingGlobals)</span>
+<span class="lineNum">     396 </span>            : {
+<span class="lineNum">     397 </span><span class="lineCov">       2970 :     while (!c -&gt; isFinished())</span>
+<span class="lineNum">     398 </span>            :     {
+<span class="lineNum">     399 </span><span class="lineCov">       1650 :       c -&gt; setCurrentNode(c -&gt; current());</span>
+<span class="lineNum">     400 </span><span class="lineCov">       1650 :         if (IP) </span>
+<span class="lineNum">     401 </span>            :           {
+<span class="lineNum">     402 </span><span class="lineNoCov">          0 :             E( IP -&gt; execute(S, c, resolvingGlobals) );</span>
+<span class="lineNum">     403 </span>            :           }
+<span class="lineNum">     404 </span>            :         else
+<span class="lineNum">     405 </span>            :           {
+<span class="lineNum">     406 </span><span class="lineCov">       1650 :             E( execApplyTemplates(S, c, resolvingGlobals) );</span>
+<span class="lineNum">     407 </span>            :           }
+<span class="lineNum">     408 </span><span class="lineCov">       1650 :         c -&gt; shift();</span>
+<span class="lineNum">     409 </span>            :     };
+<span class="lineNum">     410 </span><span class="lineCov">        660 :     cdelete(c);</span>
+<span class="lineNum">     411 </span><span class="lineCov">        660 :     return OK;</span>
+<a name="412"><span class="lineNum">     412 </span>            : }</a>
+<span class="lineNum">     413 </span>            : 
+<span class="lineNum">     414 </span><span class="lineNoCov">          0 : eFlag Processor::execute(Sit S, VertexList &amp;IPlist, Context *&amp;c, Bool resolvingGlobals)</span>
+<span class="lineNum">     415 </span>            : {
+<span class="lineNum">     416 </span>            :     // we may need to remove some variable bindings on each pass
+<span class="lineNum">     417 </span>            :     // through a for loop
+<span class="lineNum">     418 </span><span class="lineNoCov">          0 :     Vertex *theParent = IPlist.number()? IPlist[0] -&gt; parent : NULL;</span>
+<span class="lineNum">     419 </span>            :     XSLElement *theForParent;
+<span class="lineNum">     420 </span><span class="lineNoCov">          0 :     if (theParent &amp;&amp; isXSLElement(theParent) &amp;&amp; toX(theParent) -&gt; op == XSL_FOR_EACH)</span>
+<span class="lineNum">     421 </span><span class="lineNoCov">          0 :         theForParent = toX(theParent);</span>
+<span class="lineNum">     422 </span>            :     else
+<span class="lineNum">     423 </span>            :         theForParent = NULL;
+<span class="lineNum">     424 </span>            :     
+<span class="lineNum">     425 </span><span class="lineNoCov">          0 :     while (c -&gt; current())</span>
+<span class="lineNum">     426 </span>            :     {
+<span class="lineNum">     427 </span><span class="lineNoCov">          0 :         c -&gt; setCurrentNode(c -&gt; current());</span>
+<span class="lineNum">     428 </span><span class="lineNoCov">          0 :         E( IPlist.execute(S, c, resolvingGlobals) );</span>
+<span class="lineNum">     429 </span><span class="lineNoCov">          0 :         c -&gt; shift();</span>
+<span class="lineNum">     430 </span><span class="lineNoCov">          0 :         if (theForParent)</span>
+<span class="lineNum">     431 </span><span class="lineNoCov">          0 :             theForParent -&gt; removeBindings(S);</span>
+<span class="lineNum">     432 </span>            :     };
+<span class="lineNum">     433 </span><span class="lineNoCov">          0 :     cdelete(c);</span>
+<span class="lineNum">     434 </span><span class="lineNoCov">          0 :     return OK;</span>
+<a name="435"><span class="lineNum">     435 </span>            : }</a>
+<span class="lineNum">     436 </span>            : 
+<span class="lineNum">     437 </span><span class="lineCov">       1650 : eFlag Processor::execApplyTemplates(Sit S, Context *c, Bool resolvingGlobals)</span>
+<span class="lineNum">     438 </span>            : {
+<span class="lineNum">     439 </span>            :     XSLElement *rule;
+<span class="lineNum">     440 </span><span class="lineCov">       1650 :     E( NZ(styleSheet) -&gt; findBestRule(S, rule, c, getCurrentMode(), FALSE) );</span>
+<span class="lineNum">     441 </span><span class="lineCov">       1650 :     if (!rule)</span>
+<span class="lineNum">     442 </span><span class="lineCov">       1650 :         E( builtinRule(S, c, resolvingGlobals) )</span>
+<span class="lineNum">     443 </span>            :     else
+<span class="lineNum">     444 </span><span class="lineNoCov">          0 :         E( rule -&gt; execute(S, c, resolvingGlobals) );</span>
+<span class="lineNum">     445 </span>            :     return OK;
+<a name="446"><span class="lineNum">     446 </span>            : }</a>
+<span class="lineNum">     447 </span>            : 
+<span class="lineNum">     448 </span><span class="lineNoCov">          0 : eFlag Processor::execApplyImports(Sit S, Context *c, SubtreeInfo *subtree,</span>
+<span class="lineNum">     449 </span>            :                                   Bool resolvingGlobals)
+<span class="lineNum">     450 </span>            : {
+<span class="lineNum">     451 </span>            :     XSLElement *rule;
+<span class="lineNum">     452 </span><span class="lineNoCov">          0 :     E( NZ(styleSheet) -&gt; </span>
+<span class="lineNum">     453 </span>            :        findBestRule(S, rule, c, getCurrentMode(), TRUE, subtree) );
+<span class="lineNum">     454 </span><span class="lineNoCov">          0 :     if (rule)</span>
+<span class="lineNum">     455 </span><span class="lineNoCov">          0 :         E( rule -&gt; execute(S, c, FALSE) );</span>
+<span class="lineNum">     456 </span>            :     return OK;
+<a name="457"><span class="lineNum">     457 </span>            : }</a>
+<span class="lineNum">     458 </span>            : 
+<span class="lineNum">     459 </span><span class="lineCov">       5280 : eFlag Processor::builtinRule(Sit S, Context *c, Bool resolvingGlobals)</span>
+<span class="lineNum">     460 </span>            : {
+<span class="lineNum">     461 </span>            :   // may assume v to be a physical vertex
+<span class="lineNum">     462 </span>            :   //Vertex *v = toPhysical(c -&gt; current());
+<span class="lineNum">     463 </span><span class="lineCov">       1650 :   NodeHandle v = c -&gt; current();</span>
+<span class="lineNum">     464 </span>            :     
+<span class="lineNum">     465 </span><span class="lineCov">       1650 :   switch (S.dom().getNodeType(v)) {</span>
+<span class="lineNum">     466 </span>            :   case DOCUMENT_NODE:
+<span class="lineNum">     467 </span>            :   case ELEMENT_NODE:
+<span class="lineNum">     468 </span>            :     //apply-templates
+<span class="lineNum">     469 </span>            :     {
+<span class="lineNum">     470 </span><span class="lineCov">       1188 :       GP( Expression ) e = new Expression(styleSheet-&gt;getRoot(), EXF_LOCPATH);</span>
+<span class="lineNum">     471 </span><span class="lineCov">       1188 :       (*e).setLS(AXIS_CHILD, EXNODE_NODE);</span>
+<span class="lineNum">     472 </span>            :       GP( Context ) newc;
+<span class="lineNum">     473 </span>            :       newc.assign(c);
+<span class="lineNum">     474 </span><span class="lineCov">       1188 :       E( (*e).createContext(S, newc) );</span>
+<span class="lineNum">     475 </span>            :       newc.unkeep();
+<span class="lineNum">     476 </span><span class="lineCov">        594 :       E( execute(S, NULL, newc, resolvingGlobals) );</span>
+<span class="lineNum">     477 </span>            :       newc.keep(); // GP: it's NULL by this time anyway
+<span class="lineNum">     478 </span><span class="lineCov">        594 :       e.del();</span>
+<span class="lineNum">     479 </span><span class="lineCov">        594 :     }; break;</span>
+<span class="lineNum">     480 </span>            :   case TEXT_NODE:
+<span class="lineNum">     481 </span>            :   case ATTRIBUTE_NODE:
+<span class="lineNum">     482 </span>            :     //copy contents to output
+<span class="lineNum">     483 </span>            :     {
+<span class="lineNum">     484 </span><span class="lineCov">        990 :       const char *val = S.dom().getNodeValue(v);</span>
+<span class="lineNum">     485 </span><span class="lineCov">       1980 :       E( outputter() -&gt; eventData(S, Str(val)) );</span>
+<span class="lineNum">     486 </span><span class="lineCov">        990 :       S.dom().freeValue(v, (char*)val);</span>
+<span class="lineNum">     487 </span><span class="lineCov">        990 :     }; break;</span>
+<span class="lineNum">     488 </span>            :   case PROCESSING_INSTRUCTION_NODE:
+<span class="lineNum">     489 </span>            :   case COMMENT_NODE:
+<span class="lineNum">     490 </span>            :     {};
+<span class="lineNum">     491 </span>            :   };
+<span class="lineNum">     492 </span>            : 
+<span class="lineNum">     493 </span>            :   /*
+<span class="lineNum">     494 </span>            :   switch(v -&gt; vt &amp; VT_BASE)
+<span class="lineNum">     495 </span>            :   {
+<span class="lineNum">     496 </span>            :   case VT_ROOT:
+<span class="lineNum">     497 </span>            :   case VT_ELEMENT:
+<span class="lineNum">     498 </span>            :     //apply-templates
+<span class="lineNum">     499 </span>            :     {
+<span class="lineNum">     500 </span>            :       GP( Expression ) e = new Expression(*toE(v), EXF_LOCPATH);
+<span class="lineNum">     501 </span>            :       (*e).setLS(AXIS_CHILD, EXNODE_NODE);
+<span class="lineNum">     502 </span>            :       GP( Context ) newc;
+<span class="lineNum">     503 </span>            :       newc.assign(c);
+<span class="lineNum">     504 </span>            :       E( (*e).createContext(S, newc) );
+<span class="lineNum">     505 </span>            :       newc.unkeep();
+<span class="lineNum">     506 </span>            :       E( execute(S, NULL, newc, resolvingGlobals) );
+<span class="lineNum">     507 </span>            :       newc.keep(); // GP: it's NULL by this time anyway
+<span class="lineNum">     508 </span>            :       e.del();
+<span class="lineNum">     509 </span>            :     }; break;
+<span class="lineNum">     510 </span>            :     case VT_TEXT:
+<span class="lineNum">     511 </span>            :   case VT_ATTRIBUTE:
+<span class="lineNum">     512 </span>            :     //copy contents to output
+<span class="lineNum">     513 </span>            :     {
+<span class="lineNum">     514 </span>            :       DStr temp;
+<span class="lineNum">     515 </span>            :       E( v -&gt; value(S, temp, c) );
+<span class="lineNum">     516 </span>            :       E( outputter() -&gt; eventData(S, temp) );
+<span class="lineNum">     517 </span>            :     }; break;
+<span class="lineNum">     518 </span>            :   case VT_PI:
+<span class="lineNum">     519 </span>            :   case VT_COMMENT:
+<span class="lineNum">     520 </span>            :     {};
+<span class="lineNum">     521 </span>            :   };
+<span class="lineNum">     522 </span>            :   */
+<span class="lineNum">     523 </span>            :   return OK;
+<span class="lineNum">     524 </span>            : };
+<span class="lineNum">     525 </span>            : 
+<span class="lineNum">     526 </span>            : 
+<span class="lineNum">     527 </span>            : /*................................................................
+<span class="lineNum">     528 </span>            : getCurrentMode()
+<span class="lineNum">     529 </span>            : RETURN: pointer to the current mode which is a QName
+<a name="530"><span class="lineNum">     530 </span>            : ................................................................*/</a>
+<span class="lineNum">     531 </span>            : 
+<span class="lineNum">     532 </span><span class="lineNoCov">          0 : QName* Processor::getCurrentMode()</span>
+<span class="lineNum">     533 </span>            : {
+<span class="lineNum">     534 </span><span class="lineCov">       1650 :     return (modes.number() ? modes.last() : NULL);</span>
+<span class="lineNum">     535 </span>            : }
+<span class="lineNum">     536 </span>            : 
+<span class="lineNum">     537 </span>            : /*................................................................
+<span class="lineNum">     538 </span>            : pushMode()
+<span class="lineNum">     539 </span>            : called before every mode-changing apply-templates
+<span class="lineNum">     540 </span>            : ARGS:
+<span class="lineNum">     541 </span>            : m       the mode to be placed on top of the mode stack
+<a name="542"><span class="lineNum">     542 </span>            : ................................................................*/</a>
+<span class="lineNum">     543 </span>            : 
+<span class="lineNum">     544 </span><span class="lineNoCov">          0 : void Processor::pushMode(QName *m)</span>
+<span class="lineNum">     545 </span>            : {
+<span class="lineNum">     546 </span><span class="lineNoCov">          0 :     modes.append(m);</span>
+<span class="lineNum">     547 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">     548 </span>            : 
+<span class="lineNum">     549 </span>            : /*................................................................
+<span class="lineNum">     550 </span>            : popMode()
+<span class="lineNum">     551 </span>            : called after every mode-changing apply-templates
+<span class="lineNum">     552 </span>            : removes the current mode from the mode stack FREEING it
+<a name="553"><span class="lineNum">     553 </span>            : ................................................................*/</a>
+<span class="lineNum">     554 </span>            : 
+<span class="lineNum">     555 </span><span class="lineNoCov">          0 : void Processor::popMode()</span>
+<span class="lineNum">     556 </span>            : {
+<span class="lineNum">     557 </span><span class="lineNoCov">          0 :     modes.freelast(FALSE);</span>
+<span class="lineNum">     558 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">     559 </span>            : 
+<span class="lineNum">     560 </span><span class="lineNoCov">          0 : eFlag Processor::addLineNoTree(Sit S, DataLine *&amp;d, Str &amp;absolute, Bool isXSL)</span>
+<span class="lineNum">     561 </span>            : {
+<span class="lineNum">     562 </span>            :     GP( DataLine ) d_;
+<span class="lineNum">     563 </span><span class="lineNoCov">          0 :     M( S, d_ = new DataLine );</span>
+<span class="lineNum">     564 </span><span class="lineNoCov">          0 :     E( (*d_).open(S, absolute, DLMODE_READ, &amp;argList) );</span>
+<span class="lineNum">     565 </span><span class="lineNoCov">          0 :     E( datalines.addLine(S, d_, NULL, isXSL) );</span>
+<span class="lineNum">     566 </span><span class="lineNoCov">          0 :     d = d_.keep();</span>
+<span class="lineNum">     567 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     568 </span>            : }
+<span class="lineNum">     569 </span>            : 
+<span class="lineNum">     570 </span><span class="lineNoCov">          0 : eFlag Processor::addLineTreeOnly(Sit S, DataLine *&amp;d, Str &amp;absolute, Bool isXSL,</span>
+<span class="lineNum">     571 </span>            :     Tree *t)
+<span class="lineNum">     572 </span>            : {
+<span class="lineNum">     573 </span>            :     GP( DataLine ) d_;
+<span class="lineNum">     574 </span><span class="lineNoCov">          0 :     M( S, d_ = new DataLine );</span>
+<span class="lineNum">     575 </span><span class="lineNoCov">          0 :     E( (*d_).setURIAndClose(S, absolute) );</span>
+<span class="lineNum">     576 </span><span class="lineNoCov">          0 :     E( datalines.addLine(S, d_, t, isXSL, /* preparsedTree = */ TRUE) );</span>
+<span class="lineNum">     577 </span><span class="lineNoCov">          0 :     d = d_.keep();</span>
+<span class="lineNum">     578 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     579 </span>            : }
+<span class="lineNum">     580 </span>            : 
+<span class="lineNum">     581 </span><span class="lineCov">        687 : eFlag Processor::addLineParse(Sit S, Tree *&amp; newTree, Str &amp;absolute, </span>
+<span class="lineNum">     582 </span>            :                               Bool isXSL, Bool ignoreErr /* = FALSE */)
+<span class="lineNum">     583 </span>            : {
+<span class="lineNum">     584 </span><span class="lineCov">        687 :     GP( DataLine ) d = new DataLine;</span>
+<span class="lineNum">     585 </span><span class="lineCov">       1374 :     E( (*d).open(S, absolute, DLMODE_READ, &amp;argList, ignoreErr) );</span>
+<span class="lineNum">     586 </span><span class="lineCov">        687 :     GP( Tree ) newTree_ = new Tree(absolute, isXSL );</span>
+<span class="lineNum">     587 </span>            :     //E( (*newTree_).parse(S, d) );
+<span class="lineNum">     588 </span><span class="lineCov">       1374 :     eFlag status = (*newTree_).parse(S, d);</span>
+<span class="lineNum">     589 </span><span class="lineCov">       1374 :     E( (*d).close(S) );</span>
+<span class="lineNum">     590 </span>            :     //hold parse errors after dataline is closed
+<span class="lineNum">     591 </span><span class="lineCov">        687 :     E( status );</span>
+<span class="lineNum">     592 </span><span class="lineCov">        436 :     E( datalines.addLine(S, d.keep(), newTree = newTree_.keep(), isXSL) );</span>
+<span class="lineNum">     593 </span>            :     return OK;
+<a name="594"><span class="lineNum">     594 </span>            : }</a>
+<span class="lineNum">     595 </span>            : 
+<span class="lineNum">     596 </span><span class="lineCov">       1374 : const Str&amp; Processor::findBaseURI(Sit S, const Str&amp; unmappedBase)</span>
+<span class="lineNum">     597 </span>            : {
+<span class="lineNum">     598 </span><span class="lineCov">       2748 :     Str scheme, rest;</span>
+<span class="lineNum">     599 </span><span class="lineCov">       1374 :     uri2SchemePath(S, unmappedBase, scheme, rest);</span>
+<span class="lineNum">     600 </span><span class="lineCov">       1374 :     Str *mapping = baseURIMappings.find(scheme);</span>
+<span class="lineNum">     601 </span><span class="lineCov">       1374 :     if (mapping) return *mapping;</span>
+<span class="lineNum">     602 </span><span class="lineCov">       1374 :     mapping = baseURIMappings.find(&quot;&quot;/**theEmptyString*/);</span>
+<span class="lineNum">     603 </span><span class="lineCov">       1374 :     if (mapping) return *mapping;</span>
+<span class="lineNum">     604 </span><span class="lineCov">       2748 :     return unmappedBase;</span>
+<span class="lineNum">     605 </span>            : }
+<span class="lineNum">     606 </span>            : 
+<span class="lineNum">     607 </span>            : //
+<span class="lineNum">     608 </span>            : //          Processor::baseForVertex
+<span class="lineNum">     609 </span>            : //
+<span class="lineNum">     610 </span>            : //  returns the *translated* base URI in effect for a given vertex
+<a name="611"><span class="lineNum">     611 </span>            : //</a>
+<span class="lineNum">     612 </span>            : 
+<span class="lineNum">     613 </span><span class="lineNoCov">          0 : const Str&amp; Processor::baseForVertex(Sit S, Element *v)</span>
+<span class="lineNum">     614 </span>            : {
+<span class="lineNum">     615 </span><span class="lineNoCov">          0 :     return findBaseURI(S, NZ(v) -&gt; getSubtreeInfo() -&gt; getBaseURI());</span>
+<span class="lineNum">     616 </span>            : }
+<span class="lineNum">     617 </span>            : 
+<span class="lineNum">     618 </span>            : 
+<span class="lineNum">     619 </span>            : //
+<span class="lineNum">     620 </span>            : //          Processor::readTreeFromURI
+<span class="lineNum">     621 </span>            : //
+<span class="lineNum">     622 </span>            : //  reads in a tree from URI 'location' resolved against 'base' which is 
+<span class="lineNum">     623 </span>            : //  a *translated* base (one for which the 'hard base URIs' have been taken 
+<span class="lineNum">     624 </span>            : //  into account)
+<a name="625"><span class="lineNum">     625 </span>            : //</a>
+<span class="lineNum">     626 </span>            : 
+<span class="lineNum">     627 </span><span class="lineCov">        687 : eFlag Processor::readTreeFromURI(Sit S, Tree*&amp; newTree, const Str&amp; location, </span>
+<span class="lineNum">     628 </span>            :                                  const Str&amp; base, Bool isXSL, 
+<span class="lineNum">     629 </span>            :                                  Bool ignoreErr /* = FALSE */)
+<span class="lineNum">     630 </span>            : {
+<span class="lineNum">     631 </span>            :     Str
+<span class="lineNum">     632 </span><span class="lineCov">        687 :         absolute;</span>
+<span class="lineNum">     633 </span><span class="lineCov">        687 :     makeAbsoluteURI(S, location, base, absolute);</span>
+<span class="lineNum">     634 </span><span class="lineCov">        687 :     newTree = datalines.getTree(absolute, isXSL, DLMODE_READ);</span>
+<span class="lineNum">     635 </span><span class="lineCov">        687 :     if (!newTree)</span>
+<span class="lineNum">     636 </span><span class="lineCov">        687 :         E( addLineParse(S, newTree, absolute, isXSL, ignoreErr) );</span>
+<span class="lineNum">     637 </span><span class="lineCov">        687 :     return OK;</span>
+<span class="lineNum">     638 </span>            : }
+<span class="lineNum">     639 </span>            : 
+<span class="lineNum">     640 </span><span class="lineCov">        109 : eFlag Processor::createOutputterForURI(Sit S, //Str&amp; location, Str&amp; base,</span>
+<span class="lineNum">     641 </span>            :                                        Str&amp; absolute,
+<span class="lineNum">     642 </span>            :                                        OutputterObj*&amp; result,
+<span class="lineNum">     643 </span>            :                                        OutputDefinition *outDef /*=null*/)
+<span class="lineNum">     644 </span>            : {
+<span class="lineNum">     645 </span>            :   //Str absolute;
+<span class="lineNum">     646 </span>            :   //makeAbsoluteURI(S, location, base, absolute);
+<span class="lineNum">     647 </span><span class="lineCov">        109 :   if (datalines.getTree(absolute, FALSE, DLMODE_WRITE))</span>
+<span class="lineNum">     648 </span><span class="lineNoCov">          0 :     Err1(S, E1_URI_WRITE, absolute);</span>
+<span class="lineNum">     649 </span>            :   GP( DataLine ) d;
+<span class="lineNum">     650 </span><span class="lineCov">        109 :   if ( !(absolute == &quot;arg:/null&quot;) ) </span>
+<span class="lineNum">     651 </span>            :     { 
+<span class="lineNum">     652 </span><span class="lineCov">        218 :       M( S, d = new DataLine );</span>
+<span class="lineNum">     653 </span><span class="lineCov">        218 :       E( (*d).open(S, absolute, DLMODE_WRITE, &amp;argList) );</span>
+<span class="lineNum">     654 </span>            :       // FIXME: the NULL tree in the following
+<span class="lineNum">     655 </span><span class="lineCov">        109 :       E( datalines.addLine(S, d.keep(), NULL, FALSE) );</span>
+<span class="lineNum">     656 </span>            :     } else { //physical output not required
+<span class="lineNum">     657 </span>            :       d = NULL;
+<span class="lineNum">     658 </span>            :     };
+<span class="lineNum">     659 </span>            :   GP( OutputterObj ) newOut;
+<span class="lineNum">     660 </span><span class="lineCov">        218 :   M( S, newOut = new OutputterObj );</span>
+<span class="lineNum">     661 </span>            :   
+<span class="lineNum">     662 </span><span class="lineCov">        109 :   if (!outDef) outDef = &amp;(styleSheet -&gt; outputDef);</span>
+<span class="lineNum">     663 </span><span class="lineCov">        218 :   E( (*newOut).setOptions(S, d, outDef) );</span>
+<span class="lineNum">     664 </span><span class="lineCov">        109 :   if (theSAXHandler)</span>
+<span class="lineNum">     665 </span><span class="lineNoCov">          0 :     E( (*newOut).setOptionsSAX(S, theSAXHandler, theSAXUserData, </span>
+<span class="lineNum">     666 </span>            :                                SAXOUTPUT_AS_PHYSICAL) );
+<span class="lineNum">     667 </span>            :   
+<span class="lineNum">     668 </span><span class="lineCov">        109 :   result = newOut.keep();</span>
+<span class="lineNum">     669 </span>            :   
+<span class="lineNum">     670 </span><span class="lineCov">        109 :   return OK;</span>
+<a name="671"><span class="lineNum">     671 </span>            : }</a>
+<span class="lineNum">     672 </span>            : 
+<span class="lineNum">     673 </span><span class="lineNoCov">          0 : eFlag Processor::getOutputDocument(Sit S, Str&amp; href,</span>
+<span class="lineNum">     674 </span>            :                                       OutputDocument *&amp;resultDoc, 
+<span class="lineNum">     675 </span>            :                                       OutputDefinition *def)
+<span class="lineNum">     676 </span>            : {
+<span class="lineNum">     677 </span>            :   //OutputDocument * aux = outputDocuments.find(def -&gt; 
+<span class="lineNum">     678 </span>            :   
+<span class="lineNum">     679 </span>            :   //GP(OutputDocument) doc = new OutputDocument(newOut, def);
+<span class="lineNum">     680 </span><span class="lineNoCov">          0 :   GP(OutputDocument) doc = new OutputDocument(href, def);</span>
+<span class="lineNum">     681 </span>            : 
+<span class="lineNum">     682 </span><span class="lineNoCov">          0 :   resultDoc = doc.keep();</span>
+<span class="lineNum">     683 </span><span class="lineNoCov">          0 :   outputDocuments.append(resultDoc);</span>
+<span class="lineNum">     684 </span>            : 
+<span class="lineNum">     685 </span><span class="lineNoCov">          0 :   return OK;</span>
+<a name="686"><span class="lineNum">     686 </span>            : }</a>
+<span class="lineNum">     687 </span>            : 
+<span class="lineNum">     688 </span><span class="lineNoCov">          0 : eFlag Processor::startDocument(Sit S, OutputDocument *doc)</span>
+<span class="lineNum">     689 </span>            : {
+<span class="lineNum">     690 </span><span class="lineNoCov">          0 :   switch (doc -&gt; getState()) {</span>
+<span class="lineNum">     691 </span>            :   case OUTDOC_ACTIVE:
+<span class="lineNum">     692 </span>            :     {
+<span class="lineNum">     693 </span><span class="lineNoCov">          0 :       sabassert(!&quot;rewrite document&quot;);</span>
+<span class="lineNum">     694 </span>            :       //printf(&quot;---&gt; aaa\n&quot;);
+<span class="lineNum">     695 </span>            :       //OutputterObj *out = NZ( doc -&gt; getOutputter());
+<span class="lineNum">     696 </span>            :       //E( pushOutputter(S, out) );
+<span class="lineNum">     697 </span>            :     }; break;
+<span class="lineNum">     698 </span>            :   case OUTDOC_NEW:
+<span class="lineNum">     699 </span>            :     {
+<span class="lineNum">     700 </span>            :       ////////////////////////////////////////
+<span class="lineNum">     701 </span>            :       //create the outputter
+<span class="lineNum">     702 </span><span class="lineNoCov">          0 :       Str &amp;href = doc -&gt; getHref();</span>
+<span class="lineNum">     703 </span><span class="lineNoCov">          0 :       DStr base = &quot;&quot;;</span>
+<span class="lineNum">     704 </span><span class="lineNoCov">          0 :       OutputterObj *current = outputter();</span>
+<span class="lineNum">     705 </span><span class="lineNoCov">          0 :       PhysicalOutputLayerObj *phys;</span>
+<span class="lineNum">     706 </span><span class="lineNoCov">          0 :       if (current &amp;&amp; (phys = current-&gt;getPhysical()) &amp;&amp; phys-&gt;getDataLine())</span>
+<span class="lineNum">     707 </span>            :         {
+<span class="lineNum">     708 </span><span class="lineNoCov">          0 :           base = phys -&gt; getDataLine() -&gt; fullUri;</span>
+<span class="lineNum">     709 </span>            :         }
+<span class="lineNum">     710 </span><span class="lineNoCov">          0 :       if (base == &quot;&quot; || base == &quot;file:///__stdout&quot; || base == &quot;file:///__stderr&quot;)</span>
+<span class="lineNum">     711 </span>            :         {
+<span class="lineNum">     712 </span><span class="lineNoCov">          0 :           DStr cwd;</span>
+<span class="lineNum">     713 </span><span class="lineNoCov">          0 :           my_getcwd(cwd);</span>
+<span class="lineNum">     714 </span><span class="lineNoCov">          0 :           base = &quot;file://&quot;;</span>
+<span class="lineNum">     715 </span><span class="lineNoCov">          0 :           base += cwd;</span>
+<span class="lineNum">     716 </span><span class="lineNoCov">          0 :           S.message(MT_LOG, L2_SUBDOC_BASE, href, base);</span>
+<span class="lineNum">     717 </span>            :         }
+<span class="lineNum">     718 </span><span class="lineNoCov">          0 :       S.message(MT_LOG, L2_SUBDOC, href, base);</span>
+<span class="lineNum">     719 </span>            : 
+<span class="lineNum">     720 </span>            :       OutputterObj *newOut;
+<span class="lineNum">     721 </span><span class="lineNoCov">          0 :       Str absolute;</span>
+<span class="lineNum">     722 </span><span class="lineNoCov">          0 :       makeAbsoluteURI(S, href, base, absolute);</span>
+<span class="lineNum">     723 </span>            : 
+<span class="lineNum">     724 </span>            :       //test if the document was not output recently
+<span class="lineNum">     725 </span><span class="lineNoCov">          0 :       if ( outputDocumentURIs.findIdx(absolute) != -1 ) {</span>
+<span class="lineNum">     726 </span><span class="lineNoCov">          0 :         Err1( S, E_DUPLICIT_OUTDOC, absolute );</span>
+<span class="lineNum">     727 </span>            :       } else {
+<span class="lineNum">     728 </span>            :         doc -&gt; setURI(absolute);
+<span class="lineNum">     729 </span><span class="lineNoCov">          0 :         outputDocumentURIs.insert(new Str(absolute));</span>
+<span class="lineNum">     730 </span>            :       }
+<span class="lineNum">     731 </span>            : 
+<span class="lineNum">     732 </span><span class="lineNoCov">          0 :       E( createOutputterForURI(S, absolute, newOut, doc-&gt;getDefinition()) );</span>
+<span class="lineNum">     733 </span><span class="lineNoCov">          0 :       E( pushOutputter(S, doc -&gt; setOutputter(newOut)) );</span>
+<span class="lineNum">     734 </span><span class="lineNoCov">          0 :       E( outputter() -&gt; eventBeginOutput(S) );</span>
+<span class="lineNum">     735 </span>            : 
+<span class="lineNum">     736 </span><span class="lineNoCov">          0 :       doc -&gt; setState(OUTDOC_ACTIVE);</span>
+<span class="lineNum">     737 </span><span class="lineNoCov">          0 :     }; break;</span>
+<span class="lineNum">     738 </span>            :   case OUTDOC_FINISHED:
+<span class="lineNum">     739 </span><span class="lineNoCov">          0 :     sabassert(! &quot;Couldn't write the document twice&quot;); break;</span>
+<span class="lineNum">     740 </span>            :   }
+<span class="lineNum">     741 </span>            :   return OK;
+<a name="742"><span class="lineNum">     742 </span>            : }</a>
+<span class="lineNum">     743 </span>            : 
+<span class="lineNum">     744 </span><span class="lineNoCov">          0 : eFlag Processor::finishDocument(Sit S, OutputDocument *doc, Bool canClose)</span>
+<span class="lineNum">     745 </span>            : {
+<span class="lineNum">     746 </span><span class="lineNoCov">          0 :   switch (doc -&gt; getState()) {</span>
+<span class="lineNum">     747 </span>            :   case OUTDOC_NEW:
+<span class="lineNum">     748 </span>            :   case OUTDOC_FINISHED:
+<span class="lineNum">     749 </span><span class="lineNoCov">          0 :     sabassert(!&quot;Could not finish unopened/finished document&quot;); break;</span>
+<span class="lineNum">     750 </span>            :   case OUTDOC_ACTIVE:
+<span class="lineNum">     751 </span>            :     {
+<span class="lineNum">     752 </span><span class="lineNoCov">          0 :       E( doc -&gt; finish(S) );</span>
+<span class="lineNum">     753 </span>            :       E( popOutputter(S) );
+<span class="lineNum">     754 </span>            :     }; break;
+<span class="lineNum">     755 </span>            :   }
+<span class="lineNum">     756 </span>            :   return OK;
+<a name="757"><span class="lineNum">     757 </span>            : }</a>
+<span class="lineNum">     758 </span>            : 
+<span class="lineNum">     759 </span><span class="lineCov">        109 : eFlag Processor::pushOutputterForURI(Sit S, Str&amp; location, Str&amp; base, </span>
+<span class="lineNum">     760 </span>            :                                      OutputDefinition *outDef /*=NULL*/)
+<span class="lineNum">     761 </span>            : {
+<span class="lineNum">     762 </span>            :   OutputterObj *newOut;
+<span class="lineNum">     763 </span>            : 
+<span class="lineNum">     764 </span><span class="lineCov">        109 :   Str absolute;</span>
+<span class="lineNum">     765 </span><span class="lineCov">        109 :   makeAbsoluteURI(S, location, base, absolute);</span>
+<span class="lineNum">     766 </span><span class="lineCov">        109 :   E( createOutputterForURI(S, absolute, newOut, outDef) );</span>
+<span class="lineNum">     767 </span>            : 
+<span class="lineNum">     768 </span><span class="lineCov">        109 :   outputters_.append(newOut);</span>
+<span class="lineNum">     769 </span><span class="lineCov">        109 :   return OK;</span>
+<a name="770"><span class="lineNum">     770 </span>            : }</a>
+<span class="lineNum">     771 </span>            : 
+<span class="lineNum">     772 </span><span class="lineNoCov">          0 : eFlag Processor::pushTreeConstructer(Sit S, TreeConstructer *&amp; newTC, Tree *t,</span>
+<span class="lineNum">     773 </span>            :                                      SAXOutputType ot)
+<span class="lineNum">     774 </span>            : {
+<span class="lineNum">     775 </span><span class="lineNoCov">          0 :     newTC = NULL;</span>
+<span class="lineNum">     776 </span><span class="lineNoCov">          0 :     GP( TreeConstructer ) newTC_ = new TreeConstructer(S);</span>
+<span class="lineNum">     777 </span><span class="lineNoCov">          0 :     GP( OutputterObj ) newTCSource = new OutputterObj;</span>
+<span class="lineNum">     778 </span>            :     //E( (*newTCSource).setOptions(S, NULL, &amp;(styleSheet -&gt; outputDef)) ); //_PH_
+<span class="lineNum">     779 </span><span class="lineNoCov">          0 :     M( S, newTC_+0 );</span>
+<span class="lineNum">     780 </span><span class="lineNoCov">          0 :     outputters_.append(newTCSource);</span>
+<span class="lineNum">     781 </span><span class="lineNoCov">          0 :     E( (*newTC_).parseUsingSAX(S, t, *newTCSource, ot) );</span>
+<span class="lineNum">     782 </span>            :     newTCSource.keep();
+<span class="lineNum">     783 </span><span class="lineNoCov">          0 :     newTC = newTC_.keep();</span>
+<span class="lineNum">     784 </span><span class="lineNoCov">          0 :     return OK;</span>
+<a name="785"><span class="lineNum">     785 </span>            : }</a>
+<span class="lineNum">     786 </span>            : 
+<span class="lineNum">     787 </span><span class="lineNoCov">          0 : eFlag Processor::pushOutputter(Sit S, OutputterObj* out_)</span>
+<span class="lineNum">     788 </span>            : {
+<span class="lineNum">     789 </span><span class="lineNoCov">          0 :     outputters_.append(out_);</span>
+<span class="lineNum">     790 </span><span class="lineNoCov">          0 :     return OK;</span>
+<a name="791"><span class="lineNum">     791 </span>            : }</a>
+<span class="lineNum">     792 </span>            : 
+<a name="793"><span class="lineNum">     793 </span><span class="lineNoCov">          0 : eFlag Processor::popOutputter(Sit S)</span></a>
+<span class="lineNum">     794 </span>            : {
+<span class="lineNum">     795 </span><span class="lineCov">        109 :     outputters_.freelast(FALSE);</span>
+<span class="lineNum">     796 </span><span class="lineNoCov">          0 :     return OK;</span>
+<a name="797"><span class="lineNum">     797 </span>            : }</a>
+<span class="lineNum">     798 </span>            : 
+<span class="lineNum">     799 </span><span class="lineNoCov">          0 : eFlag Processor::popOutputterNoFree(Sit S)</span>
+<span class="lineNum">     800 </span>            : {
+<span class="lineNum">     801 </span><span class="lineNoCov">          0 :     outputters_.deppend();</span>
+<span class="lineNum">     802 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     803 </span>            : }
+<span class="lineNum">     804 </span>            : 
+<span class="lineNum">     805 </span><span class="lineNoCov">          0 : eFlag Processor::popTreeConstructer(Sit S, TreeConstructer *theTC)</span>
+<span class="lineNum">     806 </span>            : {
+<span class="lineNum">     807 </span>            :     popOutputter(S);
+<span class="lineNum">     808 </span><span class="lineNoCov">          0 :     delete theTC;</span>
+<span class="lineNum">     809 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     810 </span>            : }
+<span class="lineNum">     811 </span>            : 
+<span class="lineNum">     812 </span>            : /*
+<span class="lineNum">     813 </span>            : eFlag Processor::parse(Sit S, Tree *t, DataLine *d)
+<span class="lineNum">     814 </span>            : {
+<span class="lineNum">     815 </span>            :     Log1(S, L1_PARSING, t -&gt; name);
+<span class="lineNum">     816 </span>            :     double time_was = getMillisecs();
+<span class="lineNum">     817 </span>            :     TreeConstructer tc(S);
+<span class="lineNum">     818 </span>            :     eFlag retval = tc.parseDataLineUsingExpat(S, t, d);
+<span class="lineNum">     819 </span>            :     if (!retval)
+<span class="lineNum">     820 </span>            :     {
+<span class="lineNum">     821 </span>            :         Log1(S, L1_PARSE_DONE, getMillisecsDiff(time_was));
+<span class="lineNum">     822 </span>            :     }
+<span class="lineNum">     823 </span>            :     return retval;
+<span class="lineNum">     824 </span>            : }
+<a name="825"><span class="lineNum">     825 </span>            : */</a>
+<span class="lineNum">     826 </span>            : 
+<span class="lineNum">     827 </span><span class="lineNoCov">          0 : eFlag Processor::getArg(Sit S, const char* name, char*&amp; buffer, Bool isUTF16)</span>
+<span class="lineNum">     828 </span>            : {
+<span class="lineNum">     829 </span><span class="lineNoCov">          0 :     Str temp, *value = argList.find(temp = (char*)name);</span>
+<span class="lineNum">     830 </span><span class="lineNoCov">          0 :     if (!value)</span>
+<span class="lineNum">     831 </span><span class="lineNoCov">          0 :         Err1(S, E1_ARG_NOT_FOUND,(char*) name);</span>
+<span class="lineNum">     832 </span><span class="lineNoCov">          0 :     buffer = (char*) *value;</span>
+<span class="lineNum">     833 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     834 </span>            : }
+<span class="lineNum">     835 </span>            : 
+<span class="lineNum">     836 </span>            : //
+<span class="lineNum">     837 </span>            : //
+<span class="lineNum">     838 </span>            : //
+<span class="lineNum">     839 </span>            : //      plugin handler stuff
+<span class="lineNum">     840 </span>            : //
+<span class="lineNum">     841 </span>            : //
+<a name="842"><span class="lineNum">     842 </span>            : //</a>
+<span class="lineNum">     843 </span>            : 
+<span class="lineNum">     844 </span><span class="lineNoCov">          0 : eFlag Processor::setHandler(Sit S, HandlerType type, void *handler, void *userData)</span>
+<span class="lineNum">     845 </span>            : {
+<span class="lineNum">     846 </span>            :     void **whereHandler, **whereUserData;
+<span class="lineNum">     847 </span><span class="lineNoCov">          0 :     switch(type)</span>
+<span class="lineNum">     848 </span>            :     {
+<span class="lineNum">     849 </span>            :     case HLR_SCHEME: 
+<span class="lineNum">     850 </span>            :         {
+<span class="lineNum">     851 </span><span class="lineNoCov">          0 :             whereHandler = (void **)&amp;theSchemeHandler;</span>
+<span class="lineNum">     852 </span><span class="lineNoCov">          0 :             whereUserData = &amp;theSchemeUserData;</span>
+<span class="lineNum">     853 </span><span class="lineNoCov">          0 :         }; break;</span>
+<span class="lineNum">     854 </span>            :     case HLR_MESSAGE: 
+<span class="lineNum">     855 </span>            :         {
+<span class="lineNum">     856 </span><span class="lineNoCov">          0 :             whereHandler = (void **)&amp;theMessageHandler;</span>
+<span class="lineNum">     857 </span><span class="lineNoCov">          0 :             whereUserData = &amp;theMessageUserData;</span>
+<span class="lineNum">     858 </span><span class="lineNoCov">          0 :         }; break;</span>
+<span class="lineNum">     859 </span>            :     case HLR_SAX: 
+<span class="lineNum">     860 </span>            :         {
+<span class="lineNum">     861 </span><span class="lineNoCov">          0 :             whereHandler = (void **)&amp;theSAXHandler;</span>
+<span class="lineNum">     862 </span><span class="lineNoCov">          0 :             whereUserData = &amp;theSAXUserData;</span>
+<span class="lineNum">     863 </span><span class="lineNoCov">          0 :         }; break;</span>
+<span class="lineNum">     864 </span>            :     case HLR_MISC: 
+<span class="lineNum">     865 </span>            :         {
+<span class="lineNum">     866 </span><span class="lineNoCov">          0 :             whereHandler = (void **)&amp;theMiscHandler;</span>
+<span class="lineNum">     867 </span><span class="lineNoCov">          0 :             whereUserData = &amp;theMiscUserData;</span>
+<span class="lineNum">     868 </span><span class="lineNoCov">          0 :         }; break;</span>
+<span class="lineNum">     869 </span>            :     case HLR_ENC:
+<span class="lineNum">     870 </span>            :         {
+<span class="lineNum">     871 </span><span class="lineNoCov">          0 :             whereHandler = (void **)&amp;theEncHandler;</span>
+<span class="lineNum">     872 </span><span class="lineNoCov">          0 :             whereUserData = &amp;theEncUserData;</span>
+<span class="lineNum">     873 </span><span class="lineNoCov">          0 :         }; break;</span>
+<span class="lineNum">     874 </span>            :     default: 
+<span class="lineNum">     875 </span><span class="lineNoCov">          0 :         Err1(S, E1_INVALID_HLR_TYPE, (int) type);</span>
+<span class="lineNum">     876 </span>            :     }
+<span class="lineNum">     877 </span><span class="lineNoCov">          0 :     if (*whereHandler)</span>
+<span class="lineNum">     878 </span>            :     {
+<span class="lineNum">     879 </span><span class="lineNoCov">          0 :         if (handler)</span>
+<span class="lineNum">     880 </span><span class="lineNoCov">          0 :             Warn1(S, W1_HLR_REGISTERED, hlrTypeNames[type])</span>
+<span class="lineNum">     881 </span>            :         else
+<span class="lineNum">     882 </span>            :         {
+<span class="lineNum">     883 </span><span class="lineNoCov">          0 :             *whereHandler = NULL;</span>
+<span class="lineNum">     884 </span><span class="lineNoCov">          0 :             *whereUserData = NULL;</span>
+<span class="lineNum">     885 </span>            :         }
+<span class="lineNum">     886 </span>            :     }
+<span class="lineNum">     887 </span>            :     else
+<span class="lineNum">     888 </span>            :     {
+<span class="lineNum">     889 </span><span class="lineNoCov">          0 :         if (handler)</span>
+<span class="lineNum">     890 </span>            :         {
+<span class="lineNum">     891 </span><span class="lineNoCov">          0 :             *whereHandler = handler;</span>
+<span class="lineNum">     892 </span><span class="lineNoCov">          0 :             *whereUserData = userData;</span>
+<span class="lineNum">     893 </span>            :         }
+<span class="lineNum">     894 </span>            :         else
+<span class="lineNum">     895 </span><span class="lineNoCov">          0 :             Warn1(S, W1_HLR_NOT_REGISTERED, hlrTypeNames[type])</span>
+<span class="lineNum">     896 </span>            :     }
+<span class="lineNum">     897 </span>            :     return OK;
+<span class="lineNum">     898 </span>            : }
+<a name="899"><span class="lineNum">     899 </span>            : </a>
+<span class="lineNum">     900 </span>            : 
+<span class="lineNum">     901 </span><span class="lineNoCov">          0 : SchemeHandler* Processor::getSchemeHandler(void **udata)</span>
+<span class="lineNum">     902 </span>            : {
+<span class="lineNum">     903 </span><span class="lineNoCov">          0 :     if (udata)</span>
+<span class="lineNum">     904 </span><span class="lineNoCov">          0 :         *udata = theSchemeUserData;</span>
+<span class="lineNum">     905 </span><span class="lineNoCov">          0 :     return theSchemeHandler;</span>
+<a name="906"><span class="lineNum">     906 </span>            : }</a>
+<span class="lineNum">     907 </span>            : 
+<span class="lineNum">     908 </span><span class="lineCov">       3983 : MessageHandler* Processor::getMessageHandler(void **udata)</span>
+<span class="lineNum">     909 </span>            : {
+<span class="lineNum">     910 </span><span class="lineCov">       3983 :     if (udata)</span>
+<span class="lineNum">     911 </span><span class="lineCov">       3415 :         *udata = theMessageUserData;</span>
+<span class="lineNum">     912 </span><span class="lineCov">       3983 :     return theMessageHandler;</span>
+<a name="913"><span class="lineNum">     913 </span>            : }</a>
+<span class="lineNum">     914 </span>            : 
+<span class="lineNum">     915 </span><span class="lineNoCov">          0 : SAXHandler* Processor::getSAXHandler(void **udata)</span>
+<span class="lineNum">     916 </span>            : {
+<span class="lineNum">     917 </span><span class="lineNoCov">          0 :     if (udata)</span>
+<span class="lineNum">     918 </span><span class="lineNoCov">          0 :         *udata = theSAXUserData;</span>
+<span class="lineNum">     919 </span><span class="lineNoCov">          0 :     return theSAXHandler;</span>
+<a name="920"><span class="lineNum">     920 </span>            : }</a>
+<span class="lineNum">     921 </span>            : 
+<span class="lineNum">     922 </span><span class="lineNoCov">          0 : MiscHandler* Processor::getMiscHandler(void **udata)</span>
+<span class="lineNum">     923 </span>            : {
+<span class="lineNum">     924 </span><span class="lineNoCov">          0 :     if (udata)</span>
+<span class="lineNum">     925 </span><span class="lineCov">        109 :         *udata = theMiscUserData;</span>
+<span class="lineNum">     926 </span><span class="lineCov">        109 :     return theMiscHandler;</span>
+<a name="927"><span class="lineNum">     927 </span>            : }</a>
+<span class="lineNum">     928 </span>            : 
+<span class="lineNum">     929 </span><span class="lineNoCov">          0 : EncHandler* Processor::getEncHandler(void **udata)</span>
+<span class="lineNum">     930 </span>            : {
+<span class="lineNum">     931 </span><span class="lineNoCov">          0 :     if (udata)</span>
+<span class="lineNum">     932 </span><span class="lineNoCov">          0 :         *udata = theEncUserData;</span>
+<span class="lineNum">     933 </span><span class="lineNoCov">          0 :     return theEncHandler;</span>
+<a name="934"><span class="lineNum">     934 </span>            : }</a>
+<span class="lineNum">     935 </span>            : 
+<span class="lineNum">     936 </span><span class="lineNoCov">          0 : void* Processor::getHandlerUserData(HandlerType type, void *handler)</span>
+<span class="lineNum">     937 </span>            : {
+<span class="lineNum">     938 </span><span class="lineNoCov">          0 :     switch(type)</span>
+<span class="lineNum">     939 </span>            :     {
+<span class="lineNum">     940 </span><span class="lineNoCov">          0 :     case HLR_SCHEME: return theSchemeUserData;</span>
+<span class="lineNum">     941 </span><span class="lineNoCov">          0 :     case HLR_MESSAGE: return theMessageUserData;</span>
+<span class="lineNum">     942 </span><span class="lineNoCov">          0 :     case HLR_MISC: return theMiscUserData;</span>
+<span class="lineNum">     943 </span><span class="lineNoCov">          0 :     default: return theSAXUserData;</span>
+<span class="lineNum">     944 </span>            :     }
+<a name="945"><span class="lineNum">     945 </span>            : }</a>
+<span class="lineNum">     946 </span>            : 
+<span class="lineNum">     947 </span><span class="lineNoCov">          0 : void Processor::setHardEncoding(const Str&amp; hardEncoding_)</span>
+<span class="lineNum">     948 </span>            : {
+<span class="lineNum">     949 </span><span class="lineNoCov">          0 :     hardEncoding = hardEncoding_;</span>
+<a name="950"><span class="lineNum">     950 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     951 </span>            : 
+<span class="lineNum">     952 </span><span class="lineCov">        109 : const Str&amp; Processor::getHardEncoding() const</span>
+<span class="lineNum">     953 </span>            : {
+<span class="lineNum">     954 </span><span class="lineCov">        109 :     return hardEncoding;</span>
+<span class="lineNum">     955 </span>            : };
+<span class="lineNum">     956 </span>            : 
+<span class="lineNum">     957 </span>            : /*****************************************************************
+<span class="lineNum">     958 </span>            : copyArg
+<span class="lineNum">     959 </span>            :   called if the result document's location uses the arg:
+<span class="lineNum">     960 </span>            :   scheme. Returns information about the associated named buffer.
+<span class="lineNum">     961 </span>            :   if not found, returns -1 in argOrdinal and NULL in newCopy.
+<span class="lineNum">     962 </span>            : ARGS
+<span class="lineNum">     963 </span>            :   argName       the name of the arg
+<span class="lineNum">     964 </span>            : RETURNS
+<span class="lineNum">     965 </span>            :   *argOrdinal    the ordinal number of this arg. This is the number
+<span class="lineNum">     966 </span>            :                 of the call to useArg() which defined the arg.
+<span class="lineNum">     967 </span>            :   newCopy       pointer to a new copy of the arg (allocated via
+<span class="lineNum">     968 </span>            :                 malloc())
+<a name="969"><span class="lineNum">     969 </span>            : *****************************************************************/</a>
+<span class="lineNum">     970 </span>            : 
+<span class="lineNum">     971 </span><span class="lineCov">        109 : void Processor::copyArg(Sit S, const Str&amp; argName, int* argOrdinal,</span>
+<span class="lineNum">     972 </span>            :     char*&amp; newCopy)
+<span class="lineNum">     973 </span>            : {
+<span class="lineNum">     974 </span><span class="lineCov">        109 :     Str absolute;</span>
+<span class="lineNum">     975 </span>            :     int lineNo;
+<span class="lineNum">     976 </span><span class="lineCov">        218 :     if ((makeAbsoluteURI(S, (Str&amp;)argName, &quot;arg:/&quot;, absolute) != URI_ARG)</span>
+<span class="lineNum">     977 </span><span class="lineCov">        109 :         || (lineNo = datalines.findNum(absolute, FALSE, DLMODE_WRITE)) == -1)</span>
+<span class="lineNum">     978 </span>            :     {
+<span class="lineNum">     979 </span><span class="lineCov">        109 :         newCopy = NULL;</span>
+<span class="lineNum">     980 </span><span class="lineCov">        109 :         *argOrdinal = -1;</span>
+<span class="lineNum">     981 </span><span class="lineCov">        218 :         return;</span>
+<span class="lineNum">     982 </span>            :     }
+<span class="lineNum">     983 </span><span class="lineNoCov">          0 :     DynBlock *block = NZ( datalines[lineNo] -&gt; _dataline -&gt; getOutBuffer() );</span>
+<span class="lineNum">     984 </span><span class="lineNoCov">          0 :     newCopy = block -&gt; compactToBuffer(); // GP: OK (no exit route)</span>
+<span class="lineNum">     985 </span>            : 
+<span class="lineNum">     986 </span>            :     //  set *argOrdinal
+<span class="lineNum">     987 </span><span class="lineNoCov">          0 :     *argOrdinal = argList.findNum((char *)absolute + 4);    // skip 'arg:'</span>
+<span class="lineNum">     988 </span>            : 
+<a name="989"><span class="lineNum">     989 </span>            : }</a>
+<span class="lineNum">     990 </span>            : 
+<span class="lineNum">     991 </span><span class="lineNoCov">          0 : eFlag Processor::useArg(Sit S, const char *name, const char *val)</span>
+<span class="lineNum">     992 </span>            : {
+<span class="lineNum">     993 </span><span class="lineNoCov">          0 :     sabassert(name);</span>
+<span class="lineNum">     994 </span><span class="lineNoCov">          0 :     DStr nameStr;</span>
+<span class="lineNum">     995 </span><span class="lineNoCov">          0 :     if (*name != '/')</span>
+<span class="lineNum">     996 </span><span class="lineNoCov">          0 :         nameStr = &quot;/&quot;;</span>
+<span class="lineNum">     997 </span><span class="lineNoCov">          0 :     nameStr += name;</span>
+<span class="lineNum">     998 </span><span class="lineNoCov">          0 :     if (argList.find(nameStr))</span>
+<span class="lineNum">     999 </span><span class="lineNoCov">          0 :         Err1(S, E1_DUPLICATE_ARG, nameStr);</span>
+<span class="lineNum">    1000 </span><span class="lineNoCov">          0 :     StrStr *p = new StrStr;</span>
+<span class="lineNum">    1001 </span><span class="lineNoCov">          0 :     p -&gt; key = nameStr;</span>
+<span class="lineNum">    1002 </span><span class="lineNoCov">          0 :     if (val)</span>
+<span class="lineNum">    1003 </span><span class="lineNoCov">          0 :         p -&gt; value = val;</span>
+<span class="lineNum">    1004 </span>            :     else
+<span class="lineNum">    1005 </span><span class="lineNoCov">          0 :         p -&gt; value.empty();</span>
+<span class="lineNum">    1006 </span><span class="lineNoCov">          0 :     argList.append(p);</span>
+<span class="lineNum">    1007 </span><span class="lineNoCov">          0 :     addedFlag = TRUE;</span>
+<span class="lineNum">    1008 </span>            : 
+<span class="lineNum">    1009 </span><span class="lineNoCov">          0 :     return OK;</span>
+<a name="1010"><span class="lineNum">    1010 </span>            : }</a>
+<span class="lineNum">    1011 </span>            : 
+<span class="lineNum">    1012 </span><span class="lineNoCov">          0 : eFlag Processor::useTree(Sit S, const char *name, Tree *t)</span>
+<span class="lineNum">    1013 </span>            : {
+<span class="lineNum">    1014 </span><span class="lineNoCov">          0 :   sabassert(name);</span>
+<span class="lineNum">    1015 </span><span class="lineNoCov">          0 :   DStr nameStr;</span>
+<span class="lineNum">    1016 </span><span class="lineNoCov">          0 :   if (*name != '/')</span>
+<span class="lineNum">    1017 </span><span class="lineNoCov">          0 :     nameStr = &quot;/&quot;;</span>
+<span class="lineNum">    1018 </span><span class="lineNoCov">          0 :   nameStr += name;</span>
+<span class="lineNum">    1019 </span>            :   // to check for duplicate trees
+<span class="lineNum">    1020 </span><span class="lineNoCov">          0 :   E( useArg(S, name, NULL) );</span>
+<span class="lineNum">    1021 </span>            :   
+<span class="lineNum">    1022 </span><span class="lineNoCov">          0 :   Str absolute;</span>
+<span class="lineNum">    1023 </span>            :   DataLine *d;
+<span class="lineNum">    1024 </span><span class="lineNoCov">          0 :   makeAbsoluteURI(S, nameStr, &quot;arg:/&quot;, absolute);</span>
+<span class="lineNum">    1025 </span><span class="lineNoCov">          0 :   E( addLineTreeOnly(S, d, absolute, t -&gt; XSLTree, t) );</span>
+<span class="lineNum">    1026 </span><span class="lineNoCov">          0 :   addedFlag = TRUE;</span>
+<span class="lineNum">    1027 </span><span class="lineNoCov">          0 :   return OK;</span>
+<a name="1028"><span class="lineNum">    1028 </span>            : }</a>
+<span class="lineNum">    1029 </span>            : 
+<span class="lineNum">    1030 </span><span class="lineNoCov">          0 : eFlag Processor::addGlobalParam(Sit S, const char *name, const char *val)</span>
+<span class="lineNum">    1031 </span>            : {
+<span class="lineNum">    1032 </span><span class="lineNoCov">          0 :     sabassert(name);</span>
+<span class="lineNum">    1033 </span><span class="lineNoCov">          0 :     if (!val) val = (char*)&quot;&quot;;</span>
+<span class="lineNum">    1034 </span><span class="lineNoCov">          0 :     globalParamsList.appendConstruct(name, val);</span>
+<span class="lineNum">    1035 </span><span class="lineNoCov">          0 :     return OK;</span>
+<a name="1036"><span class="lineNum">    1036 </span>            : }</a>
+<span class="lineNum">    1037 </span>            : 
+<span class="lineNum">    1038 </span><span class="lineNoCov">          0 : eFlag Processor::useGlobalParam(Sit S, const char *name, const char *val)</span>
+<span class="lineNum">    1039 </span>            : {
+<span class="lineNum">    1040 </span><span class="lineNoCov">          0 :     sabassert(name);</span>
+<span class="lineNum">    1041 </span><span class="lineNoCov">          0 :     QName q;</span>
+<span class="lineNum">    1042 </span><span class="lineNoCov">          0 :     q.setLocal(NZ(styleSheet) -&gt; unexpand(name));</span>
+<span class="lineNum">    1043 </span><span class="lineNoCov">          0 :     Expression *expr = new Expression(styleSheet -&gt; getRoot(), EXF_ATOM);</span>
+<span class="lineNum">    1044 </span><span class="lineNoCov">          0 :     Str aux = val;</span>
+<span class="lineNum">    1045 </span><span class="lineNoCov">          0 :     expr -&gt; setAtom(aux);</span>
+<span class="lineNum">    1046 </span><span class="lineNoCov">          0 :     vars -&gt; addPrebinding(S, q, expr);</span>
+<span class="lineNum">    1047 </span><span class="lineNoCov">          0 :     return OK;</span>
+<a name="1048"><span class="lineNum">    1048 </span>            : }</a>
+<span class="lineNum">    1049 </span>            : 
+<span class="lineNum">    1050 </span><span class="lineNoCov">          0 : eFlag Processor::useGlobalParams(Sit S)</span>
+<span class="lineNum">    1051 </span>            : {
+<span class="lineNum">    1052 </span><span class="lineNoCov">          0 :     while (globalParamsList.number())</span>
+<span class="lineNum">    1053 </span>            :     {
+<span class="lineNum">    1054 </span><span class="lineNoCov">          0 :         StrStr&amp; item = *(globalParamsList.last());</span>
+<span class="lineNum">    1055 </span><span class="lineNoCov">          0 :         E( useGlobalParam(S, item.key, item.value) );</span>
+<span class="lineNum">    1056 </span><span class="lineNoCov">          0 :             globalParamsList.freelast(FALSE);       </span>
+<span class="lineNum">    1057 </span>            :     }
+<span class="lineNum">    1058 </span>            :     return OK;
+<a name="1059"><span class="lineNum">    1059 </span>            : }</a>
+<span class="lineNum">    1060 </span>            : 
+<span class="lineNum">    1061 </span><span class="lineNoCov">          0 : void Processor::setHardBaseURI(const char* hardBase)</span>
+<span class="lineNum">    1062 </span>            : {
+<span class="lineNum">    1063 </span><span class="lineNoCov">          0 :   addBaseURIMapping(&quot;&quot;/**theEmptyString*/, (const Str) hardBase);</span>
+<a name="1064"><span class="lineNum">    1064 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">    1065 </span>            : 
+<span class="lineNum">    1066 </span><span class="lineNoCov">          0 : void Processor::addBaseURIMapping(const Str&amp; scheme, const Str&amp; mapping)</span>
+<span class="lineNum">    1067 </span>            : {
+<span class="lineNum">    1068 </span><span class="lineNoCov">          0 :     int ndx = baseURIMappings.findNum(scheme);</span>
+<span class="lineNum">    1069 </span><span class="lineNoCov">          0 :     if (ndx != -1)</span>
+<span class="lineNum">    1070 </span><span class="lineNoCov">          0 :         baseURIMappings.freerm(ndx, FALSE);</span>
+<span class="lineNum">    1071 </span><span class="lineNoCov">          0 :     if (!mapping.isEmpty())</span>
+<span class="lineNum">    1072 </span><span class="lineNoCov">          0 :         baseURIMappings.appendConstruct(scheme, mapping);</span>
+<a name="1073"><span class="lineNum">    1073 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">    1074 </span>            : 
+<span class="lineNum">    1075 </span><span class="lineCov">       1625 : eFlag Processor::freeResultArgs(Sit S)</span>
+<span class="lineNum">    1076 </span>            : {
+<span class="lineNum">    1077 </span><span class="lineCov">       1625 :     datalines.freeall(FALSE);</span>
+<span class="lineNum">    1078 </span><span class="lineCov">       1625 :     argList.freeall(FALSE);</span>
+<span class="lineNum">    1079 </span><span class="lineCov">       1625 :     addedFlag = FALSE;</span>
+<span class="lineNum">    1080 </span><span class="lineCov">       1625 :     return OK;</span>
+<a name="1081"><span class="lineNum">    1081 </span>            : }</a>
+<span class="lineNum">    1082 </span>            : 
+<span class="lineNum">    1083 </span><span class="lineNoCov">          0 : SabArena* Processor::getArena() </span>
+<span class="lineNum">    1084 </span>            : {
+<span class="lineNum">    1085 </span><span class="lineNoCov">          0 :     return &amp;theArena;</span>
+<a name="1086"><span class="lineNum">    1086 </span>            : }</a>
+<span class="lineNum">    1087 </span>            : 
+<span class="lineNum">    1088 </span><span class="lineNoCov">          0 : eFlag Processor::prefixIsAliasTarget(Sit S, const Str&amp; prefix, Bool&amp; result)</span>
+<span class="lineNum">    1089 </span>            : {
+<span class="lineNum">    1090 </span><span class="lineNoCov">          0 :   result = FALSE;</span>
+<span class="lineNum">    1091 </span>            :   //we may enter during the tree copy as well
+<span class="lineNum">    1092 </span><span class="lineNoCov">          0 :   if (styleSheet)</span>
+<span class="lineNum">    1093 </span>            :     {
+<span class="lineNum">    1094 </span><span class="lineNoCov">          0 :       Phrase p = NZ(styleSheet) -&gt; unexpand(prefix);</span>
+<span class="lineNum">    1095 </span><span class="lineNoCov">          0 :       for (int i = 0; i &lt; styleSheet -&gt; aliases().number(); i++)</span>
+<span class="lineNum">    1096 </span>            :         {
+<span class="lineNum">    1097 </span><span class="lineNoCov">          0 :           if (styleSheet -&gt; aliases()[i] -&gt; getValue() == p)</span>
+<span class="lineNum">    1098 </span>            :             {
+<span class="lineNum">    1099 </span><span class="lineNoCov">          0 :               result = TRUE;</span>
+<span class="lineNum">    1100 </span><span class="lineNoCov">          0 :               break;</span>
+<span class="lineNum">    1101 </span>            :             }
+<span class="lineNum">    1102 </span>            :         }
+<span class="lineNum">    1103 </span>            :     }
+<span class="lineNum">    1104 </span><span class="lineNoCov">          0 :   return OK;</span>
+<a name="1105"><span class="lineNum">    1105 </span>            : }</a>
+<span class="lineNum">    1106 </span>            : 
+<span class="lineNum">    1107 </span><span class="lineCov">       1664 : void Processor::getAliasedName(EQName &amp; name, Bool &amp; aliased)</span>
+<span class="lineNum">    1108 </span>            : {
+<span class="lineNum">    1109 </span><span class="lineCov">       1664 :   Str myUri = name.getUri();</span>
+<span class="lineNum">    1110 </span><span class="lineNoCov">          0 :   for (int i = 0; i &lt; styleSheet -&gt; aliases().number(); i++)</span>
+<span class="lineNum">    1111 </span>            :     {
+<span class="lineNum">    1112 </span>            :       const Str &amp; aliasUri = 
+<span class="lineNum">    1113 </span><span class="lineNoCov">          0 :         styleSheet -&gt; expand(styleSheet -&gt; aliases()[i]-&gt;getKey());</span>
+<span class="lineNum">    1114 </span><span class="lineNoCov">          0 :       if (aliasUri &amp;&amp; aliasUri == myUri)</span>
+<span class="lineNum">    1115 </span>            :         {
+<span class="lineNum">    1116 </span><span class="lineNoCov">          0 :           Phrase newUri = styleSheet -&gt; aliases()[i] -&gt; getValue();</span>
+<span class="lineNum">    1117 </span><span class="lineNoCov">          0 :           Phrase newPrefix = styleSheet -&gt; aliases()[i] -&gt; getPrefix();</span>
+<span class="lineNum">    1118 </span><span class="lineNoCov">          0 :           name.setUri(styleSheet -&gt; expand(newUri));</span>
+<span class="lineNum">    1119 </span>            :           //name.setPrefix(styleSheet -&gt; expand(newPrefix));
+<span class="lineNum">    1120 </span><span class="lineNoCov">          0 :           aliased = true;</span>
+<span class="lineNum">    1121 </span><span class="lineNoCov">          0 :           break;</span>
+<span class="lineNum">    1122 </span>            :         };              
+<span class="lineNum">    1123 </span><span class="lineCov">       1664 :     }</span>
+<span class="lineNum">    1124 </span><span class="lineCov">       1664 : }</span>
+<span class="lineNum">    1125 </span>            : 
+<span class="lineNum">    1126 </span>            : /*
+<span class="lineNum">    1127 </span>            : Str Processor::getAliasedName(const EQName&amp; name, 
+<span class="lineNum">    1128 </span>            :                               NamespaceStack&amp; currNamespaces,
+<span class="lineNum">    1129 </span>            :                               Bool expatLike)
+<span class="lineNum">    1130 </span>            : {
+<span class="lineNum">    1131 </span>            :    DStr s;
+<span class="lineNum">    1132 </span>            :    Str newPrefixStr;
+<span class="lineNum">    1133 </span>            :    Str newUri;
+<span class="lineNum">    1134 </span>            :    //Bool defaultNS = !name.hasPrefix();
+<span class="lineNum">    1135 </span>            : 
+<span class="lineNum">    1136 </span>            :    if (1 || name.hasPrefix())
+<span class="lineNum">    1137 </span>            :    {
+<span class="lineNum">    1138 </span>            :       Phrase newPrefix = UNDEF_PHRASE;
+<span class="lineNum">    1139 </span>            :       Str myUri = name.getUri();
+<span class="lineNum">    1140 </span>            :       int i;
+<span class="lineNum">    1141 </span>            :       Bool aliasFound = FALSE;
+<span class="lineNum">    1142 </span>            :       if (styleSheet)
+<span class="lineNum">    1143 </span>            :       {
+<span class="lineNum">    1144 </span>            :           for (i = 0; i &lt; styleSheet -&gt; aliases().number(); i++)
+<span class="lineNum">    1145 </span>            :           {
+<span class="lineNum">    1146 </span>            :             const Str* aliasUri = 
+<span class="lineNum">    1147 </span>            :               currNamespaces.getUri(styleSheet -&gt; expand(
+<span class="lineNum">    1148 </span>            :                                  styleSheet -&gt; aliases()[i]-&gt;getKey()));
+<span class="lineNum">    1149 </span>            :             if (aliasUri &amp;&amp; *aliasUri == myUri)
+<span class="lineNum">    1150 </span>            :               {
+<span class="lineNum">    1151 </span>            :                 newPrefix = styleSheet -&gt; aliases()[i] -&gt; getValue();
+<span class="lineNum">    1152 </span>            :                 aliasFound = TRUE;
+<span class="lineNum">    1153 </span>            :               };                
+<span class="lineNum">    1154 </span>            :           }
+<span class="lineNum">    1155 </span>            :       };
+<span class="lineNum">    1156 </span>            :       
+<span class="lineNum">    1157 </span>            :       if (newPrefix == UNDEF_PHRASE)
+<span class="lineNum">    1158 </span>            :         {
+<span class="lineNum">    1159 </span>            :           if (! aliasFound &amp;&amp; name.hasPrefix()) 
+<span class="lineNum">    1160 </span>            :             newPrefixStr = name.getPrefix();
+<span class="lineNum">    1161 </span>            :         } 
+<span class="lineNum">    1162 </span>            :       else 
+<span class="lineNum">    1163 </span>            :         {
+<span class="lineNum">    1164 </span>            :           newPrefixStr = styleSheet -&gt; expand(newPrefix);
+<span class="lineNum">    1165 </span>            :           //s += newPrefixStr;
+<span class="lineNum">    1166 </span>            :           //we should proceed w/o this 
+<span class="lineNum">    1167 </span>            :           //currNamespaces.appendConstruct(name.getPrefix(),name.getUri(),TRUE);
+<span class="lineNum">    1168 </span>            :           //currNamespaces.appendConstruct(newPrefixStr,
+<span class="lineNum">    1169 </span>            :           // *currNamespaces.getUri(newPrefixStr));
+<span class="lineNum">    1170 </span>            :         };
+<span class="lineNum">    1171 </span>            :         //if (!s.isEmpty()) //could be empty e.g. for the default namespace
+<span class="lineNum">    1172 </span>            :       //  s += &quot;:&quot;;
+<span class="lineNum">    1173 </span>            :    };
+<span class="lineNum">    1174 </span>            :    if (expatLike)
+<span class="lineNum">    1175 </span>            :      {
+<span class="lineNum">    1176 </span>            :        s  = name.getUri();
+<span class="lineNum">    1177 </span>            :        s += THE_NAMESPACE_SEPARATOR;
+<span class="lineNum">    1178 </span>            :        s += name.getLocal();
+<span class="lineNum">    1179 </span>            :        s += THE_NAMESPACE_SEPARATOR;
+<span class="lineNum">    1180 </span>            :        s += newPrefixStr;
+<span class="lineNum">    1181 </span>            :      }
+<span class="lineNum">    1182 </span>            :    else 
+<span class="lineNum">    1183 </span>            :      {
+<span class="lineNum">    1184 </span>            :        s = newPrefixStr;
+<span class="lineNum">    1185 </span>            :        if (! s.isEmpty()) s += &quot;:&quot;;
+<span class="lineNum">    1186 </span>            :        s += name.getLocal();
+<span class="lineNum">    1187 </span>            :      }
+<span class="lineNum">    1188 </span>            :    return s;
+<span class="lineNum">    1189 </span>            : }
+<a name="1190"><span class="lineNum">    1190 </span>            : */</a>
+<span class="lineNum">    1191 </span>            : 
+<span class="lineNum">    1192 </span><span class="lineNoCov">          0 : eFlag Processor::addKey(Sit S, const EQName&amp; ename,</span>
+<span class="lineNum">    1193 </span>            :                         Expression&amp; match, Expression &amp;use)
+<span class="lineNum">    1194 </span>            : {
+<span class="lineNum">    1195 </span>            :   
+<span class="lineNum">    1196 </span>            :   //E( keys -&gt; addKey(S, ename, toSXP_Document(*input), match, use) );
+<span class="lineNum">    1197 </span><span class="lineNoCov">          0 :   E( NZ(keys) -&gt; addKey(S, ename, inputRoot, match, use) );</span>
+<span class="lineNum">    1198 </span><span class="lineNoCov">          0 :   return OK;</span>
+<a name="1199"><span class="lineNum">    1199 </span>            : }</a>
+<span class="lineNum">    1200 </span>            : 
+<span class="lineNum">    1201 </span><span class="lineNoCov">          0 : eFlag Processor::getKeyNodes(Sit S, const EQName&amp; ename, </span>
+<span class="lineNum">    1202 </span>            :                              const Str&amp; value, Context&amp; result, 
+<span class="lineNum">    1203 </span>            :                              SXP_Document doc) const
+<span class="lineNum">    1204 </span>            : {
+<span class="lineNum">    1205 </span><span class="lineNoCov">          0 :     E( NZ(keys) -&gt; getNodes(S, ename, doc, value, result) );</span>
+<span class="lineNum">    1206 </span><span class="lineNoCov">          0 :     return OK;</span>
+<a name="1207"><span class="lineNum">    1207 </span>            : }</a>
+<span class="lineNum">    1208 </span>            : 
+<span class="lineNum">    1209 </span><span class="lineNoCov">          0 : eFlag Processor::makeKeysForDoc(Sit S, SXP_Document doc)</span>
+<span class="lineNum">    1210 </span>            : { 
+<span class="lineNum">    1211 </span><span class="lineNoCov">          0 :     E( NZ(keys) -&gt; makeKeysForDoc(S, doc) );</span>
+<span class="lineNum">    1212 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">    1213 </span>            : }
+<a name="1214"><span class="lineNum">    1214 </span>            : </a>
+<span class="lineNum">    1215 </span>            : 
+<span class="lineNum">    1216 </span><span class="lineNoCov">          0 : void Processor::report(Sit S, MsgType type, MsgCode code, </span>
+<a name="1217"><span class="lineNum">    1217 </span>            :     const Str &amp;arg1, const Str &amp;arg2) const</a>
+<span class="lineNum">    1218 </span>            : {
+<span class="lineNum">    1219 </span><span class="lineCov">        218 :     S.message(type, code, arg1, arg2);</span>
+<a name="1220"><span class="lineNum">    1220 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">    1221 </span>            : 
+<span class="lineNum">    1222 </span><span class="lineNoCov">          0 : void Processor::initForSXP(Tree *baseTree)</span>
+<span class="lineNum">    1223 </span>            : {
+<span class="lineNum">    1224 </span><span class="lineNoCov">          0 :   input = NULL;</span>
+<span class="lineNum">    1225 </span><span class="lineNoCov">          0 :   styleSheet = baseTree;</span>
+<span class="lineNum">    1226 </span><span class="lineNoCov">          0 :   runsOnExternal = TRUE;</span>
+<span class="lineNum">    1227 </span><span class="lineNoCov">          0 :   if (!vars)</span>
+<span class="lineNum">    1228 </span><span class="lineNoCov">          0 :     vars = new VarsList(*styleSheet);</span>
+<a name="1229"><span class="lineNum">    1229 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">    1230 </span>            : 
+<span class="lineNum">    1231 </span><span class="lineNoCov">          0 : void Processor::cleanupAfterSXP()</span>
+<span class="lineNum">    1232 </span>            : {
+<span class="lineNum">    1233 </span><span class="lineNoCov">          0 :   vars -&gt; freeall(FALSE);</span>
+<span class="lineNum">    1234 </span><span class="lineNoCov">          0 :   styleSheet = NULL;</span>
+<span class="lineNum">    1235 </span><span class="lineNoCov">          0 :   runsOnExternal = FALSE;</span>
+<a name="1236"><span class="lineNum">    1236 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">    1237 </span>            : 
+<span class="lineNum">    1238 </span><span class="lineNoCov">          0 : Bool Processor::supportsFunction(Str &amp;uri, Str &amp;name) </span>
+<span class="lineNum">    1239 </span>            : {
+<span class="lineNum">    1240 </span>            : #ifdef ENABLE_JS
+<span class="lineNum">    1241 </span>            :   JSContextItem *item = jscontexts.find(uri, FALSE);  
+<span class="lineNum">    1242 </span>            :   if (item) {
+<span class="lineNum">    1243 </span>            :     for (int i = 0; i &lt; item -&gt; names.number(); i++) {
+<span class="lineNum">    1244 </span>            :       if (*(item -&gt; names[i]) == name) return TRUE;
+<span class="lineNum">    1245 </span>            :     }
+<span class="lineNum">    1246 </span>            :   }
+<span class="lineNum">    1247 </span>            :   return FALSE;
+<span class="lineNum">    1248 </span>            : #else
+<span class="lineNum">    1249 </span><span class="lineNoCov">          0 :   return FALSE;</span>
+<span class="lineNum">    1250 </span>            : #endif
+<span class="lineNum">    1251 </span>            : }
+<span class="lineNum">    1252 </span>            : 
+<span class="lineNum">    1253 </span>            : #ifdef ENABLE_JS
+<span class="lineNum">    1254 </span>            : eFlag Processor::evaluateJavaScript(Sit S, Str &amp;uri, DStr &amp;script) 
+<span class="lineNum">    1255 </span>            : {
+<span class="lineNum">    1256 </span>            :   //printf(&quot;===&gt; evaluating uri %s: %s\n&quot;, (char*)uri, (char*)script);
+<span class="lineNum">    1257 </span>            : 
+<span class="lineNum">    1258 </span>            :   JSContextItem *item = jscontexts.find(uri, TRUE);
+<span class="lineNum">    1259 </span>            :   sabassert(item);
+<span class="lineNum">    1260 </span>            :   if (item &amp;&amp; item -&gt; cx) {
+<span class="lineNum">    1261 </span>            :     if (! SJSEvaluate(*item, script ) )
+<span class="lineNum">    1262 </span>            :       {
+<span class="lineNum">    1263 </span>            :         Str msg = &quot;'&quot;;
+<span class="lineNum">    1264 </span>            :         msg = msg + (item -&gt; errInfo.message ? item -&gt; errInfo.message : &quot;&quot;);
+<span class="lineNum">    1265 </span>            :         if (item -&gt; errInfo.token) {
+<span class="lineNum">    1266 </span>            :           msg = msg + &quot;' token: '&quot;;
+<span class="lineNum">    1267 </span>            :           msg = msg + (item -&gt; errInfo.token ? item -&gt; errInfo.token : &quot;&quot;);
+<span class="lineNum">    1268 </span>            :         }
+<span class="lineNum">    1269 </span>            :         msg = msg + &quot;'&quot;;
+<span class="lineNum">    1270 </span>            :         Err2( S, E_JS_EVAL_ERROR, 
+<span class="lineNum">    1271 </span>            :               Str(item -&gt; errInfo.line), msg );
+<span class="lineNum">    1272 </span>            :       }
+<span class="lineNum">    1273 </span>            :   }
+<span class="lineNum">    1274 </span>            :   
+<span class="lineNum">    1275 </span>            :   return OK;
+<span class="lineNum">    1276 </span>            : }
+<span class="lineNum">    1277 </span>            : 
+<span class="lineNum">    1278 </span>            : eFlag Processor::callJSFunction(Sit S, Context *c, Str &amp;uri, Str &amp;name, 
+<span class="lineNum">    1279 </span>            :                                   ExprList &amp;atoms, Expression &amp;retxpr)
+<span class="lineNum">    1280 </span>            : {
+<span class="lineNum">    1281 </span>            :   if (supportsFunction(uri, name)) {
+<span class="lineNum">    1282 </span>            :     JSContextItem *item = jscontexts.find(uri, FALSE);
+<span class="lineNum">    1283 </span>            :     if (item) {
+<span class="lineNum">    1284 </span>            :       if (! SJSCallFunction(S, c, *item, name, atoms, retxpr) )
+<span class="lineNum">    1285 </span>            :         {
+<span class="lineNum">    1286 </span>            :           Str msg = &quot;'&quot;;
+<span class="lineNum">    1287 </span>            :           msg = msg + (item -&gt; errInfo.message ? item -&gt; errInfo.message : &quot;&quot;);
+<span class="lineNum">    1288 </span>            :           if (item -&gt; errInfo.token) {
+<span class="lineNum">    1289 </span>            :             msg = msg + &quot;' token: '&quot;;
+<span class="lineNum">    1290 </span>            :             msg = msg + (item -&gt; errInfo.token ? item -&gt; errInfo.token : &quot;&quot;);
+<span class="lineNum">    1291 </span>            :           }
+<span class="lineNum">    1292 </span>            :           msg = msg + &quot;'&quot;;
+<span class="lineNum">    1293 </span>            :           Err2( S, E_JS_EVAL_ERROR, 
+<span class="lineNum">    1294 </span>            :                 Str(item -&gt; errInfo.line), msg );
+<span class="lineNum">    1295 </span>            :         };
+<span class="lineNum">    1296 </span>            :     }
+<span class="lineNum">    1297 </span>            :   }
+<span class="lineNum">    1298 </span>            : 
+<span class="lineNum">    1299 </span>            :   return OK;
+<span class="lineNum">    1300 </span>            : }
+<a name="1301"><span class="lineNum">    1301 </span>            : #endif</a>
+<span class="lineNum">    1302 </span>            : 
+<span class="lineNum">    1303 </span><span class="lineNoCov">          0 : Str Processor::getNextNSPrefix()</span>
+<span class="lineNum">    1304 </span>            : {
+<span class="lineNum">    1305 </span>            :   char ret[10];
+<span class="lineNum">    1306 </span><span class="lineNoCov">          0 :   sprintf(ret, &quot;ns_%d&quot;, nsUnique++);</span>
+<span class="lineNum">    1307 </span><span class="lineNoCov">          0 :   return Str(ret);</span>
+<span class="lineNum">    1308 </span>            : }
+<span class="lineNum">    1309 </span>            : 
+<span class="lineNum">    1310 </span><span class="lineNoCov">          0 : eFlag Processor::resolveGlobal(Sit S, Context *c, QName &amp;name, XSLElement *varElem /* = NULL */)    </span>
+<span class="lineNum">    1311 </span>            : { 
+<span class="lineNum">    1312 </span>            :   // if !varElem, we need to ask styleSheet's toplevel var directory
+<span class="lineNum">    1313 </span>            :   /*
+<span class="lineNum">    1314 </span>            :   if (!varElem)
+<span class="lineNum">    1315 </span>            :     varElem = styleSheet -&gt; findVarInDirectory(name);
+<span class="lineNum">    1316 </span>            :   else
+<span class="lineNum">    1317 </span>            :     {
+<span class="lineNum">    1318 </span>            :       // set the variable name from the element
+<span class="lineNum">    1319 </span>            :       E( varElem -&gt; setLogical(S, name, NZ(varElem -&gt; atts.find(XSLA_NAME)) -&gt; cont, FALSE) );
+<span class="lineNum">    1320 </span>            :     }
+<span class="lineNum">    1321 </span>            :   */
+<span class="lineNum">    1322 </span>            :   
+<span class="lineNum">    1323 </span>            :   //we have either the name or the element, if both, the element wins
+<span class="lineNum">    1324 </span><span class="lineNoCov">          0 :   if (varElem) </span>
+<span class="lineNum">    1325 </span><span class="lineNoCov">          0 :       E( varElem-&gt;setLogical(S, name, </span>
+<span class="lineNum">    1326 </span>            :                              NZ(varElem-&gt;atts.find(XSLA_NAME))-&gt;cont, FALSE) );
+<span class="lineNum">    1327 </span>            :   //this element must be the same as the varElem if available
+<span class="lineNum">    1328 </span><span class="lineNoCov">          0 :   XSLElement *aux = styleSheet -&gt; findVarInDirectory(name);</span>
+<span class="lineNum">    1329 </span><span class="lineNoCov">          0 :   if (varElem)</span>
+<span class="lineNum">    1330 </span>            :     {
+<span class="lineNum">    1331 </span>            :       //it should happen only if the caller is XSLElement::execute
+<span class="lineNum">    1332 </span>            :       //and we have some overriden (import) declaration
+<span class="lineNum">    1333 </span>            :       //in such a case we simply skip the processing
+<span class="lineNum">    1334 </span><span class="lineNoCov">          0 :       if (varElem != aux) return OK;</span>
+<span class="lineNum">    1335 </span>            :     }
+<span class="lineNum">    1336 </span>            :   else
+<span class="lineNum">    1337 </span>            :     { 
+<span class="lineNum">    1338 </span>            :       varElem = aux;
+<span class="lineNum">    1339 </span>            :     }
+<span class="lineNum">    1340 </span>            : 
+<span class="lineNum">    1341 </span><span class="lineNoCov">          0 :   if (varElem)</span>
+<span class="lineNum">    1342 </span>            :     {
+<span class="lineNum">    1343 </span>            :       // find the var record for several references
+<span class="lineNum">    1344 </span><span class="lineNoCov">          0 :       VarBindings* record = vars -&gt; find(name);</span>
+<span class="lineNum">    1345 </span>            :       // maybe it has a binding defined from a forward reference?
+<span class="lineNum">    1346 </span>            :       //but it shouldn't happen now, due the ** condition
+<span class="lineNum">    1347 </span><span class="lineNoCov">          0 :       if (record &amp;&amp; vars -&gt; getBinding(record))</span>
+<span class="lineNum">    1348 </span><span class="lineNoCov">          0 :         return OK;</span>
+<span class="lineNum">    1349 </span>            :       else
+<span class="lineNum">    1350 </span>            :         {
+<span class="lineNum">    1351 </span>            :           // maybe it is an &quot;open toplevel&quot; (currently processed)
+<span class="lineNum">    1352 </span><span class="lineNoCov">          0 :           if (record &amp;&amp; vars -&gt; isOpenGlobal(record))</span>
+<span class="lineNum">    1353 </span>            :             {
+<span class="lineNum">    1354 </span><span class="lineNoCov">          0 :               Str fullName;</span>
+<span class="lineNum">    1355 </span><span class="lineNoCov">          0 :               styleSheet -&gt; expandQStr(name, fullName);</span>
+<span class="lineNum">    1356 </span><span class="lineNoCov">          0 :               Err1(S, E1_VAR_CIRCULAR_REF, fullName);</span>
+<span class="lineNum">    1357 </span>            :             }
+<span class="lineNum">    1358 </span>            :           else
+<span class="lineNum">    1359 </span>            :             {
+<span class="lineNum">    1360 </span>            :               // process it normally
+<span class="lineNum">    1361 </span><span class="lineNoCov">          0 :               E( vars -&gt; openGlobal(S, name, record) );</span>
+<span class="lineNum">    1362 </span>            :               // varElem's expression will automatically evaluate with &quot;resolvingGlobal&quot;
+<span class="lineNum">    1363 </span><span class="lineNoCov">          0 :               E( varElem -&gt; execute(S, c, /* resolvingGlobals = */ TRUE) );</span>
+<span class="lineNum">    1364 </span><span class="lineNoCov">          0 :               E( vars -&gt; closeGlobal(S, record) );           </span>
+<span class="lineNum">    1365 </span>            :             }
+<span class="lineNum">    1366 </span>            :         }
+<span class="lineNum">    1367 </span>            :     }
+<span class="lineNum">    1368 </span>            :   else
+<span class="lineNum">    1369 </span>            :     {
+<span class="lineNum">    1370 </span>            :       // this is not a global
+<span class="lineNum">    1371 </span><span class="lineNoCov">          0 :       Str fullName;</span>
+<span class="lineNum">    1372 </span><span class="lineNoCov">          0 :       styleSheet -&gt; expandQStr(name, fullName);</span>
+<span class="lineNum">    1373 </span><span class="lineNoCov">          0 :       Err1(S, E1_VAR_NOT_FOUND, fullName);</span>
+<span class="lineNum">    1374 </span>            :     }
+<span class="lineNum">    1375 </span><span class="lineNoCov">          0 :   return OK;</span>
+<span class="lineNum">    1376 </span>            : }
+<span class="lineNum">    1377 </span>            : 
+<span class="lineNum">    1378 </span>            : /*
+<span class="lineNum">    1379 </span>            : eFlag Processor::resolveGlobals(Sit S, Context *c)
+<span class="lineNum">    1380 </span>            : {
+<span class="lineNum">    1381 </span>            :      return styleSheet -&gt; resolveGlobals(S, c, this);
+<span class="lineNum">    1382 </span>            : }
+<a name="1383"><span class="lineNum">    1383 </span>            : */</a>
+<span class="lineNum">    1384 </span>            : 
+<span class="lineNum">    1385 </span><span class="lineNoCov">          0 : eFlag Processor::stripElement(Sit S, Daddy *e)</span>
+<span class="lineNum">    1386 </span>            : {
+<span class="lineNum">    1387 </span><span class="lineNoCov">          0 :   if (isElement(e) &amp;&amp; ! toE(e) -&gt; preserveSpace)</span>
+<span class="lineNum">    1388 </span>            :     {
+<span class="lineNum">    1389 </span><span class="lineNoCov">          0 :       EQName ename;</span>
+<span class="lineNum">    1390 </span><span class="lineNoCov">          0 :       e -&gt; getOwner().expandQ(e -&gt; getName(), ename);</span>
+<span class="lineNum">    1391 </span>            :       int sprec, pprec;
+<span class="lineNum">    1392 </span>            :       double sprio, pprio;
+<span class="lineNum">    1393 </span><span class="lineNoCov">          0 :       Bool s = styleSheet -&gt; findStrippedName(ename, sprec, sprio);</span>
+<span class="lineNum">    1394 </span><span class="lineNoCov">          0 :       Bool p = styleSheet -&gt; findPreservedName(ename, pprec, pprio);</span>
+<span class="lineNum">    1395 </span>            : 
+<span class="lineNum">    1396 </span><span class="lineNoCov">          0 :       if (s &amp;&amp; (!p || sprec &lt; pprec || sprio &gt; pprio))</span>
+<span class="lineNum">    1397 </span>            :         {
+<span class="lineNum">    1398 </span><span class="lineNoCov">          0 :           e -&gt; contents.strip();</span>
+<span class="lineNum">    1399 </span><span class="lineNoCov">          0 :         }</span>
+<span class="lineNum">    1400 </span>            :     }
+<span class="lineNum">    1401 </span>            : 
+<span class="lineNum">    1402 </span>            :   //process recursively
+<span class="lineNum">    1403 </span><span class="lineNoCov">          0 :   for (int i = 0; i &lt; e -&gt; contents.number(); i++)</span>
+<span class="lineNum">    1404 </span>            :     {
+<span class="lineNum">    1405 </span><span class="lineNoCov">          0 :       if (isElement(e -&gt; contents[i]))</span>
+<span class="lineNum">    1406 </span><span class="lineNoCov">          0 :         E( stripElement(S, toE(e -&gt; contents[i])) );</span>
+<span class="lineNum">    1407 </span>            :     }
+<span class="lineNum">    1408 </span>            :   return OK;
+<a name="1409"><span class="lineNum">    1409 </span>            : }</a>
+<span class="lineNum">    1410 </span>            : 
+<span class="lineNum">    1411 </span><span class="lineCov">        109 : eFlag Processor::stripTree(Sit S, Tree &amp;tree)</span>
+<span class="lineNum">    1412 </span>            : {
+<span class="lineNum">    1413 </span>            :   //strip is forbidden
+<span class="lineNum">    1414 </span><span class="lineCov">        109 :   if (S.hasFlag(SAB_DISABLE_STRIPPING)) return OK;</span>
+<span class="lineNum">    1415 </span>            : 
+<span class="lineNum">    1416 </span>            :   //never strip the tree twice
+<span class="lineNum">    1417 </span><span class="lineCov">        109 :   if (tree.stripped) return OK;</span>
+<span class="lineNum">    1418 </span>            : 
+<span class="lineNum">    1419 </span>            :   //skip if no definition in the stylesheet
+<span class="lineNum">    1420 </span><span class="lineCov">        218 :   if (!styleSheet -&gt; hasAnyStrippedName() &amp;&amp; </span>
+<span class="lineNum">    1421 </span><span class="lineCov">        109 :       ! styleSheet -&gt; hasAnyPreservedName())</span>
+<span class="lineNum">    1422 </span>            :     return OK;
+<span class="lineNum">    1423 </span>            : 
+<span class="lineNum">    1424 </span>            :   //do it
+<span class="lineNum">    1425 </span><span class="lineNoCov">          0 :   Daddy &amp;d = tree.getRoot();</span>
+<span class="lineNum">    1426 </span><span class="lineNoCov">          0 :   E( stripElement(S, &amp;d) );</span>
+<span class="lineNum">    1427 </span>            : 
+<span class="lineNum">    1428 </span><span class="lineNoCov">          0 :   tree.stripped = TRUE;</span>
+<span class="lineNum">    1429 </span>            : 
+<span class="lineNum">    1430 </span><span class="lineNoCov">          0 :   return OK;</span>
+<a name="1431"><span class="lineNum">    1431 </span>            : }</a>
+<span class="lineNum">    1432 </span>            : 
+<span class="lineNum">    1433 </span><span class="lineNoCov">          0 : void Processor::pushInBinding(Bool val)</span>
+<span class="lineNum">    1434 </span>            : {
+<span class="lineNum">    1435 </span><span class="lineNoCov">          0 :   inBinding.append(val);</span>
+<a name="1436"><span class="lineNum">    1436 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">    1437 </span>            : 
+<span class="lineNum">    1438 </span><span class="lineNoCov">          0 : void Processor::popInBinding()</span>
+<span class="lineNum">    1439 </span>            : {
+<span class="lineNum">    1440 </span><span class="lineNoCov">          0 :   inBinding.deppend();</span>
+<a name="1441"><span class="lineNum">    1441 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">    1442 </span>            : 
+<span class="lineNum">    1443 </span><span class="lineNoCov">          0 : Bool Processor::isInBinding()</span>
+<span class="lineNum">    1444 </span>            : {
+<span class="lineNum">    1445 </span><span class="lineNoCov">          0 :   return inBinding.number() &amp;&amp; inBinding.last();</span>
+<span class="lineNum">    1446 </span>            : }
+<span class="lineNum">    1447 </span>            : 
+<span class="lineNum">    1448 </span>            : /*
+<span class="lineNum">    1449 </span>            : eFlag Processor::pushDocumentDefinition(Sit S, OutputDefinition *def,
+<span class="lineNum">    1450 </span>            :                                         OutputterObj*&amp; out)
+<span class="lineNum">    1451 </span>            : {
+<span class="lineNum">    1452 </span>            :   sabassert(def);
+<span class="lineNum">    1453 </span>            :   Bool change = !documentDefinitions.number() || 
+<span class="lineNum">    1454 </span>            :     documentDefinitions.last() != def;
+<span class="lineNum">    1455 </span>            : 
+<span class="lineNum">    1456 </span>            :   documentDefinitions.append(def);
+<span class="lineNum">    1457 </span>            :   
+<span class="lineNum">    1458 </span>            :   if (change)
+<span class="lineNum">    1459 </span>            :     {
+<span class="lineNum">    1460 </span>            :       Str href = &quot;file:///home/pavel/ga/sablot-ext/bin/inner.xml&quot;;
+<span class="lineNum">    1461 </span>            :       Str base = &quot;&quot;;
+<span class="lineNum">    1462 </span>            :       E( pushOutputterForURI(S, href, base, def) );
+<span class="lineNum">    1463 </span>            :       E( outputter() -&gt; eventBeginOutput(S) );
+<span class="lineNum">    1464 </span>            :     }
+<span class="lineNum">    1465 </span>            : 
+<span class="lineNum">    1466 </span>            :   out = outputter();
+<span class="lineNum">    1467 </span>            :   return OK;
+<span class="lineNum">    1468 </span>            : }
+<span class="lineNum">    1469 </span>            : 
+<span class="lineNum">    1470 </span>            : eFlag Processor::popDocumentDefinition(Sit S)
+<span class="lineNum">    1471 </span>            : {
+<span class="lineNum">    1472 </span>            :   sabassert(documentDefinitions.number());
+<span class="lineNum">    1473 </span>            :   OutputDefinition *last = documentDefinitions.last();
+<span class="lineNum">    1474 </span>            :   documentDefinitions.deppend();
+<span class="lineNum">    1475 </span>            :   //
+<span class="lineNum">    1476 </span>            :   if (!documentDefinitions.number() || documentDefinitions.last() != last)
+<span class="lineNum">    1477 </span>            :     {
+<span class="lineNum">    1478 </span>            :       E( outputter() -&gt; eventTrailingNewline(S) );
+<span class="lineNum">    1479 </span>            :       E( outputter() -&gt; eventEndOutput(S) );
+<span class="lineNum">    1480 </span>            :       E( popOutputter(S) );
+<span class="lineNum">    1481 </span>            :     }
+<span class="lineNum">    1482 </span>            :   return OK;
+<span class="lineNum">    1483 </span>            : }
+<span class="lineNum">    1484 </span>            : 
+<span class="lineNum">    1485 </span>            : */
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

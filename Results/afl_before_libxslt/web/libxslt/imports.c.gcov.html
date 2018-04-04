@@ -1,0 +1,490 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - libxslt/imports.c</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">libxslt</a> - imports.c<span style="font-size: 80%;"> (source / <a href="imports.c.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">84</td>
+            <td class="headerCovTableEntry">138</td>
+            <td class="headerCovTableEntryLo">60.9 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-10-23</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">6</td>
+            <td class="headerCovTableEntry">7</td>
+            <td class="headerCovTableEntryMed">85.7 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /*</a>
+<span class="lineNum">       2 </span>            :  * imports.c: Implementation of the XSLT imports
+<span class="lineNum">       3 </span>            :  *
+<span class="lineNum">       4 </span>            :  * Reference:
+<span class="lineNum">       5 </span>            :  *   http://www.w3.org/TR/1999/REC-xslt-19991116
+<span class="lineNum">       6 </span>            :  *
+<span class="lineNum">       7 </span>            :  * See Copyright for the status of this software.
+<span class="lineNum">       8 </span>            :  *
+<span class="lineNum">       9 </span>            :  * daniel@veillard.com
+<span class="lineNum">      10 </span>            :  */
+<span class="lineNum">      11 </span>            : 
+<span class="lineNum">      12 </span>            : #define IN_LIBXSLT
+<span class="lineNum">      13 </span>            : #include &quot;libxslt.h&quot;
+<span class="lineNum">      14 </span>            : 
+<span class="lineNum">      15 </span>            : #include &lt;string.h&gt;
+<span class="lineNum">      16 </span>            : 
+<span class="lineNum">      17 </span>            : #ifdef HAVE_SYS_TYPES_H
+<span class="lineNum">      18 </span>            : #include &lt;sys/types.h&gt;
+<span class="lineNum">      19 </span>            : #endif
+<span class="lineNum">      20 </span>            : #ifdef HAVE_MATH_H
+<span class="lineNum">      21 </span>            : #include &lt;math.h&gt;
+<span class="lineNum">      22 </span>            : #endif
+<span class="lineNum">      23 </span>            : #ifdef HAVE_FLOAT_H
+<span class="lineNum">      24 </span>            : #include &lt;float.h&gt;
+<span class="lineNum">      25 </span>            : #endif
+<span class="lineNum">      26 </span>            : #ifdef HAVE_IEEEFP_H
+<span class="lineNum">      27 </span>            : #include &lt;ieeefp.h&gt;
+<span class="lineNum">      28 </span>            : #endif
+<span class="lineNum">      29 </span>            : #ifdef HAVE_NAN_H
+<span class="lineNum">      30 </span>            : #include &lt;nan.h&gt;
+<span class="lineNum">      31 </span>            : #endif
+<span class="lineNum">      32 </span>            : #ifdef HAVE_CTYPE_H
+<span class="lineNum">      33 </span>            : #include &lt;ctype.h&gt;
+<span class="lineNum">      34 </span>            : #endif
+<span class="lineNum">      35 </span>            : 
+<span class="lineNum">      36 </span>            : #include &lt;libxml/xmlmemory.h&gt;
+<span class="lineNum">      37 </span>            : #include &lt;libxml/tree.h&gt;
+<span class="lineNum">      38 </span>            : #include &lt;libxml/hash.h&gt;
+<span class="lineNum">      39 </span>            : #include &lt;libxml/xmlerror.h&gt;
+<span class="lineNum">      40 </span>            : #include &lt;libxml/uri.h&gt;
+<span class="lineNum">      41 </span>            : #include &quot;xslt.h&quot;
+<span class="lineNum">      42 </span>            : #include &quot;xsltInternals.h&quot;
+<span class="lineNum">      43 </span>            : #include &quot;xsltutils.h&quot;
+<span class="lineNum">      44 </span>            : #include &quot;preproc.h&quot;
+<span class="lineNum">      45 </span>            : #include &quot;imports.h&quot;
+<span class="lineNum">      46 </span>            : #include &quot;documents.h&quot;
+<span class="lineNum">      47 </span>            : #include &quot;security.h&quot;
+<span class="lineNum">      48 </span>            : #include &quot;pattern.h&quot;
+<span class="lineNum">      49 </span>            : 
+<span class="lineNum">      50 </span>            : 
+<span class="lineNum">      51 </span>            : /************************************************************************
+<span class="lineNum">      52 </span>            :  *                                                                      *
+<span class="lineNum">      53 </span>            :  *                      Module interfaces                               *
+<span class="lineNum">      54 </span>            :  *                                                                      *
+<span class="lineNum">      55 </span>            :  ************************************************************************/
+<span class="lineNum">      56 </span>            : /**
+<span class="lineNum">      57 </span>            :  * xsltFixImportedCompSteps:
+<span class="lineNum">      58 </span>            :  * @master: the &quot;master&quot; stylesheet
+<span class="lineNum">      59 </span>            :  * @style: the stylesheet being imported by the master
+<span class="lineNum">      60 </span>            :  *
+<span class="lineNum">      61 </span>            :  * normalize the comp steps for the stylesheet being imported
+<span class="lineNum">      62 </span>            :  * by the master, together with any imports within that.
+<a name="63"><span class="lineNum">      63 </span>            :  *</a>
+<span class="lineNum">      64 </span>            :  */
+<span class="lineNum">      65 </span><span class="lineNoCov">          0 : static void xsltFixImportedCompSteps(xsltStylesheetPtr master,</span>
+<span class="lineNum">      66 </span>            :                         xsltStylesheetPtr style) {
+<span class="lineNum">      67 </span>            :     xsltStylesheetPtr res;
+<span class="lineNum">      68 </span><span class="lineNoCov">          0 :     xmlHashScan(style-&gt;templatesHash,</span>
+<span class="lineNum">      69 </span>            :                     (xmlHashScanner) xsltNormalizeCompSteps, master);
+<span class="lineNum">      70 </span><span class="lineNoCov">          0 :     master-&gt;extrasNr += style-&gt;extrasNr;</span>
+<span class="lineNum">      71 </span><span class="lineNoCov">          0 :     for (res = style-&gt;imports; res != NULL; res = res-&gt;next) {</span>
+<span class="lineNum">      72 </span><span class="lineNoCov">          0 :         xsltFixImportedCompSteps(master, res);</span>
+<span class="lineNum">      73 </span>            :     }
+<span class="lineNum">      74 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">      75 </span>            : 
+<span class="lineNum">      76 </span>            : /**
+<span class="lineNum">      77 </span>            :  * xsltParseStylesheetImport:
+<span class="lineNum">      78 </span>            :  * @style:  the XSLT stylesheet
+<span class="lineNum">      79 </span>            :  * @cur:  the import element
+<span class="lineNum">      80 </span>            :  *
+<span class="lineNum">      81 </span>            :  * parse an XSLT stylesheet import element
+<span class="lineNum">      82 </span>            :  *
+<span class="lineNum">      83 </span>            :  * Returns 0 in case of success -1 in case of failure.
+<span class="lineNum">      84 </span>            :  */
+<a name="85"><span class="lineNum">      85 </span>            : </a>
+<span class="lineNum">      86 </span>            : int
+<span class="lineNum">      87 </span><span class="lineCov">          2 : xsltParseStylesheetImport(xsltStylesheetPtr style, xmlNodePtr cur) {</span>
+<span class="lineNum">      88 </span><span class="lineCov">          2 :     int ret = -1;</span>
+<span class="lineNum">      89 </span><span class="lineCov">          2 :     xmlDocPtr import = NULL;</span>
+<span class="lineNum">      90 </span><span class="lineCov">          2 :     xmlChar *base = NULL;</span>
+<span class="lineNum">      91 </span><span class="lineCov">          2 :     xmlChar *uriRef = NULL;</span>
+<span class="lineNum">      92 </span><span class="lineCov">          2 :     xmlChar *URI = NULL;</span>
+<span class="lineNum">      93 </span>            :     xsltStylesheetPtr res;
+<span class="lineNum">      94 </span>            :     xsltSecurityPrefsPtr sec;
+<span class="lineNum">      95 </span>            : 
+<span class="lineNum">      96 </span><span class="lineCov">          2 :     if ((cur == NULL) || (style == NULL))</span>
+<span class="lineNum">      97 </span>            :         return (ret);
+<span class="lineNum">      98 </span>            : 
+<span class="lineNum">      99 </span><span class="lineCov">          2 :     uriRef = xmlGetNsProp(cur, (const xmlChar *)&quot;href&quot;, NULL);</span>
+<span class="lineNum">     100 </span><span class="lineCov">          2 :     if (uriRef == NULL) {</span>
+<span class="lineNum">     101 </span><span class="lineNoCov">          0 :         xsltTransformError(NULL, style, cur,</span>
+<span class="lineNum">     102 </span>            :             &quot;xsl:import : missing href attribute\n&quot;);
+<span class="lineNum">     103 </span><span class="lineNoCov">          0 :         goto error;</span>
+<span class="lineNum">     104 </span>            :     }
+<span class="lineNum">     105 </span>            : 
+<span class="lineNum">     106 </span><span class="lineCov">          2 :     base = xmlNodeGetBase(style-&gt;doc, cur);</span>
+<span class="lineNum">     107 </span><span class="lineCov">          2 :     URI = xmlBuildURI(uriRef, base);</span>
+<span class="lineNum">     108 </span><span class="lineCov">          2 :     if (URI == NULL) {</span>
+<span class="lineNum">     109 </span><span class="lineNoCov">          0 :         xsltTransformError(NULL, style, cur,</span>
+<span class="lineNum">     110 </span>            :             &quot;xsl:import : invalid URI reference %s\n&quot;, uriRef);
+<span class="lineNum">     111 </span><span class="lineNoCov">          0 :         goto error;</span>
+<span class="lineNum">     112 </span>            :     }
+<span class="lineNum">     113 </span>            : 
+<span class="lineNum">     114 </span>            :     res = style;
+<span class="lineNum">     115 </span><span class="lineCov">          4 :     while (res != NULL) {</span>
+<span class="lineNum">     116 </span><span class="lineCov">          2 :         if (res-&gt;doc == NULL)</span>
+<span class="lineNum">     117 </span>            :             break;
+<span class="lineNum">     118 </span><span class="lineCov">          2 :         if (xmlStrEqual(res-&gt;doc-&gt;URL, URI)) {</span>
+<span class="lineNum">     119 </span><span class="lineNoCov">          0 :             xsltTransformError(NULL, style, cur,</span>
+<span class="lineNum">     120 </span>            :                &quot;xsl:import : recursion detected on imported URL %s\n&quot;, URI);
+<span class="lineNum">     121 </span><span class="lineNoCov">          0 :             goto error;</span>
+<span class="lineNum">     122 </span>            :         }
+<span class="lineNum">     123 </span><span class="lineCov">          2 :         res = res-&gt;parent;</span>
+<span class="lineNum">     124 </span>            :     }
+<span class="lineNum">     125 </span>            : 
+<span class="lineNum">     126 </span>            :     /*
+<span class="lineNum">     127 </span>            :      * Security framework check
+<span class="lineNum">     128 </span>            :      */
+<span class="lineNum">     129 </span><span class="lineCov">          2 :     sec = xsltGetDefaultSecurityPrefs();</span>
+<span class="lineNum">     130 </span><span class="lineCov">          2 :     if (sec != NULL) {</span>
+<span class="lineNum">     131 </span>            :         int secres;
+<span class="lineNum">     132 </span>            : 
+<span class="lineNum">     133 </span><span class="lineCov">          2 :         secres = xsltCheckRead(sec, NULL, URI);</span>
+<span class="lineNum">     134 </span><span class="lineCov">          2 :         if (secres == 0) {</span>
+<span class="lineNum">     135 </span><span class="lineNoCov">          0 :             xsltTransformError(NULL, NULL, NULL,</span>
+<span class="lineNum">     136 </span>            :                  &quot;xsl:import: read rights for %s denied\n&quot;,
+<span class="lineNum">     137 </span>            :                              URI);
+<span class="lineNum">     138 </span><span class="lineNoCov">          0 :             goto error;</span>
+<span class="lineNum">     139 </span>            :         }
+<span class="lineNum">     140 </span>            :     }
+<span class="lineNum">     141 </span>            : 
+<span class="lineNum">     142 </span><span class="lineCov">          2 :     import = xsltDocDefaultLoader(URI, style-&gt;dict, XSLT_PARSE_OPTIONS,</span>
+<span class="lineNum">     143 </span>            :                                   (void *) style, XSLT_LOAD_STYLESHEET);
+<span class="lineNum">     144 </span><span class="lineCov">          2 :     if (import == NULL) {</span>
+<span class="lineNum">     145 </span><span class="lineCov">          2 :         xsltTransformError(NULL, style, cur,</span>
+<span class="lineNum">     146 </span>            :             &quot;xsl:import : unable to load %s\n&quot;, URI);
+<span class="lineNum">     147 </span><span class="lineCov">          2 :         goto error;</span>
+<span class="lineNum">     148 </span>            :     }
+<span class="lineNum">     149 </span>            : 
+<span class="lineNum">     150 </span><span class="lineNoCov">          0 :     res = xsltParseStylesheetImportedDoc(import, style);</span>
+<span class="lineNum">     151 </span><span class="lineNoCov">          0 :     if (res != NULL) {</span>
+<span class="lineNum">     152 </span><span class="lineNoCov">          0 :         res-&gt;next = style-&gt;imports;</span>
+<span class="lineNum">     153 </span><span class="lineNoCov">          0 :         style-&gt;imports = res;</span>
+<span class="lineNum">     154 </span><span class="lineNoCov">          0 :         if (style-&gt;parent == NULL) {</span>
+<span class="lineNum">     155 </span><span class="lineNoCov">          0 :             xsltFixImportedCompSteps(style, res);</span>
+<span class="lineNum">     156 </span>            :         }
+<span class="lineNum">     157 </span>            :         ret = 0;
+<span class="lineNum">     158 </span>            :     } else {
+<span class="lineNum">     159 </span><span class="lineNoCov">          0 :         xmlFreeDoc(import);</span>
+<span class="lineNum">     160 </span>            :         }
+<span class="lineNum">     161 </span>            : 
+<span class="lineNum">     162 </span>            : error:
+<span class="lineNum">     163 </span><span class="lineCov">          2 :     if (uriRef != NULL)</span>
+<span class="lineNum">     164 </span><span class="lineCov">          2 :         xmlFree(uriRef);</span>
+<span class="lineNum">     165 </span><span class="lineCov">          2 :     if (base != NULL)</span>
+<span class="lineNum">     166 </span><span class="lineCov">          2 :         xmlFree(base);</span>
+<span class="lineNum">     167 </span><span class="lineCov">          2 :     if (URI != NULL)</span>
+<span class="lineNum">     168 </span><span class="lineCov">          2 :         xmlFree(URI);</span>
+<span class="lineNum">     169 </span>            : 
+<span class="lineNum">     170 </span><span class="lineCov">          2 :     return (ret);</span>
+<span class="lineNum">     171 </span>            : }
+<span class="lineNum">     172 </span>            : 
+<span class="lineNum">     173 </span>            : /**
+<span class="lineNum">     174 </span>            :  * xsltParseStylesheetInclude:
+<span class="lineNum">     175 </span>            :  * @style:  the XSLT stylesheet
+<span class="lineNum">     176 </span>            :  * @cur:  the include node
+<span class="lineNum">     177 </span>            :  *
+<span class="lineNum">     178 </span>            :  * parse an XSLT stylesheet include element
+<span class="lineNum">     179 </span>            :  *
+<span class="lineNum">     180 </span>            :  * Returns 0 in case of success -1 in case of failure
+<span class="lineNum">     181 </span>            :  */
+<a name="182"><span class="lineNum">     182 </span>            : </a>
+<span class="lineNum">     183 </span>            : int
+<span class="lineNum">     184 </span><span class="lineCov">          3 : xsltParseStylesheetInclude(xsltStylesheetPtr style, xmlNodePtr cur) {</span>
+<span class="lineNum">     185 </span><span class="lineCov">          3 :     int ret = -1;</span>
+<span class="lineNum">     186 </span>            :     xmlDocPtr oldDoc;
+<span class="lineNum">     187 </span><span class="lineCov">          3 :     xmlChar *base = NULL;</span>
+<span class="lineNum">     188 </span><span class="lineCov">          3 :     xmlChar *uriRef = NULL;</span>
+<span class="lineNum">     189 </span><span class="lineCov">          3 :     xmlChar *URI = NULL;</span>
+<span class="lineNum">     190 </span>            :     xsltStylesheetPtr result;
+<span class="lineNum">     191 </span>            :     xsltDocumentPtr include;
+<span class="lineNum">     192 </span>            :     xsltDocumentPtr docptr;
+<span class="lineNum">     193 </span>            :     int oldNopreproc;
+<span class="lineNum">     194 </span>            : 
+<span class="lineNum">     195 </span><span class="lineCov">          3 :     if ((cur == NULL) || (style == NULL))</span>
+<span class="lineNum">     196 </span>            :         return (ret);
+<span class="lineNum">     197 </span>            : 
+<span class="lineNum">     198 </span><span class="lineCov">          3 :     uriRef = xmlGetNsProp(cur, (const xmlChar *)&quot;href&quot;, NULL);</span>
+<span class="lineNum">     199 </span><span class="lineCov">          3 :     if (uriRef == NULL) {</span>
+<span class="lineNum">     200 </span><span class="lineNoCov">          0 :         xsltTransformError(NULL, style, cur,</span>
+<span class="lineNum">     201 </span>            :             &quot;xsl:include : missing href attribute\n&quot;);
+<span class="lineNum">     202 </span><span class="lineNoCov">          0 :         goto error;</span>
+<span class="lineNum">     203 </span>            :     }
+<span class="lineNum">     204 </span>            : 
+<span class="lineNum">     205 </span><span class="lineCov">          3 :     base = xmlNodeGetBase(style-&gt;doc, cur);</span>
+<span class="lineNum">     206 </span><span class="lineCov">          3 :     URI = xmlBuildURI(uriRef, base);</span>
+<span class="lineNum">     207 </span><span class="lineCov">          3 :     if (URI == NULL) {</span>
+<span class="lineNum">     208 </span><span class="lineNoCov">          0 :         xsltTransformError(NULL, style, cur,</span>
+<span class="lineNum">     209 </span>            :             &quot;xsl:include : invalid URI reference %s\n&quot;, uriRef);
+<span class="lineNum">     210 </span><span class="lineNoCov">          0 :         goto error;</span>
+<span class="lineNum">     211 </span>            :     }
+<span class="lineNum">     212 </span>            : 
+<span class="lineNum">     213 </span>            :     /*
+<span class="lineNum">     214 </span>            :      * in order to detect recursion, we check all previously included
+<span class="lineNum">     215 </span>            :      * stylesheets.
+<span class="lineNum">     216 </span>            :      */
+<span class="lineNum">     217 </span><span class="lineCov">          3 :     docptr = style-&gt;includes;</span>
+<span class="lineNum">     218 </span><span class="lineCov">          6 :     while (docptr != NULL) {</span>
+<span class="lineNum">     219 </span><span class="lineNoCov">          0 :         if (xmlStrEqual(docptr-&gt;doc-&gt;URL, URI)) {</span>
+<span class="lineNum">     220 </span><span class="lineNoCov">          0 :             xsltTransformError(NULL, style, cur,</span>
+<span class="lineNum">     221 </span>            :                 &quot;xsl:include : recursion detected on included URL %s\n&quot;, URI);
+<span class="lineNum">     222 </span><span class="lineNoCov">          0 :             goto error;</span>
+<span class="lineNum">     223 </span>            :         }
+<span class="lineNum">     224 </span><span class="lineNoCov">          0 :         docptr = docptr-&gt;includes;</span>
+<span class="lineNum">     225 </span>            :     }
+<span class="lineNum">     226 </span>            : 
+<span class="lineNum">     227 </span><span class="lineCov">          3 :     include = xsltLoadStyleDocument(style, URI);</span>
+<span class="lineNum">     228 </span><span class="lineCov">          3 :     if (include == NULL) {</span>
+<span class="lineNum">     229 </span><span class="lineCov">          3 :         xsltTransformError(NULL, style, cur,</span>
+<span class="lineNum">     230 </span>            :             &quot;xsl:include : unable to load %s\n&quot;, URI);
+<span class="lineNum">     231 </span><span class="lineCov">          3 :         goto error;</span>
+<span class="lineNum">     232 </span>            :     }
+<span class="lineNum">     233 </span>            : #ifdef XSLT_REFACTORED
+<span class="lineNum">     234 </span>            :     if (IS_XSLT_ELEM_FAST(cur) &amp;&amp; (cur-&gt;psvi != NULL)) {
+<span class="lineNum">     235 </span>            :         ((xsltStyleItemIncludePtr) cur-&gt;psvi)-&gt;include = include;
+<span class="lineNum">     236 </span>            :     } else {
+<span class="lineNum">     237 </span>            :         xsltTransformError(NULL, style, cur,
+<span class="lineNum">     238 </span>            :             &quot;Internal error: (xsltParseStylesheetInclude) &quot;
+<span class="lineNum">     239 </span>            :             &quot;The xsl:include element was not compiled.\n&quot;, URI);
+<span class="lineNum">     240 </span>            :         style-&gt;errors++;
+<span class="lineNum">     241 </span>            :     }
+<span class="lineNum">     242 </span>            : #endif
+<span class="lineNum">     243 </span><span class="lineNoCov">          0 :     oldDoc = style-&gt;doc;</span>
+<span class="lineNum">     244 </span><span class="lineNoCov">          0 :     style-&gt;doc = include-&gt;doc;</span>
+<span class="lineNum">     245 </span>            :     /* chain to stylesheet for recursion checking */
+<span class="lineNum">     246 </span><span class="lineNoCov">          0 :     include-&gt;includes = style-&gt;includes;</span>
+<span class="lineNum">     247 </span><span class="lineNoCov">          0 :     style-&gt;includes = include;</span>
+<span class="lineNum">     248 </span><span class="lineNoCov">          0 :     oldNopreproc = style-&gt;nopreproc;</span>
+<span class="lineNum">     249 </span><span class="lineNoCov">          0 :     style-&gt;nopreproc = include-&gt;preproc;</span>
+<span class="lineNum">     250 </span>            :     /*
+<span class="lineNum">     251 </span>            :     * TODO: This will change some values of the
+<span class="lineNum">     252 </span>            :     *  including stylesheet with every included module
+<span class="lineNum">     253 </span>            :     *  (e.g. excluded-result-prefixes)
+<span class="lineNum">     254 </span>            :     *  We need to strictly seperate such stylesheet-owned values.
+<span class="lineNum">     255 </span>            :     */
+<span class="lineNum">     256 </span><span class="lineNoCov">          0 :     result = xsltParseStylesheetProcess(style, include-&gt;doc);</span>
+<span class="lineNum">     257 </span><span class="lineNoCov">          0 :     style-&gt;nopreproc = oldNopreproc;</span>
+<span class="lineNum">     258 </span><span class="lineNoCov">          0 :     include-&gt;preproc = 1;</span>
+<span class="lineNum">     259 </span><span class="lineNoCov">          0 :     style-&gt;includes = include-&gt;includes;</span>
+<span class="lineNum">     260 </span><span class="lineNoCov">          0 :     style-&gt;doc = oldDoc;</span>
+<span class="lineNum">     261 </span><span class="lineNoCov">          0 :     if (result == NULL) {</span>
+<span class="lineNum">     262 </span>            :         ret = -1;
+<span class="lineNum">     263 </span>            :         goto error;
+<span class="lineNum">     264 </span>            :     }
+<span class="lineNum">     265 </span><span class="lineNoCov">          0 :     ret = 0;</span>
+<span class="lineNum">     266 </span>            : 
+<span class="lineNum">     267 </span>            : error:
+<span class="lineNum">     268 </span><span class="lineCov">          3 :     if (uriRef != NULL)</span>
+<span class="lineNum">     269 </span><span class="lineCov">          3 :         xmlFree(uriRef);</span>
+<span class="lineNum">     270 </span><span class="lineCov">          3 :     if (base != NULL)</span>
+<span class="lineNum">     271 </span><span class="lineCov">          3 :         xmlFree(base);</span>
+<span class="lineNum">     272 </span><span class="lineCov">          3 :     if (URI != NULL)</span>
+<span class="lineNum">     273 </span><span class="lineCov">          3 :         xmlFree(URI);</span>
+<span class="lineNum">     274 </span>            : 
+<span class="lineNum">     275 </span><span class="lineCov">          3 :     return (ret);</span>
+<span class="lineNum">     276 </span>            : }
+<span class="lineNum">     277 </span>            : 
+<span class="lineNum">     278 </span>            : /**
+<span class="lineNum">     279 </span>            :  * xsltNextImport:
+<span class="lineNum">     280 </span>            :  * @cur:  the current XSLT stylesheet
+<span class="lineNum">     281 </span>            :  *
+<span class="lineNum">     282 </span>            :  * Find the next stylesheet in import precedence.
+<span class="lineNum">     283 </span>            :  *
+<span class="lineNum">     284 </span>            :  * Returns the next stylesheet or NULL if it was the last one
+<span class="lineNum">     285 </span>            :  */
+<a name="286"><span class="lineNum">     286 </span>            : </a>
+<span class="lineNum">     287 </span>            : xsltStylesheetPtr
+<span class="lineNum">     288 </span><span class="lineCov">        872 : xsltNextImport(xsltStylesheetPtr cur) {</span>
+<span class="lineNum">     289 </span><span class="lineCov">        872 :     if (cur == NULL)</span>
+<span class="lineNum">     290 </span>            :         return(NULL);
+<span class="lineNum">     291 </span><span class="lineCov">        872 :     if (cur-&gt;imports != NULL)</span>
+<span class="lineNum">     292 </span>            :         return(cur-&gt;imports);
+<span class="lineNum">     293 </span><span class="lineCov">        872 :     if (cur-&gt;next != NULL)</span>
+<span class="lineNum">     294 </span>            :         return(cur-&gt;next) ;
+<span class="lineNum">     295 </span>            :     do {
+<span class="lineNum">     296 </span><span class="lineCov">        872 :         cur = cur-&gt;parent;</span>
+<span class="lineNum">     297 </span><span class="lineCov">        872 :         if (cur == NULL) break;</span>
+<span class="lineNum">     298 </span><span class="lineNoCov">          0 :         if (cur-&gt;next != NULL) return(cur-&gt;next);</span>
+<span class="lineNum">     299 </span><span class="lineNoCov">          0 :     } while (cur != NULL);</span>
+<span class="lineNum">     300 </span>            :     return(cur);
+<span class="lineNum">     301 </span>            : }
+<span class="lineNum">     302 </span>            : 
+<span class="lineNum">     303 </span>            : /**
+<span class="lineNum">     304 </span>            :  * xsltNeedElemSpaceHandling:
+<span class="lineNum">     305 </span>            :  * @ctxt:  an XSLT transformation context
+<span class="lineNum">     306 </span>            :  *
+<span class="lineNum">     307 </span>            :  * Checks whether that stylesheet requires white-space stripping
+<span class="lineNum">     308 </span>            :  *
+<span class="lineNum">     309 </span>            :  * Returns 1 if space should be stripped, 0 if not
+<span class="lineNum">     310 </span>            :  */
+<a name="311"><span class="lineNum">     311 </span>            : </a>
+<span class="lineNum">     312 </span>            : int
+<span class="lineNum">     313 </span><span class="lineCov">         40 : xsltNeedElemSpaceHandling(xsltTransformContextPtr ctxt) {</span>
+<span class="lineNum">     314 </span>            :     xsltStylesheetPtr style;
+<span class="lineNum">     315 </span>            : 
+<span class="lineNum">     316 </span><span class="lineCov">         40 :     if (ctxt == NULL)</span>
+<span class="lineNum">     317 </span>            :         return(0);
+<span class="lineNum">     318 </span><span class="lineCov">         40 :     style = ctxt-&gt;style;</span>
+<span class="lineNum">     319 </span><span class="lineCov">        118 :     while (style != NULL) {</span>
+<span class="lineNum">     320 </span><span class="lineCov">         40 :         if (style-&gt;stripSpaces != NULL)</span>
+<span class="lineNum">     321 </span>            :             return(1);
+<span class="lineNum">     322 </span><span class="lineCov">         38 :         style = xsltNextImport(style);</span>
+<span class="lineNum">     323 </span>            :     }
+<span class="lineNum">     324 </span>            :     return(0);
+<span class="lineNum">     325 </span>            : }
+<span class="lineNum">     326 </span>            : 
+<span class="lineNum">     327 </span>            : /**
+<span class="lineNum">     328 </span>            :  * xsltFindElemSpaceHandling:
+<span class="lineNum">     329 </span>            :  * @ctxt:  an XSLT transformation context
+<span class="lineNum">     330 </span>            :  * @node:  an XML node
+<span class="lineNum">     331 </span>            :  *
+<span class="lineNum">     332 </span>            :  * Find strip-space or preserve-space informations for an element
+<span class="lineNum">     333 </span>            :  * respect the import precedence or the wildcards
+<span class="lineNum">     334 </span>            :  *
+<span class="lineNum">     335 </span>            :  * Returns 1 if space should be stripped, 0 if not, and 2 if everything
+<span class="lineNum">     336 </span>            :  *         should be CDTATA wrapped.
+<span class="lineNum">     337 </span>            :  */
+<a name="338"><span class="lineNum">     338 </span>            : </a>
+<span class="lineNum">     339 </span>            : int
+<span class="lineNum">     340 </span><span class="lineCov">         16 : xsltFindElemSpaceHandling(xsltTransformContextPtr ctxt, xmlNodePtr node) {</span>
+<span class="lineNum">     341 </span>            :     xsltStylesheetPtr style;
+<span class="lineNum">     342 </span>            :     const xmlChar *val;
+<span class="lineNum">     343 </span>            : 
+<span class="lineNum">     344 </span><span class="lineCov">         16 :     if ((ctxt == NULL) || (node == NULL))</span>
+<span class="lineNum">     345 </span>            :         return(0);
+<span class="lineNum">     346 </span><span class="lineCov">         16 :     style = ctxt-&gt;style;</span>
+<span class="lineNum">     347 </span><span class="lineCov">         32 :     while (style != NULL) {</span>
+<span class="lineNum">     348 </span><span class="lineCov">         16 :         if (node-&gt;ns != NULL) {</span>
+<span class="lineNum">     349 </span><span class="lineNoCov">          0 :             val = (const xmlChar *)</span>
+<span class="lineNum">     350 </span><span class="lineNoCov">          0 :               xmlHashLookup2(style-&gt;stripSpaces, node-&gt;name, node-&gt;ns-&gt;href);</span>
+<span class="lineNum">     351 </span><span class="lineNoCov">          0 :             if (val == NULL) {</span>
+<span class="lineNum">     352 </span><span class="lineNoCov">          0 :                 val = (const xmlChar *)</span>
+<span class="lineNum">     353 </span><span class="lineNoCov">          0 :                     xmlHashLookup2(style-&gt;stripSpaces, BAD_CAST &quot;*&quot;,</span>
+<span class="lineNum">     354 </span><span class="lineNoCov">          0 :                                    node-&gt;ns-&gt;href);</span>
+<span class="lineNum">     355 </span>            :             }
+<span class="lineNum">     356 </span>            :         } else {
+<span class="lineNum">     357 </span><span class="lineCov">         16 :             val = (const xmlChar *)</span>
+<span class="lineNum">     358 </span><span class="lineCov">         16 :                   xmlHashLookup2(style-&gt;stripSpaces, node-&gt;name, NULL);</span>
+<span class="lineNum">     359 </span>            :         }
+<span class="lineNum">     360 </span><span class="lineCov">         16 :         if (val != NULL) {</span>
+<span class="lineNum">     361 </span><span class="lineNoCov">          0 :             if (xmlStrEqual(val, (xmlChar *) &quot;strip&quot;))</span>
+<span class="lineNum">     362 </span>            :                 return(1);
+<span class="lineNum">     363 </span><span class="lineNoCov">          0 :             if (xmlStrEqual(val, (xmlChar *) &quot;preserve&quot;))</span>
+<span class="lineNum">     364 </span>            :                 return(0);
+<span class="lineNum">     365 </span>            :         }
+<span class="lineNum">     366 </span><span class="lineCov">         16 :         if (style-&gt;stripAll == 1)</span>
+<span class="lineNum">     367 </span>            :             return(1);
+<span class="lineNum">     368 </span><span class="lineCov">          8 :         if (style-&gt;stripAll == -1)</span>
+<span class="lineNum">     369 </span>            :             return(0);
+<span class="lineNum">     370 </span>            : 
+<span class="lineNum">     371 </span><span class="lineNoCov">          0 :         style = xsltNextImport(style);</span>
+<span class="lineNum">     372 </span>            :     }
+<span class="lineNum">     373 </span>            :     return(0);
+<span class="lineNum">     374 </span>            : }
+<span class="lineNum">     375 </span>            : 
+<span class="lineNum">     376 </span>            : /**
+<span class="lineNum">     377 </span>            :  * xsltFindTemplate:
+<span class="lineNum">     378 </span>            :  * @ctxt:  an XSLT transformation context
+<span class="lineNum">     379 </span>            :  * @name: the template name
+<span class="lineNum">     380 </span>            :  * @nameURI: the template name URI
+<span class="lineNum">     381 </span>            :  *
+<span class="lineNum">     382 </span>            :  * Finds the named template, apply import precedence rule.
+<span class="lineNum">     383 </span>            :  * REVISIT TODO: We'll change the nameURI fields of
+<span class="lineNum">     384 </span>            :  *  templates to be in the string dict, so if the
+<span class="lineNum">     385 </span>            :  *  specified @nameURI is in the same dict, then use pointer
+<span class="lineNum">     386 </span>            :  *  comparison. Check if this can be done in a sane way.
+<span class="lineNum">     387 </span>            :  *  Maybe this function is not needed internally at
+<span class="lineNum">     388 </span>            :  *  transformation-time if we hard-wire the called templates
+<span class="lineNum">     389 </span>            :  *  to the caller.
+<span class="lineNum">     390 </span>            :  *
+<span class="lineNum">     391 </span>            :  * Returns the xsltTemplatePtr or NULL if not found
+<a name="392"><span class="lineNum">     392 </span>            :  */</a>
+<span class="lineNum">     393 </span>            : xsltTemplatePtr
+<span class="lineNum">     394 </span><span class="lineCov">          1 : xsltFindTemplate(xsltTransformContextPtr ctxt, const xmlChar *name,</span>
+<span class="lineNum">     395 </span>            :                  const xmlChar *nameURI) {
+<span class="lineNum">     396 </span>            :     xsltTemplatePtr cur;
+<span class="lineNum">     397 </span>            :     xsltStylesheetPtr style;
+<span class="lineNum">     398 </span>            : 
+<span class="lineNum">     399 </span><span class="lineCov">          1 :     if ((ctxt == NULL) || (name == NULL))</span>
+<span class="lineNum">     400 </span>            :         return(NULL);
+<span class="lineNum">     401 </span><span class="lineCov">          1 :     style = ctxt-&gt;style;</span>
+<span class="lineNum">     402 </span><span class="lineCov">          2 :     while (style != NULL) {</span>
+<span class="lineNum">     403 </span><span class="lineCov">          1 :         if (style-&gt;namedTemplates != NULL) {</span>
+<span class="lineNum">     404 </span><span class="lineCov">          1 :             cur = (xsltTemplatePtr)</span>
+<span class="lineNum">     405 </span>            :                 xmlHashLookup2(style-&gt;namedTemplates, name, nameURI);
+<span class="lineNum">     406 </span><span class="lineCov">          1 :             if (cur != NULL)</span>
+<span class="lineNum">     407 </span>            :                 return(cur);
+<span class="lineNum">     408 </span>            :         }
+<span class="lineNum">     409 </span>            : 
+<span class="lineNum">     410 </span><span class="lineNoCov">          0 :         style = xsltNextImport(style);</span>
+<span class="lineNum">     411 </span>            :     }
+<span class="lineNum">     412 </span>            :     return(NULL);
+<span class="lineNum">     413 </span>            : }
+<span class="lineNum">     414 </span>            : 
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

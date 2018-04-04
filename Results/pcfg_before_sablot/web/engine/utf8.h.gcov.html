@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - engine/utf8.h</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">engine</a> - utf8.h<span style="font-size: 80%;"> (source / <a href="utf8.h.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">4</td>
+            <td class="headerCovTableEntry">5</td>
+            <td class="headerCovTableEntryMed">80.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-10-12</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* </a>
+<span class="lineNum">       2 </span>            :  * The contents of this file are subject to the Mozilla Public
+<span class="lineNum">       3 </span>            :  * License Version 1.1 (the &quot;License&quot;); you may not use this file
+<span class="lineNum">       4 </span>            :  * except in compliance with the License. You may obtain a copy of
+<span class="lineNum">       5 </span>            :  * the License at http://www.mozilla.org/MPL/
+<span class="lineNum">       6 </span>            :  * 
+<span class="lineNum">       7 </span>            :  * Software distributed under the License is distributed on an &quot;AS
+<span class="lineNum">       8 </span>            :  * IS&quot; basis, WITHOUT WARRANTY OF ANY KIND, either express or
+<span class="lineNum">       9 </span>            :  * implied. See the License for the specific language governing
+<span class="lineNum">      10 </span>            :  * rights and limitations under the License.
+<span class="lineNum">      11 </span>            :  * 
+<span class="lineNum">      12 </span>            :  * The Original Code is the Sablotron XSLT Processor.
+<span class="lineNum">      13 </span>            :  * 
+<span class="lineNum">      14 </span>            :  * The Initial Developer of the Original Code is Ginger Alliance Ltd.
+<span class="lineNum">      15 </span>            :  * Portions created by Ginger Alliance are Copyright (C) 2000-2002
+<span class="lineNum">      16 </span>            :  * Ginger Alliance Ltd. All Rights Reserved.
+<span class="lineNum">      17 </span>            :  * 
+<span class="lineNum">      18 </span>            :  * Contributor(s):
+<span class="lineNum">      19 </span>            :  * 
+<span class="lineNum">      20 </span>            :  * Alternatively, the contents of this file may be used under the
+<span class="lineNum">      21 </span>            :  * terms of the GNU General Public License Version 2 or later (the
+<span class="lineNum">      22 </span>            :  * &quot;GPL&quot;), in which case the provisions of the GPL are applicable 
+<span class="lineNum">      23 </span>            :  * instead of those above.  If you wish to allow use of your 
+<span class="lineNum">      24 </span>            :  * version of this file only under the terms of the GPL and not to
+<span class="lineNum">      25 </span>            :  * allow others to use your version of this file under the MPL,
+<span class="lineNum">      26 </span>            :  * indicate your decision by deleting the provisions above and
+<span class="lineNum">      27 </span>            :  * replace them with the notice and other provisions required by
+<span class="lineNum">      28 </span>            :  * the GPL.  If you do not delete the provisions above, a recipient
+<span class="lineNum">      29 </span>            :  * may use your version of this file under either the MPL or the
+<span class="lineNum">      30 </span>            :  * GPL.
+<span class="lineNum">      31 </span>            :  */
+<span class="lineNum">      32 </span>            : 
+<span class="lineNum">      33 </span>            : //
+<span class="lineNum">      34 </span>            : //      utf8.h
+<span class="lineNum">      35 </span>            : //
+<span class="lineNum">      36 </span>            : 
+<span class="lineNum">      37 </span>            : #if !defined(Utf8HIncl)
+<span class="lineNum">      38 </span>            : #define Utf8HIncl
+<span class="lineNum">      39 </span>            : 
+<span class="lineNum">      40 </span>            : // GP: clean
+<span class="lineNum">      41 </span>            : 
+<span class="lineNum">      42 </span>            : #include &quot;base.h&quot;
+<span class="lineNum">      43 </span>            : 
+<span class="lineNum">      44 </span>            : #define SMALL_BUFFER_SIZE 32
+<span class="lineNum">      45 </span>            : 
+<span class="lineNum">      46 </span>            : //extern  int     utf8SingleCharLength(const char* text);
+<span class="lineNum">      47 </span>            : extern  int     utf8StrLength (const char* text);
+<span class="lineNum">      48 </span>            : extern  int     utf8Strchr(const char* text, const char* character);
+<span class="lineNum">      49 </span>            : extern  char*   utf8StrIndex(char* text, int index);
+<span class="lineNum">      50 </span>            : 
+<span class="lineNum">      51 </span>            : extern  unsigned long 
+<span class="lineNum">      52 </span>            :                 utf8CharCode(const char *text);
+<span class="lineNum">      53 </span>            : 
+<span class="lineNum">      54 </span>            : extern  int     utf8GetChar(char *dest, const char *src);
+<span class="lineNum">      55 </span>            : extern  char*   utf8xfrm(const Str &amp;src);
+<span class="lineNum">      56 </span>            : extern  int     utf8FromCharCode(char *dest, unsigned long code);
+<span class="lineNum">      57 </span>            : 
+<span class="lineNum">      58 </span>            : extern  Bool    utf8IsDigit(unsigned long c);
+<span class="lineNum">      59 </span>            : extern  Bool    utf8IsBaseChar(unsigned long c);
+<span class="lineNum">      60 </span>            : extern  Bool    utf8IsLetter(unsigned long c);
+<span class="lineNum">      61 </span>            : extern  Bool    utf8IsNameChar(unsigned long c);
+<span class="lineNum">      62 </span>            : extern  Bool    utf8IsIdeographic(unsigned long c);
+<span class="lineNum">      63 </span>            : extern  Bool    utf8IsExtender(unsigned long c);
+<span class="lineNum">      64 </span>            : extern  Bool    utf8IsCombiningChar(unsigned long c);
+<span class="lineNum">      65 </span>            : 
+<span class="lineNum">      66 </span>            : extern  int     utf8ToUtf16(wchar_t *dest, const char *src);
+<a name="67"><span class="lineNum">      67 </span>            : </a>
+<span class="lineNum">      68 </span>            : //speed optimization
+<span class="lineNum">      69 </span><span class="lineNoCov">          0 : inline int utf8SingleCharLength (const char* text)</span>
+<span class="lineNum">      70 </span>            : {
+<span class="lineNum">      71 </span><span class="lineCov">   11071894 :   if (!(*text &amp; 0x80)) return 1;</span>
+<span class="lineNum">      72 </span><span class="lineCov">       5645 :   if (!(*text &amp; 0x40)) return 0;</span>
+<span class="lineNum">      73 </span><span class="lineCov">        131 :   for (int len = 2; len &lt; 7; len++)</span>
+<span class="lineNum">      74 </span><span class="lineCov">       5776 :       if (!(*text &amp; (0x80 &gt;&gt; len))) return len;</span>
+<span class="lineNum">      75 </span>            :   return 0;
+<span class="lineNum">      76 </span>            : }
+<span class="lineNum">      77 </span>            : 
+<span class="lineNum">      78 </span>            : #endif
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

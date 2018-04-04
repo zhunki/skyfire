@@ -1,0 +1,1122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - gcov/xmlstring.c</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">gcov</a> - xmlstring.c<span style="font-size: 80%;"> (source / <a href="xmlstring.c.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">73</td>
+            <td class="headerCovTableEntry">316</td>
+            <td class="headerCovTableEntryLo">23.1 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-11-01</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">11</td>
+            <td class="headerCovTableEntry">31</td>
+            <td class="headerCovTableEntryLo">35.5 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /*</a>
+<span class="lineNum">       2 </span>            :  * string.c : an XML string utilities module
+<span class="lineNum">       3 </span>            :  *
+<span class="lineNum">       4 </span>            :  * This module provides various utility functions for manipulating
+<span class="lineNum">       5 </span>            :  * the xmlChar* type. All functions named xmlStr* have been moved here
+<span class="lineNum">       6 </span>            :  * from the parser.c file (their original home).
+<span class="lineNum">       7 </span>            :  *
+<span class="lineNum">       8 </span>            :  * See Copyright for the status of this software.
+<span class="lineNum">       9 </span>            :  *
+<span class="lineNum">      10 </span>            :  * UTF8 string routines from:
+<span class="lineNum">      11 </span>            :  * William Brack &lt;wbrack@mmm.com.hk&gt;
+<span class="lineNum">      12 </span>            :  *
+<span class="lineNum">      13 </span>            :  * daniel@veillard.com
+<span class="lineNum">      14 </span>            :  */
+<span class="lineNum">      15 </span>            : 
+<span class="lineNum">      16 </span>            : #define IN_LIBXML
+<span class="lineNum">      17 </span>            : #include &quot;libxml.h&quot;
+<span class="lineNum">      18 </span>            : 
+<span class="lineNum">      19 </span>            : #include &lt;stdlib.h&gt;
+<span class="lineNum">      20 </span>            : #include &lt;string.h&gt;
+<span class="lineNum">      21 </span>            : #include &lt;libxml/xmlmemory.h&gt;
+<span class="lineNum">      22 </span>            : #include &lt;libxml/parserInternals.h&gt;
+<span class="lineNum">      23 </span>            : #include &lt;libxml/xmlstring.h&gt;
+<span class="lineNum">      24 </span>            : 
+<span class="lineNum">      25 </span>            : /************************************************************************
+<span class="lineNum">      26 </span>            :  *                                                                      *
+<span class="lineNum">      27 </span>            :  *                Commodity functions to handle xmlChars                *
+<span class="lineNum">      28 </span>            :  *                                                                      *
+<span class="lineNum">      29 </span>            :  ************************************************************************/
+<span class="lineNum">      30 </span>            : 
+<span class="lineNum">      31 </span>            : /**
+<span class="lineNum">      32 </span>            :  * xmlStrndup:
+<span class="lineNum">      33 </span>            :  * @cur:  the input xmlChar *
+<span class="lineNum">      34 </span>            :  * @len:  the len of @cur
+<span class="lineNum">      35 </span>            :  *
+<span class="lineNum">      36 </span>            :  * a strndup for array of xmlChar's
+<span class="lineNum">      37 </span>            :  *
+<span class="lineNum">      38 </span>            :  * Returns a new xmlChar * or NULL
+<a name="39"><span class="lineNum">      39 </span>            :  */</a>
+<span class="lineNum">      40 </span>            : xmlChar *
+<span class="lineNum">      41 </span><span class="lineCov">      92476 : xmlStrndup(const xmlChar *cur, int len) {</span>
+<span class="lineNum">      42 </span>            :     xmlChar *ret;
+<span class="lineNum">      43 </span>            : 
+<span class="lineNum">      44 </span><span class="lineCov">      92476 :     if ((cur == NULL) || (len &lt; 0)) return(NULL);</span>
+<span class="lineNum">      45 </span><span class="lineCov">      92476 :     ret = (xmlChar *) xmlMallocAtomic((len + 1) * sizeof(xmlChar));</span>
+<span class="lineNum">      46 </span><span class="lineCov">      92476 :     if (ret == NULL) {</span>
+<span class="lineNum">      47 </span><span class="lineNoCov">          0 :         xmlErrMemory(NULL, NULL);</span>
+<span class="lineNum">      48 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">      49 </span>            :     }
+<span class="lineNum">      50 </span><span class="lineCov">      92476 :     memcpy(ret, cur, len * sizeof(xmlChar));</span>
+<span class="lineNum">      51 </span>            :     ret[len] = 0;
+<span class="lineNum">      52 </span><span class="lineCov">      92476 :     return(ret);</span>
+<span class="lineNum">      53 </span>            : }
+<span class="lineNum">      54 </span>            : 
+<span class="lineNum">      55 </span>            : /**
+<span class="lineNum">      56 </span>            :  * xmlStrdup:
+<span class="lineNum">      57 </span>            :  * @cur:  the input xmlChar *
+<span class="lineNum">      58 </span>            :  *
+<span class="lineNum">      59 </span>            :  * a strdup for array of xmlChar's. Since they are supposed to be
+<span class="lineNum">      60 </span>            :  * encoded in UTF-8 or an encoding with 8bit based chars, we assume
+<span class="lineNum">      61 </span>            :  * a termination mark of '0'.
+<span class="lineNum">      62 </span>            :  *
+<span class="lineNum">      63 </span>            :  * Returns a new xmlChar * or NULL
+<a name="64"><span class="lineNum">      64 </span>            :  */</a>
+<span class="lineNum">      65 </span>            : xmlChar *
+<span class="lineNum">      66 </span><span class="lineCov">      55738 : xmlStrdup(const xmlChar *cur) {</span>
+<span class="lineNum">      67 </span><span class="lineCov">      55738 :     const xmlChar *p = cur;</span>
+<span class="lineNum">      68 </span>            : 
+<span class="lineNum">      69 </span><span class="lineCov">      55738 :     if (cur == NULL) return(NULL);</span>
+<span class="lineNum">      70 </span><span class="lineCov">    1171795 :     while (*p != 0) p++; /* non input consuming */</span>
+<span class="lineNum">      71 </span><span class="lineCov">      50959 :     return(xmlStrndup(cur, p - cur));</span>
+<span class="lineNum">      72 </span>            : }
+<span class="lineNum">      73 </span>            : 
+<span class="lineNum">      74 </span>            : /**
+<span class="lineNum">      75 </span>            :  * xmlCharStrndup:
+<span class="lineNum">      76 </span>            :  * @cur:  the input char *
+<span class="lineNum">      77 </span>            :  * @len:  the len of @cur
+<span class="lineNum">      78 </span>            :  *
+<span class="lineNum">      79 </span>            :  * a strndup for char's to xmlChar's
+<span class="lineNum">      80 </span>            :  *
+<span class="lineNum">      81 </span>            :  * Returns a new xmlChar * or NULL
+<span class="lineNum">      82 </span>            :  */
+<a name="83"><span class="lineNum">      83 </span>            : </a>
+<span class="lineNum">      84 </span>            : xmlChar *
+<span class="lineNum">      85 </span><span class="lineCov">        628 : xmlCharStrndup(const char *cur, int len) {</span>
+<span class="lineNum">      86 </span>            :     int i;
+<span class="lineNum">      87 </span>            :     xmlChar *ret;
+<span class="lineNum">      88 </span>            : 
+<span class="lineNum">      89 </span><span class="lineCov">        628 :     if ((cur == NULL) || (len &lt; 0)) return(NULL);</span>
+<span class="lineNum">      90 </span><span class="lineCov">        628 :     ret = (xmlChar *) xmlMallocAtomic((len + 1) * sizeof(xmlChar));</span>
+<span class="lineNum">      91 </span><span class="lineCov">        628 :     if (ret == NULL) {</span>
+<span class="lineNum">      92 </span><span class="lineNoCov">          0 :         xmlErrMemory(NULL, NULL);</span>
+<span class="lineNum">      93 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">      94 </span>            :     }
+<span class="lineNum">      95 </span><span class="lineCov">       1884 :     for (i = 0;i &lt; len;i++) {</span>
+<span class="lineNum">      96 </span><span class="lineCov">       1884 :         ret[i] = (xmlChar) cur[i];</span>
+<span class="lineNum">      97 </span><span class="lineCov">       1884 :         if (ret[i] == 0) return(ret);</span>
+<span class="lineNum">      98 </span>            :     }
+<span class="lineNum">      99 </span><span class="lineCov">        628 :     ret[len] = 0;</span>
+<span class="lineNum">     100 </span><span class="lineCov">        628 :     return(ret);</span>
+<span class="lineNum">     101 </span>            : }
+<span class="lineNum">     102 </span>            : 
+<span class="lineNum">     103 </span>            : /**
+<span class="lineNum">     104 </span>            :  * xmlCharStrdup:
+<span class="lineNum">     105 </span>            :  * @cur:  the input char *
+<span class="lineNum">     106 </span>            :  *
+<span class="lineNum">     107 </span>            :  * a strdup for char's to xmlChar's
+<span class="lineNum">     108 </span>            :  *
+<span class="lineNum">     109 </span>            :  * Returns a new xmlChar * or NULL
+<span class="lineNum">     110 </span>            :  */
+<a name="111"><span class="lineNum">     111 </span>            : </a>
+<span class="lineNum">     112 </span>            : xmlChar *
+<span class="lineNum">     113 </span><span class="lineCov">        628 : xmlCharStrdup(const char *cur) {</span>
+<span class="lineNum">     114 </span><span class="lineCov">        628 :     const char *p = cur;</span>
+<span class="lineNum">     115 </span>            : 
+<span class="lineNum">     116 </span><span class="lineCov">        628 :     if (cur == NULL) return(NULL);</span>
+<span class="lineNum">     117 </span><span class="lineCov">       1884 :     while (*p != '\0') p++; /* non input consuming */</span>
+<span class="lineNum">     118 </span><span class="lineCov">        628 :     return(xmlCharStrndup(cur, p - cur));</span>
+<span class="lineNum">     119 </span>            : }
+<span class="lineNum">     120 </span>            : 
+<span class="lineNum">     121 </span>            : /**
+<span class="lineNum">     122 </span>            :  * xmlStrcmp:
+<span class="lineNum">     123 </span>            :  * @str1:  the first xmlChar *
+<span class="lineNum">     124 </span>            :  * @str2:  the second xmlChar *
+<span class="lineNum">     125 </span>            :  *
+<span class="lineNum">     126 </span>            :  * a strcmp for xmlChar's
+<span class="lineNum">     127 </span>            :  *
+<span class="lineNum">     128 </span>            :  * Returns the integer result of the comparison
+<span class="lineNum">     129 </span>            :  */
+<a name="130"><span class="lineNum">     130 </span>            : </a>
+<span class="lineNum">     131 </span>            : int
+<span class="lineNum">     132 </span><span class="lineNoCov">          0 : xmlStrcmp(const xmlChar *str1, const xmlChar *str2) {</span>
+<span class="lineNum">     133 </span>            :     register int tmp;
+<span class="lineNum">     134 </span>            : 
+<span class="lineNum">     135 </span><span class="lineNoCov">          0 :     if (str1 == str2) return(0);</span>
+<span class="lineNum">     136 </span><span class="lineNoCov">          0 :     if (str1 == NULL) return(-1);</span>
+<span class="lineNum">     137 </span><span class="lineNoCov">          0 :     if (str2 == NULL) return(1);</span>
+<span class="lineNum">     138 </span>            :     do {
+<span class="lineNum">     139 </span><span class="lineNoCov">          0 :         tmp = *str1++ - *str2;</span>
+<span class="lineNum">     140 </span><span class="lineNoCov">          0 :         if (tmp != 0) return(tmp);</span>
+<span class="lineNum">     141 </span><span class="lineNoCov">          0 :     } while (*str2++ != 0);</span>
+<span class="lineNum">     142 </span>            :     return 0;
+<span class="lineNum">     143 </span>            : }
+<span class="lineNum">     144 </span>            : 
+<span class="lineNum">     145 </span>            : /**
+<span class="lineNum">     146 </span>            :  * xmlStrEqual:
+<span class="lineNum">     147 </span>            :  * @str1:  the first xmlChar *
+<span class="lineNum">     148 </span>            :  * @str2:  the second xmlChar *
+<span class="lineNum">     149 </span>            :  *
+<span class="lineNum">     150 </span>            :  * Check if both strings are equal of have same content.
+<span class="lineNum">     151 </span>            :  * Should be a bit more readable and faster than xmlStrcmp()
+<span class="lineNum">     152 </span>            :  *
+<span class="lineNum">     153 </span>            :  * Returns 1 if they are equal, 0 if they are different
+<span class="lineNum">     154 </span>            :  */
+<a name="155"><span class="lineNum">     155 </span>            : </a>
+<a name="156"><span class="lineNum">     156 </span>            : int</a>
+<span class="lineNum">     157 </span><span class="lineCov">     104444 : xmlStrEqual(const xmlChar *str1, const xmlChar *str2) {</span>
+<span class="lineNum">     158 </span><span class="lineCov">     104854 :     if (str1 == str2) return(1);</span>
+<span class="lineNum">     159 </span><span class="lineCov">      52809 :     if (str1 == NULL) return(0);</span>
+<span class="lineNum">     160 </span><span class="lineCov">      51722 :     if (str2 == NULL) return(0);</span>
+<span class="lineNum">     161 </span>            :     do {
+<span class="lineNum">     162 </span><span class="lineCov">     451680 :         if (*str1++ != *str2) return(0);</span>
+<span class="lineNum">     163 </span><span class="lineCov">     434759 :     } while (*str2++);</span>
+<span class="lineNum">     164 </span>            :     return(1);
+<span class="lineNum">     165 </span>            : }
+<span class="lineNum">     166 </span>            : 
+<span class="lineNum">     167 </span>            : /**
+<span class="lineNum">     168 </span>            :  * xmlStrQEqual:
+<span class="lineNum">     169 </span>            :  * @pref:  the prefix of the QName
+<span class="lineNum">     170 </span>            :  * @name:  the localname of the QName
+<span class="lineNum">     171 </span>            :  * @str:  the second xmlChar *
+<span class="lineNum">     172 </span>            :  *
+<span class="lineNum">     173 </span>            :  * Check if a QName is Equal to a given string
+<span class="lineNum">     174 </span>            :  *
+<span class="lineNum">     175 </span>            :  * Returns 1 if they are equal, 0 if they are different
+<span class="lineNum">     176 </span>            :  */
+<span class="lineNum">     177 </span>            : 
+<span class="lineNum">     178 </span>            : int
+<span class="lineNum">     179 </span><span class="lineCov">        507 : xmlStrQEqual(const xmlChar *pref, const xmlChar *name, const xmlChar *str) {</span>
+<span class="lineNum">     180 </span><span class="lineCov">        917 :     if (pref == NULL) return(xmlStrEqual(name, str));</span>
+<span class="lineNum">     181 </span><span class="lineCov">         97 :     if (name == NULL) return(0);</span>
+<span class="lineNum">     182 </span><span class="lineCov">         97 :     if (str == NULL) return(0);</span>
+<span class="lineNum">     183 </span>            : 
+<span class="lineNum">     184 </span>            :     do {
+<span class="lineNum">     185 </span><span class="lineCov">        291 :         if (*pref++ != *str) return(0);</span>
+<span class="lineNum">     186 </span><span class="lineCov">        291 :     } while ((*str++) &amp;&amp; (*pref));</span>
+<span class="lineNum">     187 </span><span class="lineCov">         97 :     if (*str++ != ':') return(0);</span>
+<span class="lineNum">     188 </span>            :     do {
+<span class="lineNum">     189 </span><span class="lineCov">        255 :         if (*name++ != *str) return(0);</span>
+<span class="lineNum">     190 </span><span class="lineCov">        188 :     } while (*str++);</span>
+<span class="lineNum">     191 </span>            :     return(1);
+<span class="lineNum">     192 </span>            : }
+<span class="lineNum">     193 </span>            : 
+<span class="lineNum">     194 </span>            : /**
+<span class="lineNum">     195 </span>            :  * xmlStrncmp:
+<span class="lineNum">     196 </span>            :  * @str1:  the first xmlChar *
+<span class="lineNum">     197 </span>            :  * @str2:  the second xmlChar *
+<span class="lineNum">     198 </span>            :  * @len:  the max comparison length
+<span class="lineNum">     199 </span>            :  *
+<span class="lineNum">     200 </span>            :  * a strncmp for xmlChar's
+<span class="lineNum">     201 </span>            :  *
+<span class="lineNum">     202 </span>            :  * Returns the integer result of the comparison
+<span class="lineNum">     203 </span>            :  */
+<a name="204"><span class="lineNum">     204 </span>            : </a>
+<span class="lineNum">     205 </span>            : int
+<span class="lineNum">     206 </span><span class="lineCov">      43963 : xmlStrncmp(const xmlChar *str1, const xmlChar *str2, int len) {</span>
+<span class="lineNum">     207 </span>            :     register int tmp;
+<span class="lineNum">     208 </span>            : 
+<span class="lineNum">     209 </span><span class="lineCov">      43963 :     if (len &lt;= 0) return(0);</span>
+<span class="lineNum">     210 </span><span class="lineCov">      43963 :     if (str1 == str2) return(0);</span>
+<span class="lineNum">     211 </span><span class="lineCov">      43963 :     if (str1 == NULL) return(-1);</span>
+<span class="lineNum">     212 </span><span class="lineCov">      43963 :     if (str2 == NULL) return(1);</span>
+<span class="lineNum">     213 </span>            : #ifdef __GNUC__
+<span class="lineNum">     214 </span><span class="lineCov">      43963 :     tmp = strncmp((const char *)str1, (const char *)str2, len);</span>
+<span class="lineNum">     215 </span><span class="lineCov">      43963 :     return tmp;</span>
+<span class="lineNum">     216 </span>            : #else
+<span class="lineNum">     217 </span>            :     do {
+<span class="lineNum">     218 </span>            :         tmp = *str1++ - *str2;
+<span class="lineNum">     219 </span>            :         if (tmp != 0 || --len == 0) return(tmp);
+<span class="lineNum">     220 </span>            :     } while (*str2++ != 0);
+<span class="lineNum">     221 </span>            :     return 0;
+<span class="lineNum">     222 </span>            : #endif
+<span class="lineNum">     223 </span>            : }
+<span class="lineNum">     224 </span>            : 
+<span class="lineNum">     225 </span>            : static const xmlChar casemap[256] = {
+<span class="lineNum">     226 </span>            :     0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,
+<span class="lineNum">     227 </span>            :     0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,
+<span class="lineNum">     228 </span>            :     0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,
+<span class="lineNum">     229 </span>            :     0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
+<span class="lineNum">     230 </span>            :     0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,
+<span class="lineNum">     231 </span>            :     0x28,0x29,0x2A,0x2B,0x2C,0x2D,0x2E,0x2F,
+<span class="lineNum">     232 </span>            :     0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,
+<span class="lineNum">     233 </span>            :     0x38,0x39,0x3A,0x3B,0x3C,0x3D,0x3E,0x3F,
+<span class="lineNum">     234 </span>            :     0x40,0x61,0x62,0x63,0x64,0x65,0x66,0x67,
+<span class="lineNum">     235 </span>            :     0x68,0x69,0x6A,0x6B,0x6C,0x6D,0x6E,0x6F,
+<span class="lineNum">     236 </span>            :     0x70,0x71,0x72,0x73,0x74,0x75,0x76,0x77,
+<span class="lineNum">     237 </span>            :     0x78,0x79,0x7A,0x7B,0x5C,0x5D,0x5E,0x5F,
+<span class="lineNum">     238 </span>            :     0x60,0x61,0x62,0x63,0x64,0x65,0x66,0x67,
+<span class="lineNum">     239 </span>            :     0x68,0x69,0x6A,0x6B,0x6C,0x6D,0x6E,0x6F,
+<span class="lineNum">     240 </span>            :     0x70,0x71,0x72,0x73,0x74,0x75,0x76,0x77,
+<span class="lineNum">     241 </span>            :     0x78,0x79,0x7A,0x7B,0x7C,0x7D,0x7E,0x7F,
+<span class="lineNum">     242 </span>            :     0x80,0x81,0x82,0x83,0x84,0x85,0x86,0x87,
+<span class="lineNum">     243 </span>            :     0x88,0x89,0x8A,0x8B,0x8C,0x8D,0x8E,0x8F,
+<span class="lineNum">     244 </span>            :     0x90,0x91,0x92,0x93,0x94,0x95,0x96,0x97,
+<span class="lineNum">     245 </span>            :     0x98,0x99,0x9A,0x9B,0x9C,0x9D,0x9E,0x9F,
+<span class="lineNum">     246 </span>            :     0xA0,0xA1,0xA2,0xA3,0xA4,0xA5,0xA6,0xA7,
+<span class="lineNum">     247 </span>            :     0xA8,0xA9,0xAA,0xAB,0xAC,0xAD,0xAE,0xAF,
+<span class="lineNum">     248 </span>            :     0xB0,0xB1,0xB2,0xB3,0xB4,0xB5,0xB6,0xB7,
+<span class="lineNum">     249 </span>            :     0xB8,0xB9,0xBA,0xBB,0xBC,0xBD,0xBE,0xBF,
+<span class="lineNum">     250 </span>            :     0xC0,0xC1,0xC2,0xC3,0xC4,0xC5,0xC6,0xC7,
+<span class="lineNum">     251 </span>            :     0xC8,0xC9,0xCA,0xCB,0xCC,0xCD,0xCE,0xCF,
+<span class="lineNum">     252 </span>            :     0xD0,0xD1,0xD2,0xD3,0xD4,0xD5,0xD6,0xD7,
+<span class="lineNum">     253 </span>            :     0xD8,0xD9,0xDA,0xDB,0xDC,0xDD,0xDE,0xDF,
+<span class="lineNum">     254 </span>            :     0xE0,0xE1,0xE2,0xE3,0xE4,0xE5,0xE6,0xE7,
+<span class="lineNum">     255 </span>            :     0xE8,0xE9,0xEA,0xEB,0xEC,0xED,0xEE,0xEF,
+<span class="lineNum">     256 </span>            :     0xF0,0xF1,0xF2,0xF3,0xF4,0xF5,0xF6,0xF7,
+<span class="lineNum">     257 </span>            :     0xF8,0xF9,0xFA,0xFB,0xFC,0xFD,0xFE,0xFF
+<span class="lineNum">     258 </span>            : };
+<span class="lineNum">     259 </span>            : 
+<span class="lineNum">     260 </span>            : /**
+<span class="lineNum">     261 </span>            :  * xmlStrcasecmp:
+<span class="lineNum">     262 </span>            :  * @str1:  the first xmlChar *
+<span class="lineNum">     263 </span>            :  * @str2:  the second xmlChar *
+<span class="lineNum">     264 </span>            :  *
+<span class="lineNum">     265 </span>            :  * a strcasecmp for xmlChar's
+<span class="lineNum">     266 </span>            :  *
+<span class="lineNum">     267 </span>            :  * Returns the integer result of the comparison
+<span class="lineNum">     268 </span>            :  */
+<a name="269"><span class="lineNum">     269 </span>            : </a>
+<span class="lineNum">     270 </span>            : int
+<span class="lineNum">     271 </span><span class="lineCov">        761 : xmlStrcasecmp(const xmlChar *str1, const xmlChar *str2) {</span>
+<span class="lineNum">     272 </span>            :     register int tmp;
+<span class="lineNum">     273 </span>            : 
+<span class="lineNum">     274 </span><span class="lineCov">        761 :     if (str1 == str2) return(0);</span>
+<span class="lineNum">     275 </span><span class="lineCov">        761 :     if (str1 == NULL) return(-1);</span>
+<span class="lineNum">     276 </span><span class="lineCov">        761 :     if (str2 == NULL) return(1);</span>
+<span class="lineNum">     277 </span>            :     do {
+<span class="lineNum">     278 </span><span class="lineCov">       2077 :         tmp = casemap[*str1++] - casemap[*str2];</span>
+<span class="lineNum">     279 </span><span class="lineCov">       2077 :         if (tmp != 0) return(tmp);</span>
+<span class="lineNum">     280 </span><span class="lineCov">       1424 :     } while (*str2++ != 0);</span>
+<span class="lineNum">     281 </span>            :     return 0;
+<span class="lineNum">     282 </span>            : }
+<span class="lineNum">     283 </span>            : 
+<span class="lineNum">     284 </span>            : /**
+<span class="lineNum">     285 </span>            :  * xmlStrncasecmp:
+<span class="lineNum">     286 </span>            :  * @str1:  the first xmlChar *
+<span class="lineNum">     287 </span>            :  * @str2:  the second xmlChar *
+<span class="lineNum">     288 </span>            :  * @len:  the max comparison length
+<span class="lineNum">     289 </span>            :  *
+<span class="lineNum">     290 </span>            :  * a strncasecmp for xmlChar's
+<span class="lineNum">     291 </span>            :  *
+<span class="lineNum">     292 </span>            :  * Returns the integer result of the comparison
+<span class="lineNum">     293 </span>            :  */
+<a name="294"><span class="lineNum">     294 </span>            : </a>
+<span class="lineNum">     295 </span>            : int
+<span class="lineNum">     296 </span><span class="lineCov">      10976 : xmlStrncasecmp(const xmlChar *str1, const xmlChar *str2, int len) {</span>
+<span class="lineNum">     297 </span>            :     register int tmp;
+<span class="lineNum">     298 </span>            : 
+<span class="lineNum">     299 </span><span class="lineCov">      10976 :     if (len &lt;= 0) return(0);</span>
+<span class="lineNum">     300 </span><span class="lineCov">      10976 :     if (str1 == str2) return(0);</span>
+<span class="lineNum">     301 </span><span class="lineCov">      10976 :     if (str1 == NULL) return(-1);</span>
+<span class="lineNum">     302 </span><span class="lineCov">      10976 :     if (str2 == NULL) return(1);</span>
+<span class="lineNum">     303 </span>            :     do {
+<span class="lineNum">     304 </span><span class="lineCov">      69972 :         tmp = casemap[*str1++] - casemap[*str2];</span>
+<span class="lineNum">     305 </span><span class="lineCov">      69972 :         if (tmp != 0 || --len == 0) return(tmp);</span>
+<span class="lineNum">     306 </span><span class="lineCov">      58996 :     } while (*str2++ != 0);</span>
+<span class="lineNum">     307 </span>            :     return 0;
+<span class="lineNum">     308 </span>            : }
+<span class="lineNum">     309 </span>            : 
+<span class="lineNum">     310 </span>            : /**
+<span class="lineNum">     311 </span>            :  * xmlStrchr:
+<span class="lineNum">     312 </span>            :  * @str:  the xmlChar * array
+<span class="lineNum">     313 </span>            :  * @val:  the xmlChar to search
+<span class="lineNum">     314 </span>            :  *
+<span class="lineNum">     315 </span>            :  * a strchr for xmlChar's
+<span class="lineNum">     316 </span>            :  *
+<span class="lineNum">     317 </span>            :  * Returns the xmlChar * for the first occurrence or NULL.
+<span class="lineNum">     318 </span>            :  */
+<a name="319"><span class="lineNum">     319 </span>            : </a>
+<span class="lineNum">     320 </span>            : const xmlChar *
+<span class="lineNum">     321 </span><span class="lineCov">       5761 : xmlStrchr(const xmlChar *str, xmlChar val) {</span>
+<span class="lineNum">     322 </span><span class="lineCov">       5761 :     if (str == NULL) return(NULL);</span>
+<span class="lineNum">     323 </span><span class="lineCov">    4206459 :     while (*str != 0) { /* non input consuming */</span>
+<span class="lineNum">     324 </span><span class="lineCov">    4200714 :         if (*str == val) return((xmlChar *) str);</span>
+<span class="lineNum">     325 </span><span class="lineCov">    4200698 :         str++;</span>
+<span class="lineNum">     326 </span>            :     }
+<span class="lineNum">     327 </span>            :     return(NULL);
+<span class="lineNum">     328 </span>            : }
+<span class="lineNum">     329 </span>            : 
+<span class="lineNum">     330 </span>            : /**
+<span class="lineNum">     331 </span>            :  * xmlStrstr:
+<span class="lineNum">     332 </span>            :  * @str:  the xmlChar * array (haystack)
+<span class="lineNum">     333 </span>            :  * @val:  the xmlChar to search (needle)
+<span class="lineNum">     334 </span>            :  *
+<span class="lineNum">     335 </span>            :  * a strstr for xmlChar's
+<span class="lineNum">     336 </span>            :  *
+<span class="lineNum">     337 </span>            :  * Returns the xmlChar * for the first occurrence or NULL.
+<span class="lineNum">     338 </span>            :  */
+<a name="339"><span class="lineNum">     339 </span>            : </a>
+<span class="lineNum">     340 </span>            : const xmlChar *
+<span class="lineNum">     341 </span><span class="lineNoCov">          0 : xmlStrstr(const xmlChar *str, const xmlChar *val) {</span>
+<span class="lineNum">     342 </span>            :     int n;
+<span class="lineNum">     343 </span>            : 
+<span class="lineNum">     344 </span><span class="lineNoCov">          0 :     if (str == NULL) return(NULL);</span>
+<span class="lineNum">     345 </span><span class="lineNoCov">          0 :     if (val == NULL) return(NULL);</span>
+<span class="lineNum">     346 </span><span class="lineNoCov">          0 :     n = xmlStrlen(val);</span>
+<span class="lineNum">     347 </span>            : 
+<span class="lineNum">     348 </span><span class="lineNoCov">          0 :     if (n == 0) return(str);</span>
+<span class="lineNum">     349 </span><span class="lineNoCov">          0 :     while (*str != 0) { /* non input consuming */</span>
+<span class="lineNum">     350 </span><span class="lineNoCov">          0 :         if (*str == *val) {</span>
+<span class="lineNum">     351 </span><span class="lineNoCov">          0 :             if (!xmlStrncmp(str, val, n)) return((const xmlChar *) str);</span>
+<span class="lineNum">     352 </span>            :         }
+<span class="lineNum">     353 </span><span class="lineNoCov">          0 :         str++;</span>
+<span class="lineNum">     354 </span>            :     }
+<span class="lineNum">     355 </span>            :     return(NULL);
+<span class="lineNum">     356 </span>            : }
+<span class="lineNum">     357 </span>            : 
+<span class="lineNum">     358 </span>            : /**
+<span class="lineNum">     359 </span>            :  * xmlStrcasestr:
+<span class="lineNum">     360 </span>            :  * @str:  the xmlChar * array (haystack)
+<span class="lineNum">     361 </span>            :  * @val:  the xmlChar to search (needle)
+<span class="lineNum">     362 </span>            :  *
+<span class="lineNum">     363 </span>            :  * a case-ignoring strstr for xmlChar's
+<span class="lineNum">     364 </span>            :  *
+<span class="lineNum">     365 </span>            :  * Returns the xmlChar * for the first occurrence or NULL.
+<span class="lineNum">     366 </span>            :  */
+<a name="367"><span class="lineNum">     367 </span>            : </a>
+<span class="lineNum">     368 </span>            : const xmlChar *
+<span class="lineNum">     369 </span><span class="lineNoCov">          0 : xmlStrcasestr(const xmlChar *str, const xmlChar *val) {</span>
+<span class="lineNum">     370 </span>            :     int n;
+<span class="lineNum">     371 </span>            : 
+<span class="lineNum">     372 </span><span class="lineNoCov">          0 :     if (str == NULL) return(NULL);</span>
+<span class="lineNum">     373 </span><span class="lineNoCov">          0 :     if (val == NULL) return(NULL);</span>
+<span class="lineNum">     374 </span><span class="lineNoCov">          0 :     n = xmlStrlen(val);</span>
+<span class="lineNum">     375 </span>            : 
+<span class="lineNum">     376 </span><span class="lineNoCov">          0 :     if (n == 0) return(str);</span>
+<span class="lineNum">     377 </span><span class="lineNoCov">          0 :     while (*str != 0) { /* non input consuming */</span>
+<span class="lineNum">     378 </span><span class="lineNoCov">          0 :         if (casemap[*str] == casemap[*val])</span>
+<span class="lineNum">     379 </span><span class="lineNoCov">          0 :             if (!xmlStrncasecmp(str, val, n)) return(str);</span>
+<span class="lineNum">     380 </span><span class="lineNoCov">          0 :         str++;</span>
+<span class="lineNum">     381 </span>            :     }
+<span class="lineNum">     382 </span>            :     return(NULL);
+<span class="lineNum">     383 </span>            : }
+<span class="lineNum">     384 </span>            : 
+<span class="lineNum">     385 </span>            : /**
+<span class="lineNum">     386 </span>            :  * xmlStrsub:
+<span class="lineNum">     387 </span>            :  * @str:  the xmlChar * array (haystack)
+<span class="lineNum">     388 </span>            :  * @start:  the index of the first char (zero based)
+<span class="lineNum">     389 </span>            :  * @len:  the length of the substring
+<span class="lineNum">     390 </span>            :  *
+<span class="lineNum">     391 </span>            :  * Extract a substring of a given string
+<span class="lineNum">     392 </span>            :  *
+<span class="lineNum">     393 </span>            :  * Returns the xmlChar * for the first occurrence or NULL.
+<span class="lineNum">     394 </span>            :  */
+<a name="395"><span class="lineNum">     395 </span>            : </a>
+<span class="lineNum">     396 </span>            : xmlChar *
+<span class="lineNum">     397 </span><span class="lineNoCov">          0 : xmlStrsub(const xmlChar *str, int start, int len) {</span>
+<span class="lineNum">     398 </span>            :     int i;
+<span class="lineNum">     399 </span>            : 
+<span class="lineNum">     400 </span><span class="lineNoCov">          0 :     if (str == NULL) return(NULL);</span>
+<span class="lineNum">     401 </span><span class="lineNoCov">          0 :     if (start &lt; 0) return(NULL);</span>
+<span class="lineNum">     402 </span><span class="lineNoCov">          0 :     if (len &lt; 0) return(NULL);</span>
+<span class="lineNum">     403 </span>            : 
+<span class="lineNum">     404 </span><span class="lineNoCov">          0 :     for (i = 0;i &lt; start;i++) {</span>
+<span class="lineNum">     405 </span><span class="lineNoCov">          0 :         if (*str == 0) return(NULL);</span>
+<span class="lineNum">     406 </span><span class="lineNoCov">          0 :         str++;</span>
+<span class="lineNum">     407 </span>            :     }
+<span class="lineNum">     408 </span><span class="lineNoCov">          0 :     if (*str == 0) return(NULL);</span>
+<span class="lineNum">     409 </span><span class="lineNoCov">          0 :     return(xmlStrndup(str, len));</span>
+<span class="lineNum">     410 </span>            : }
+<span class="lineNum">     411 </span>            : 
+<span class="lineNum">     412 </span>            : /**
+<span class="lineNum">     413 </span>            :  * xmlStrlen:
+<span class="lineNum">     414 </span>            :  * @str:  the xmlChar * array
+<span class="lineNum">     415 </span>            :  *
+<span class="lineNum">     416 </span>            :  * length of a xmlChar's string
+<span class="lineNum">     417 </span>            :  *
+<span class="lineNum">     418 </span>            :  * Returns the number of xmlChar contained in the ARRAY.
+<span class="lineNum">     419 </span>            :  */
+<a name="420"><span class="lineNum">     420 </span>            : </a>
+<a name="421"><span class="lineNum">     421 </span>            : int</a>
+<span class="lineNum">     422 </span><span class="lineCov">      34740 : xmlStrlen(const xmlChar *str) {</span>
+<span class="lineNum">     423 </span><span class="lineCov">      34740 :     int len = 0;</span>
+<span class="lineNum">     424 </span>            : 
+<span class="lineNum">     425 </span><span class="lineCov">      34740 :     if (str == NULL) return(0);</span>
+<span class="lineNum">     426 </span><span class="lineCov">    3360033 :     while (*str != 0) { /* non input consuming */</span>
+<span class="lineNum">     427 </span><span class="lineCov">    3325293 :         str++;</span>
+<span class="lineNum">     428 </span><span class="lineCov">    3325293 :         len++;</span>
+<span class="lineNum">     429 </span>            :     }
+<span class="lineNum">     430 </span>            :     return(len);
+<span class="lineNum">     431 </span>            : }
+<span class="lineNum">     432 </span>            : 
+<span class="lineNum">     433 </span>            : /**
+<span class="lineNum">     434 </span>            :  * xmlStrncat:
+<span class="lineNum">     435 </span>            :  * @cur:  the original xmlChar * array
+<span class="lineNum">     436 </span>            :  * @add:  the xmlChar * array added
+<span class="lineNum">     437 </span>            :  * @len:  the length of @add
+<span class="lineNum">     438 </span>            :  *
+<span class="lineNum">     439 </span>            :  * a strncat for array of xmlChar's, it will extend @cur with the len
+<span class="lineNum">     440 </span>            :  * first bytes of @add. Note that if @len &lt; 0 then this is an API error
+<span class="lineNum">     441 </span>            :  * and NULL will be returned.
+<span class="lineNum">     442 </span>            :  *
+<span class="lineNum">     443 </span>            :  * Returns a new xmlChar *, the original @cur is reallocated if needed
+<span class="lineNum">     444 </span>            :  * and should not be freed
+<span class="lineNum">     445 </span>            :  */
+<span class="lineNum">     446 </span>            : 
+<span class="lineNum">     447 </span>            : xmlChar *
+<span class="lineNum">     448 </span><span class="lineNoCov">          0 : xmlStrncat(xmlChar *cur, const xmlChar *add, int len) {</span>
+<span class="lineNum">     449 </span>            :     int size;
+<span class="lineNum">     450 </span>            :     xmlChar *ret;
+<span class="lineNum">     451 </span>            : 
+<span class="lineNum">     452 </span><span class="lineNoCov">          0 :     if ((add == NULL) || (len == 0))</span>
+<span class="lineNum">     453 </span>            :         return(cur);
+<span class="lineNum">     454 </span><span class="lineNoCov">          0 :     if (len &lt; 0)</span>
+<span class="lineNum">     455 </span>            :         return(NULL);
+<span class="lineNum">     456 </span><span class="lineNoCov">          0 :     if (cur == NULL)</span>
+<span class="lineNum">     457 </span><span class="lineNoCov">          0 :         return(xmlStrndup(add, len));</span>
+<span class="lineNum">     458 </span>            : 
+<span class="lineNum">     459 </span><span class="lineNoCov">          0 :     size = xmlStrlen(cur);</span>
+<span class="lineNum">     460 </span><span class="lineNoCov">          0 :     if (size &lt; 0)</span>
+<span class="lineNum">     461 </span>            :         return(NULL);
+<span class="lineNum">     462 </span><span class="lineNoCov">          0 :     ret = (xmlChar *) xmlRealloc(cur, (size + len + 1) * sizeof(xmlChar));</span>
+<span class="lineNum">     463 </span><span class="lineNoCov">          0 :     if (ret == NULL) {</span>
+<span class="lineNum">     464 </span><span class="lineNoCov">          0 :         xmlErrMemory(NULL, NULL);</span>
+<span class="lineNum">     465 </span><span class="lineNoCov">          0 :         return(cur);</span>
+<span class="lineNum">     466 </span>            :     }
+<span class="lineNum">     467 </span><span class="lineNoCov">          0 :     memcpy(&amp;ret[size], add, len * sizeof(xmlChar));</span>
+<span class="lineNum">     468 </span><span class="lineNoCov">          0 :     ret[size + len] = 0;</span>
+<span class="lineNum">     469 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">     470 </span>            : }
+<span class="lineNum">     471 </span>            : 
+<span class="lineNum">     472 </span>            : /**
+<span class="lineNum">     473 </span>            :  * xmlStrncatNew:
+<span class="lineNum">     474 </span>            :  * @str1:  first xmlChar string
+<span class="lineNum">     475 </span>            :  * @str2:  second xmlChar string
+<span class="lineNum">     476 </span>            :  * @len:  the len of @str2 or &lt; 0
+<span class="lineNum">     477 </span>            :  *
+<span class="lineNum">     478 </span>            :  * same as xmlStrncat, but creates a new string.  The original
+<span class="lineNum">     479 </span>            :  * two strings are not freed. If @len is &lt; 0 then the length
+<span class="lineNum">     480 </span>            :  * will be calculated automatically.
+<span class="lineNum">     481 </span>            :  *
+<span class="lineNum">     482 </span>            :  * Returns a new xmlChar * or NULL
+<span class="lineNum">     483 </span>            :  */
+<span class="lineNum">     484 </span>            : xmlChar *
+<span class="lineNum">     485 </span><span class="lineNoCov">          0 : xmlStrncatNew(const xmlChar *str1, const xmlChar *str2, int len) {</span>
+<span class="lineNum">     486 </span>            :     int size;
+<span class="lineNum">     487 </span>            :     xmlChar *ret;
+<span class="lineNum">     488 </span>            : 
+<span class="lineNum">     489 </span><span class="lineNoCov">          0 :     if (len &lt; 0) {</span>
+<span class="lineNum">     490 </span><span class="lineNoCov">          0 :         len = xmlStrlen(str2);</span>
+<span class="lineNum">     491 </span><span class="lineNoCov">          0 :         if (len &lt; 0)</span>
+<span class="lineNum">     492 </span>            :             return(NULL);
+<span class="lineNum">     493 </span>            :     }
+<span class="lineNum">     494 </span><span class="lineNoCov">          0 :     if ((str2 == NULL) || (len == 0))</span>
+<span class="lineNum">     495 </span><span class="lineNoCov">          0 :         return(xmlStrdup(str1));</span>
+<span class="lineNum">     496 </span><span class="lineNoCov">          0 :     if (str1 == NULL)</span>
+<span class="lineNum">     497 </span><span class="lineNoCov">          0 :         return(xmlStrndup(str2, len));</span>
+<span class="lineNum">     498 </span>            : 
+<span class="lineNum">     499 </span><span class="lineNoCov">          0 :     size = xmlStrlen(str1);</span>
+<span class="lineNum">     500 </span><span class="lineNoCov">          0 :     if (size &lt; 0)</span>
+<span class="lineNum">     501 </span>            :         return(NULL);
+<span class="lineNum">     502 </span><span class="lineNoCov">          0 :     ret = (xmlChar *) xmlMalloc((size + len + 1) * sizeof(xmlChar));</span>
+<span class="lineNum">     503 </span><span class="lineNoCov">          0 :     if (ret == NULL) {</span>
+<span class="lineNum">     504 </span><span class="lineNoCov">          0 :         xmlErrMemory(NULL, NULL);</span>
+<span class="lineNum">     505 </span><span class="lineNoCov">          0 :         return(xmlStrndup(str1, size));</span>
+<span class="lineNum">     506 </span>            :     }
+<span class="lineNum">     507 </span><span class="lineNoCov">          0 :     memcpy(ret, str1, size * sizeof(xmlChar));</span>
+<span class="lineNum">     508 </span><span class="lineNoCov">          0 :     memcpy(&amp;ret[size], str2, len * sizeof(xmlChar));</span>
+<span class="lineNum">     509 </span><span class="lineNoCov">          0 :     ret[size + len] = 0;</span>
+<span class="lineNum">     510 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">     511 </span>            : }
+<span class="lineNum">     512 </span>            : 
+<span class="lineNum">     513 </span>            : /**
+<span class="lineNum">     514 </span>            :  * xmlStrcat:
+<span class="lineNum">     515 </span>            :  * @cur:  the original xmlChar * array
+<span class="lineNum">     516 </span>            :  * @add:  the xmlChar * array added
+<span class="lineNum">     517 </span>            :  *
+<span class="lineNum">     518 </span>            :  * a strcat for array of xmlChar's. Since they are supposed to be
+<span class="lineNum">     519 </span>            :  * encoded in UTF-8 or an encoding with 8bit based chars, we assume
+<span class="lineNum">     520 </span>            :  * a termination mark of '0'.
+<span class="lineNum">     521 </span>            :  *
+<span class="lineNum">     522 </span>            :  * Returns a new xmlChar * containing the concatenated string.
+<a name="523"><span class="lineNum">     523 </span>            :  */</a>
+<span class="lineNum">     524 </span>            : xmlChar *
+<span class="lineNum">     525 </span><span class="lineNoCov">          0 : xmlStrcat(xmlChar *cur, const xmlChar *add) {</span>
+<span class="lineNum">     526 </span><span class="lineNoCov">          0 :     const xmlChar *p = add;</span>
+<span class="lineNum">     527 </span>            : 
+<span class="lineNum">     528 </span><span class="lineNoCov">          0 :     if (add == NULL) return(cur);</span>
+<span class="lineNum">     529 </span><span class="lineNoCov">          0 :     if (cur == NULL)</span>
+<span class="lineNum">     530 </span><span class="lineNoCov">          0 :         return(xmlStrdup(add));</span>
+<span class="lineNum">     531 </span>            : 
+<span class="lineNum">     532 </span><span class="lineNoCov">          0 :     while (*p != 0) p++; /* non input consuming */</span>
+<span class="lineNum">     533 </span><span class="lineNoCov">          0 :     return(xmlStrncat(cur, add, p - add));</span>
+<span class="lineNum">     534 </span>            : }
+<span class="lineNum">     535 </span>            : 
+<span class="lineNum">     536 </span>            : /**
+<span class="lineNum">     537 </span>            :  * xmlStrPrintf:
+<span class="lineNum">     538 </span>            :  * @buf:   the result buffer.
+<span class="lineNum">     539 </span>            :  * @len:   the result buffer length.
+<span class="lineNum">     540 </span>            :  * @msg:   the message with printf formatting.
+<span class="lineNum">     541 </span>            :  * @...:   extra parameters for the message.
+<span class="lineNum">     542 </span>            :  *
+<span class="lineNum">     543 </span>            :  * Formats @msg and places result into @buf.
+<span class="lineNum">     544 </span>            :  *
+<span class="lineNum">     545 </span>            :  * Returns the number of characters written to @buf or -1 if an error occurs.
+<a name="546"><span class="lineNum">     546 </span>            :  */</a>
+<span class="lineNum">     547 </span>            : int XMLCDECL
+<span class="lineNum">     548 </span><span class="lineNoCov">          0 : xmlStrPrintf(xmlChar *buf, int len, const char *msg, ...) {</span>
+<span class="lineNum">     549 </span>            :     va_list args;
+<span class="lineNum">     550 </span>            :     int ret;
+<span class="lineNum">     551 </span>            : 
+<span class="lineNum">     552 </span><span class="lineNoCov">          0 :     if((buf == NULL) || (msg == NULL)) {</span>
+<span class="lineNum">     553 </span>            :         return(-1);
+<span class="lineNum">     554 </span>            :     }
+<span class="lineNum">     555 </span>            : 
+<span class="lineNum">     556 </span><span class="lineNoCov">          0 :     va_start(args, msg);</span>
+<span class="lineNum">     557 </span><span class="lineNoCov">          0 :     ret = vsnprintf((char *) buf, len, (const char *) msg, args);</span>
+<span class="lineNum">     558 </span><span class="lineNoCov">          0 :     va_end(args);</span>
+<span class="lineNum">     559 </span><span class="lineNoCov">          0 :     buf[len - 1] = 0; /* be safe ! */</span>
+<span class="lineNum">     560 </span>            : 
+<span class="lineNum">     561 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">     562 </span>            : }
+<span class="lineNum">     563 </span>            : 
+<span class="lineNum">     564 </span>            : /**
+<span class="lineNum">     565 </span>            :  * xmlStrVPrintf:
+<span class="lineNum">     566 </span>            :  * @buf:   the result buffer.
+<span class="lineNum">     567 </span>            :  * @len:   the result buffer length.
+<span class="lineNum">     568 </span>            :  * @msg:   the message with printf formatting.
+<span class="lineNum">     569 </span>            :  * @ap:    extra parameters for the message.
+<span class="lineNum">     570 </span>            :  *
+<span class="lineNum">     571 </span>            :  * Formats @msg and places result into @buf.
+<span class="lineNum">     572 </span>            :  *
+<span class="lineNum">     573 </span>            :  * Returns the number of characters written to @buf or -1 if an error occurs.
+<a name="574"><span class="lineNum">     574 </span>            :  */</a>
+<span class="lineNum">     575 </span>            : int
+<span class="lineNum">     576 </span><span class="lineNoCov">          0 : xmlStrVPrintf(xmlChar *buf, int len, const char *msg, va_list ap) {</span>
+<span class="lineNum">     577 </span>            :     int ret;
+<span class="lineNum">     578 </span>            : 
+<span class="lineNum">     579 </span><span class="lineNoCov">          0 :     if((buf == NULL) || (msg == NULL)) {</span>
+<span class="lineNum">     580 </span>            :         return(-1);
+<span class="lineNum">     581 </span>            :     }
+<span class="lineNum">     582 </span>            : 
+<span class="lineNum">     583 </span><span class="lineNoCov">          0 :     ret = vsnprintf((char *) buf, len, (const char *) msg, ap);</span>
+<span class="lineNum">     584 </span><span class="lineNoCov">          0 :     buf[len - 1] = 0; /* be safe ! */</span>
+<span class="lineNum">     585 </span>            : 
+<span class="lineNum">     586 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">     587 </span>            : }
+<span class="lineNum">     588 </span>            : 
+<span class="lineNum">     589 </span>            : /************************************************************************
+<span class="lineNum">     590 </span>            :  *                                                                      *
+<span class="lineNum">     591 </span>            :  *              Generic UTF8 handling routines                          *
+<span class="lineNum">     592 </span>            :  *                                                                      *
+<span class="lineNum">     593 </span>            :  * From rfc2044: encoding of the Unicode values on UTF-8:               *
+<span class="lineNum">     594 </span>            :  *                                                                      *
+<span class="lineNum">     595 </span>            :  * UCS-4 range (hex.)           UTF-8 octet sequence (binary)           *
+<span class="lineNum">     596 </span>            :  * 0000 0000-0000 007F   0xxxxxxx                                       *
+<span class="lineNum">     597 </span>            :  * 0000 0080-0000 07FF   110xxxxx 10xxxxxx                              *
+<span class="lineNum">     598 </span>            :  * 0000 0800-0000 FFFF   1110xxxx 10xxxxxx 10xxxxxx                     *
+<span class="lineNum">     599 </span>            :  *                                                                      *
+<span class="lineNum">     600 </span>            :  * I hope we won't use values &gt; 0xFFFF anytime soon !                   *
+<span class="lineNum">     601 </span>            :  *                                                                      *
+<span class="lineNum">     602 </span>            :  ************************************************************************/
+<span class="lineNum">     603 </span>            : 
+<span class="lineNum">     604 </span>            : 
+<span class="lineNum">     605 </span>            : /**
+<span class="lineNum">     606 </span>            :  * xmlUTF8Size:
+<span class="lineNum">     607 </span>            :  * @utf: pointer to the UTF8 character
+<span class="lineNum">     608 </span>            :  *
+<span class="lineNum">     609 </span>            :  * calculates the internal size of a UTF8 character
+<span class="lineNum">     610 </span>            :  *
+<span class="lineNum">     611 </span>            :  * returns the numbers of bytes in the character, -1 on format error
+<a name="612"><span class="lineNum">     612 </span>            :  */</a>
+<span class="lineNum">     613 </span>            : int
+<span class="lineNum">     614 </span><span class="lineNoCov">          0 : xmlUTF8Size(const xmlChar *utf) {</span>
+<span class="lineNum">     615 </span>            :     xmlChar mask;
+<span class="lineNum">     616 </span>            :     int len;
+<span class="lineNum">     617 </span>            : 
+<span class="lineNum">     618 </span><span class="lineNoCov">          0 :     if (utf == NULL)</span>
+<span class="lineNum">     619 </span>            :         return -1;
+<span class="lineNum">     620 </span><span class="lineNoCov">          0 :     if (*utf &lt; 0x80)</span>
+<span class="lineNum">     621 </span>            :         return 1;
+<span class="lineNum">     622 </span>            :     /* check valid UTF8 character */
+<span class="lineNum">     623 </span><span class="lineNoCov">          0 :     if (!(*utf &amp; 0x40))</span>
+<span class="lineNum">     624 </span>            :         return -1;
+<span class="lineNum">     625 </span>            :     /* determine number of bytes in char */
+<span class="lineNum">     626 </span>            :     len = 2;
+<span class="lineNum">     627 </span><span class="lineNoCov">          0 :     for (mask=0x20; mask != 0; mask&gt;&gt;=1) {</span>
+<span class="lineNum">     628 </span><span class="lineNoCov">          0 :         if (!(*utf &amp; mask))</span>
+<span class="lineNum">     629 </span>            :             return len;
+<span class="lineNum">     630 </span><span class="lineNoCov">          0 :         len++;</span>
+<span class="lineNum">     631 </span>            :     }
+<span class="lineNum">     632 </span>            :     return -1;
+<span class="lineNum">     633 </span>            : }
+<span class="lineNum">     634 </span>            : 
+<span class="lineNum">     635 </span>            : /**
+<span class="lineNum">     636 </span>            :  * xmlUTF8Charcmp:
+<span class="lineNum">     637 </span>            :  * @utf1: pointer to first UTF8 char
+<span class="lineNum">     638 </span>            :  * @utf2: pointer to second UTF8 char
+<span class="lineNum">     639 </span>            :  *
+<span class="lineNum">     640 </span>            :  * compares the two UCS4 values
+<span class="lineNum">     641 </span>            :  *
+<span class="lineNum">     642 </span>            :  * returns result of the compare as with xmlStrncmp
+<a name="643"><span class="lineNum">     643 </span>            :  */</a>
+<span class="lineNum">     644 </span>            : int
+<span class="lineNum">     645 </span><span class="lineNoCov">          0 : xmlUTF8Charcmp(const xmlChar *utf1, const xmlChar *utf2) {</span>
+<span class="lineNum">     646 </span>            : 
+<span class="lineNum">     647 </span><span class="lineNoCov">          0 :     if (utf1 == NULL ) {</span>
+<span class="lineNum">     648 </span><span class="lineNoCov">          0 :         if (utf2 == NULL)</span>
+<span class="lineNum">     649 </span>            :             return 0;
+<span class="lineNum">     650 </span><span class="lineNoCov">          0 :         return -1;</span>
+<span class="lineNum">     651 </span>            :     }
+<span class="lineNum">     652 </span><span class="lineNoCov">          0 :     return xmlStrncmp(utf1, utf2, xmlUTF8Size(utf1));</span>
+<span class="lineNum">     653 </span>            : }
+<span class="lineNum">     654 </span>            : 
+<span class="lineNum">     655 </span>            : /**
+<span class="lineNum">     656 </span>            :  * xmlUTF8Strlen:
+<span class="lineNum">     657 </span>            :  * @utf:  a sequence of UTF-8 encoded bytes
+<span class="lineNum">     658 </span>            :  *
+<span class="lineNum">     659 </span>            :  * compute the length of an UTF8 string, it doesn't do a full UTF8
+<span class="lineNum">     660 </span>            :  * checking of the content of the string.
+<span class="lineNum">     661 </span>            :  *
+<span class="lineNum">     662 </span>            :  * Returns the number of characters in the string or -1 in case of error
+<a name="663"><span class="lineNum">     663 </span>            :  */</a>
+<span class="lineNum">     664 </span>            : int
+<span class="lineNum">     665 </span><span class="lineNoCov">          0 : xmlUTF8Strlen(const xmlChar *utf) {</span>
+<span class="lineNum">     666 </span><span class="lineNoCov">          0 :     int ret = 0;</span>
+<span class="lineNum">     667 </span>            : 
+<span class="lineNum">     668 </span><span class="lineNoCov">          0 :     if (utf == NULL)</span>
+<span class="lineNum">     669 </span>            :         return(-1);
+<span class="lineNum">     670 </span>            : 
+<span class="lineNum">     671 </span><span class="lineNoCov">          0 :     while (*utf != 0) {</span>
+<span class="lineNum">     672 </span><span class="lineNoCov">          0 :         if (utf[0] &amp; 0x80) {</span>
+<span class="lineNum">     673 </span><span class="lineNoCov">          0 :             if ((utf[1] &amp; 0xc0) != 0x80)</span>
+<span class="lineNum">     674 </span>            :                 return(-1);
+<span class="lineNum">     675 </span><span class="lineNoCov">          0 :             if ((utf[0] &amp; 0xe0) == 0xe0) {</span>
+<span class="lineNum">     676 </span><span class="lineNoCov">          0 :                 if ((utf[2] &amp; 0xc0) != 0x80)</span>
+<span class="lineNum">     677 </span>            :                     return(-1);
+<span class="lineNum">     678 </span><span class="lineNoCov">          0 :                 if ((utf[0] &amp; 0xf0) == 0xf0) {</span>
+<span class="lineNum">     679 </span><span class="lineNoCov">          0 :                     if ((utf[0] &amp; 0xf8) != 0xf0 || (utf[3] &amp; 0xc0) != 0x80)</span>
+<span class="lineNum">     680 </span>            :                         return(-1);
+<span class="lineNum">     681 </span><span class="lineNoCov">          0 :                     utf += 4;</span>
+<span class="lineNum">     682 </span>            :                 } else {
+<span class="lineNum">     683 </span><span class="lineNoCov">          0 :                     utf += 3;</span>
+<span class="lineNum">     684 </span>            :                 }
+<span class="lineNum">     685 </span>            :             } else {
+<span class="lineNum">     686 </span><span class="lineNoCov">          0 :                 utf += 2;</span>
+<span class="lineNum">     687 </span>            :             }
+<span class="lineNum">     688 </span>            :         } else {
+<span class="lineNum">     689 </span><span class="lineNoCov">          0 :             utf++;</span>
+<span class="lineNum">     690 </span>            :         }
+<span class="lineNum">     691 </span><span class="lineNoCov">          0 :         ret++;</span>
+<span class="lineNum">     692 </span>            :     }
+<span class="lineNum">     693 </span>            :     return(ret);
+<span class="lineNum">     694 </span>            : }
+<span class="lineNum">     695 </span>            : 
+<span class="lineNum">     696 </span>            : /**
+<span class="lineNum">     697 </span>            :  * xmlGetUTF8Char:
+<span class="lineNum">     698 </span>            :  * @utf:  a sequence of UTF-8 encoded bytes
+<span class="lineNum">     699 </span>            :  * @len:  a pointer to the minimum number of bytes present in
+<span class="lineNum">     700 </span>            :  *        the sequence.  This is used to assure the next character
+<span class="lineNum">     701 </span>            :  *        is completely contained within the sequence.
+<span class="lineNum">     702 </span>            :  *
+<span class="lineNum">     703 </span>            :  * Read the first UTF8 character from @utf
+<span class="lineNum">     704 </span>            :  *
+<span class="lineNum">     705 </span>            :  * Returns the char value or -1 in case of error, and sets *len to
+<span class="lineNum">     706 </span>            :  *        the actual number of bytes consumed (0 in case of error)
+<a name="707"><span class="lineNum">     707 </span>            :  */</a>
+<span class="lineNum">     708 </span>            : int
+<span class="lineNum">     709 </span><span class="lineNoCov">          0 : xmlGetUTF8Char(const unsigned char *utf, int *len) {</span>
+<span class="lineNum">     710 </span>            :     unsigned int c;
+<span class="lineNum">     711 </span>            : 
+<span class="lineNum">     712 </span><span class="lineNoCov">          0 :     if (utf == NULL)</span>
+<span class="lineNum">     713 </span>            :         goto error;
+<span class="lineNum">     714 </span><span class="lineNoCov">          0 :     if (len == NULL)</span>
+<span class="lineNum">     715 </span>            :         goto error;
+<span class="lineNum">     716 </span><span class="lineNoCov">          0 :     if (*len &lt; 1)</span>
+<span class="lineNum">     717 </span>            :         goto error;
+<span class="lineNum">     718 </span>            : 
+<span class="lineNum">     719 </span><span class="lineNoCov">          0 :     c = utf[0];</span>
+<span class="lineNum">     720 </span><span class="lineNoCov">          0 :     if (c &amp; 0x80) {</span>
+<span class="lineNum">     721 </span><span class="lineNoCov">          0 :         if (*len &lt; 2)</span>
+<span class="lineNum">     722 </span>            :             goto error;
+<span class="lineNum">     723 </span><span class="lineNoCov">          0 :         if ((utf[1] &amp; 0xc0) != 0x80)</span>
+<span class="lineNum">     724 </span>            :             goto error;
+<span class="lineNum">     725 </span><span class="lineNoCov">          0 :         if ((c &amp; 0xe0) == 0xe0) {</span>
+<span class="lineNum">     726 </span><span class="lineNoCov">          0 :             if (*len &lt; 3)</span>
+<span class="lineNum">     727 </span>            :                 goto error;
+<span class="lineNum">     728 </span><span class="lineNoCov">          0 :             if ((utf[2] &amp; 0xc0) != 0x80)</span>
+<span class="lineNum">     729 </span>            :                 goto error;
+<span class="lineNum">     730 </span><span class="lineNoCov">          0 :             if ((c &amp; 0xf0) == 0xf0) {</span>
+<span class="lineNum">     731 </span><span class="lineNoCov">          0 :                 if (*len &lt; 4)</span>
+<span class="lineNum">     732 </span>            :                     goto error;
+<span class="lineNum">     733 </span><span class="lineNoCov">          0 :                 if ((c &amp; 0xf8) != 0xf0 || (utf[3] &amp; 0xc0) != 0x80)</span>
+<span class="lineNum">     734 </span>            :                     goto error;
+<span class="lineNum">     735 </span><span class="lineNoCov">          0 :                 *len = 4;</span>
+<span class="lineNum">     736 </span>            :                 /* 4-byte code */
+<span class="lineNum">     737 </span><span class="lineNoCov">          0 :                 c = (utf[0] &amp; 0x7) &lt;&lt; 18;</span>
+<span class="lineNum">     738 </span><span class="lineNoCov">          0 :                 c |= (utf[1] &amp; 0x3f) &lt;&lt; 12;</span>
+<span class="lineNum">     739 </span><span class="lineNoCov">          0 :                 c |= (utf[2] &amp; 0x3f) &lt;&lt; 6;</span>
+<span class="lineNum">     740 </span><span class="lineNoCov">          0 :                 c |= utf[3] &amp; 0x3f;</span>
+<span class="lineNum">     741 </span>            :             } else {
+<span class="lineNum">     742 </span>            :               /* 3-byte code */
+<span class="lineNum">     743 </span><span class="lineNoCov">          0 :                 *len = 3;</span>
+<span class="lineNum">     744 </span><span class="lineNoCov">          0 :                 c = (utf[0] &amp; 0xf) &lt;&lt; 12;</span>
+<span class="lineNum">     745 </span><span class="lineNoCov">          0 :                 c |= (utf[1] &amp; 0x3f) &lt;&lt; 6;</span>
+<span class="lineNum">     746 </span><span class="lineNoCov">          0 :                 c |= utf[2] &amp; 0x3f;</span>
+<span class="lineNum">     747 </span>            :             }
+<span class="lineNum">     748 </span>            :         } else {
+<span class="lineNum">     749 </span>            :           /* 2-byte code */
+<span class="lineNum">     750 </span><span class="lineNoCov">          0 :             *len = 2;</span>
+<span class="lineNum">     751 </span><span class="lineNoCov">          0 :             c = (utf[0] &amp; 0x1f) &lt;&lt; 6;</span>
+<span class="lineNum">     752 </span><span class="lineNoCov">          0 :             c |= utf[1] &amp; 0x3f;</span>
+<span class="lineNum">     753 </span>            :         }
+<span class="lineNum">     754 </span>            :     } else {
+<span class="lineNum">     755 </span>            :         /* 1-byte code */
+<span class="lineNum">     756 </span><span class="lineNoCov">          0 :         *len = 1;</span>
+<span class="lineNum">     757 </span>            :     }
+<span class="lineNum">     758 </span><span class="lineNoCov">          0 :     return(c);</span>
+<span class="lineNum">     759 </span>            : 
+<span class="lineNum">     760 </span>            : error:
+<span class="lineNum">     761 </span><span class="lineNoCov">          0 :     if (len != NULL)</span>
+<span class="lineNum">     762 </span><span class="lineNoCov">          0 :         *len = 0;</span>
+<span class="lineNum">     763 </span>            :     return(-1);
+<span class="lineNum">     764 </span>            : }
+<span class="lineNum">     765 </span>            : 
+<span class="lineNum">     766 </span>            : /**
+<span class="lineNum">     767 </span>            :  * xmlCheckUTF8:
+<span class="lineNum">     768 </span>            :  * @utf: Pointer to putative UTF-8 encoded string.
+<span class="lineNum">     769 </span>            :  *
+<span class="lineNum">     770 </span>            :  * Checks @utf for being valid UTF-8. @utf is assumed to be
+<span class="lineNum">     771 </span>            :  * null-terminated. This function is not super-strict, as it will
+<span class="lineNum">     772 </span>            :  * allow longer UTF-8 sequences than necessary. Note that Java is
+<span class="lineNum">     773 </span>            :  * capable of producing these sequences if provoked. Also note, this
+<span class="lineNum">     774 </span>            :  * routine checks for the 4-byte maximum size, but does not check for
+<span class="lineNum">     775 </span>            :  * 0x10ffff maximum value.
+<span class="lineNum">     776 </span>            :  *
+<span class="lineNum">     777 </span>            :  * Return value: true if @utf is valid.
+<a name="778"><span class="lineNum">     778 </span>            :  **/</a>
+<span class="lineNum">     779 </span>            : int
+<span class="lineNum">     780 </span><span class="lineNoCov">          0 : xmlCheckUTF8(const unsigned char *utf)</span>
+<span class="lineNum">     781 </span>            : {
+<span class="lineNum">     782 </span>            :     int ix;
+<span class="lineNum">     783 </span>            :     unsigned char c;
+<span class="lineNum">     784 </span>            : 
+<span class="lineNum">     785 </span><span class="lineNoCov">          0 :     if (utf == NULL)</span>
+<span class="lineNum">     786 </span>            :         return(0);
+<span class="lineNum">     787 </span>            :     /*
+<span class="lineNum">     788 </span>            :      * utf is a string of 1, 2, 3 or 4 bytes.  The valid strings
+<span class="lineNum">     789 </span>            :      * are as follows (in &quot;bit format&quot;):
+<span class="lineNum">     790 </span>            :      *    0xxxxxxx                                      valid 1-byte
+<span class="lineNum">     791 </span>            :      *    110xxxxx 10xxxxxx                             valid 2-byte
+<span class="lineNum">     792 </span>            :      *    1110xxxx 10xxxxxx 10xxxxxx                    valid 3-byte
+<span class="lineNum">     793 </span>            :      *    11110xxx 10xxxxxx 10xxxxxx 10xxxxxx           valid 4-byte
+<span class="lineNum">     794 </span>            :      */
+<span class="lineNum">     795 </span><span class="lineNoCov">          0 :     for (ix = 0; (c = utf[ix]);) {      /* string is 0-terminated */</span>
+<span class="lineNum">     796 </span><span class="lineNoCov">          0 :         if ((c &amp; 0x80) == 0x00) {   /* 1-byte code, starts with 10 */</span>
+<span class="lineNum">     797 </span><span class="lineNoCov">          0 :             ix++;</span>
+<span class="lineNum">     798 </span><span class="lineNoCov">          0 :         } else if ((c &amp; 0xe0) == 0xc0) {/* 2-byte code, starts with 110 */</span>
+<span class="lineNum">     799 </span><span class="lineNoCov">          0 :             if ((utf[ix+1] &amp; 0xc0 ) != 0x80)</span>
+<span class="lineNum">     800 </span>            :                 return 0;
+<span class="lineNum">     801 </span><span class="lineNoCov">          0 :             ix += 2;</span>
+<span class="lineNum">     802 </span><span class="lineNoCov">          0 :         } else if ((c &amp; 0xf0) == 0xe0) {/* 3-byte code, starts with 1110 */</span>
+<span class="lineNum">     803 </span><span class="lineNoCov">          0 :             if (((utf[ix+1] &amp; 0xc0) != 0x80) ||</span>
+<span class="lineNum">     804 </span><span class="lineNoCov">          0 :                 ((utf[ix+2] &amp; 0xc0) != 0x80))</span>
+<span class="lineNum">     805 </span>            :                     return 0;
+<span class="lineNum">     806 </span><span class="lineNoCov">          0 :             ix += 3;</span>
+<span class="lineNum">     807 </span><span class="lineNoCov">          0 :         } else if ((c &amp; 0xf8) == 0xf0) {/* 4-byte code, starts with 11110 */</span>
+<span class="lineNum">     808 </span><span class="lineNoCov">          0 :             if (((utf[ix+1] &amp; 0xc0) != 0x80) ||</span>
+<span class="lineNum">     809 </span><span class="lineNoCov">          0 :                 ((utf[ix+2] &amp; 0xc0) != 0x80) ||</span>
+<span class="lineNum">     810 </span><span class="lineNoCov">          0 :                 ((utf[ix+3] &amp; 0xc0) != 0x80))</span>
+<span class="lineNum">     811 </span>            :                     return 0;
+<span class="lineNum">     812 </span><span class="lineNoCov">          0 :             ix += 4;</span>
+<span class="lineNum">     813 </span>            :         } else                          /* unknown encoding */
+<span class="lineNum">     814 </span>            :             return 0;
+<span class="lineNum">     815 </span>            :       }
+<span class="lineNum">     816 </span>            :       return(1);
+<span class="lineNum">     817 </span>            : }
+<span class="lineNum">     818 </span>            : 
+<span class="lineNum">     819 </span>            : /**
+<span class="lineNum">     820 </span>            :  * xmlUTF8Strsize:
+<span class="lineNum">     821 </span>            :  * @utf:  a sequence of UTF-8 encoded bytes
+<span class="lineNum">     822 </span>            :  * @len:  the number of characters in the array
+<span class="lineNum">     823 </span>            :  *
+<span class="lineNum">     824 </span>            :  * storage size of an UTF8 string
+<span class="lineNum">     825 </span>            :  * the behaviour is not garanteed if the input string is not UTF-8
+<span class="lineNum">     826 </span>            :  *
+<span class="lineNum">     827 </span>            :  * Returns the storage size of
+<span class="lineNum">     828 </span>            :  * the first 'len' characters of ARRAY
+<span class="lineNum">     829 </span>            :  */
+<a name="830"><span class="lineNum">     830 </span>            : </a>
+<span class="lineNum">     831 </span>            : int
+<span class="lineNum">     832 </span><span class="lineNoCov">          0 : xmlUTF8Strsize(const xmlChar *utf, int len) {</span>
+<span class="lineNum">     833 </span><span class="lineNoCov">          0 :     const xmlChar   *ptr=utf;</span>
+<span class="lineNum">     834 </span>            :     xmlChar         ch;
+<span class="lineNum">     835 </span>            : 
+<span class="lineNum">     836 </span><span class="lineNoCov">          0 :     if (utf == NULL)</span>
+<span class="lineNum">     837 </span>            :         return(0);
+<span class="lineNum">     838 </span>            : 
+<span class="lineNum">     839 </span><span class="lineNoCov">          0 :     if (len &lt;= 0)</span>
+<span class="lineNum">     840 </span>            :         return(0);
+<span class="lineNum">     841 </span>            : 
+<span class="lineNum">     842 </span><span class="lineNoCov">          0 :     while ( len-- &gt; 0) {</span>
+<span class="lineNum">     843 </span><span class="lineNoCov">          0 :         if ( !*ptr )</span>
+<span class="lineNum">     844 </span>            :             break;
+<span class="lineNum">     845 </span><span class="lineNoCov">          0 :         if ( (ch = *ptr++) &amp; 0x80)</span>
+<span class="lineNum">     846 </span><span class="lineNoCov">          0 :             while ((ch&lt;&lt;=1) &amp; 0x80 ) {</span>
+<span class="lineNum">     847 </span><span class="lineNoCov">          0 :                 if (*ptr == 0) break;</span>
+<span class="lineNum">     848 </span><span class="lineNoCov">          0 :                 ptr++;</span>
+<span class="lineNum">     849 </span>            :             }
+<span class="lineNum">     850 </span>            :     }
+<span class="lineNum">     851 </span><span class="lineNoCov">          0 :     return (ptr - utf);</span>
+<span class="lineNum">     852 </span>            : }
+<span class="lineNum">     853 </span>            : 
+<span class="lineNum">     854 </span>            : 
+<span class="lineNum">     855 </span>            : /**
+<span class="lineNum">     856 </span>            :  * xmlUTF8Strndup:
+<span class="lineNum">     857 </span>            :  * @utf:  the input UTF8 *
+<span class="lineNum">     858 </span>            :  * @len:  the len of @utf (in chars)
+<span class="lineNum">     859 </span>            :  *
+<span class="lineNum">     860 </span>            :  * a strndup for array of UTF8's
+<span class="lineNum">     861 </span>            :  *
+<span class="lineNum">     862 </span>            :  * Returns a new UTF8 * or NULL
+<a name="863"><span class="lineNum">     863 </span>            :  */</a>
+<span class="lineNum">     864 </span>            : xmlChar *
+<span class="lineNum">     865 </span><span class="lineNoCov">          0 : xmlUTF8Strndup(const xmlChar *utf, int len) {</span>
+<span class="lineNum">     866 </span>            :     xmlChar *ret;
+<span class="lineNum">     867 </span>            :     int i;
+<span class="lineNum">     868 </span>            : 
+<span class="lineNum">     869 </span><span class="lineNoCov">          0 :     if ((utf == NULL) || (len &lt; 0)) return(NULL);</span>
+<span class="lineNum">     870 </span><span class="lineNoCov">          0 :     i = xmlUTF8Strsize(utf, len);</span>
+<span class="lineNum">     871 </span><span class="lineNoCov">          0 :     ret = (xmlChar *) xmlMallocAtomic((i + 1) * sizeof(xmlChar));</span>
+<span class="lineNum">     872 </span><span class="lineNoCov">          0 :     if (ret == NULL) {</span>
+<span class="lineNum">     873 </span><span class="lineNoCov">          0 :         xmlGenericError(xmlGenericErrorContext,</span>
+<span class="lineNum">     874 </span>            :                 &quot;malloc of %ld byte failed\n&quot;,
+<span class="lineNum">     875 </span><span class="lineNoCov">          0 :                 (len + 1) * (long)sizeof(xmlChar));</span>
+<span class="lineNum">     876 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">     877 </span>            :     }
+<span class="lineNum">     878 </span><span class="lineNoCov">          0 :     memcpy(ret, utf, i * sizeof(xmlChar));</span>
+<span class="lineNum">     879 </span><span class="lineNoCov">          0 :     ret[i] = 0;</span>
+<span class="lineNum">     880 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">     881 </span>            : }
+<span class="lineNum">     882 </span>            : 
+<span class="lineNum">     883 </span>            : /**
+<span class="lineNum">     884 </span>            :  * xmlUTF8Strpos:
+<span class="lineNum">     885 </span>            :  * @utf:  the input UTF8 *
+<span class="lineNum">     886 </span>            :  * @pos:  the position of the desired UTF8 char (in chars)
+<span class="lineNum">     887 </span>            :  *
+<span class="lineNum">     888 </span>            :  * a function to provide the equivalent of fetching a
+<span class="lineNum">     889 </span>            :  * character from a string array
+<span class="lineNum">     890 </span>            :  *
+<span class="lineNum">     891 </span>            :  * Returns a pointer to the UTF8 character or NULL
+<a name="892"><span class="lineNum">     892 </span>            :  */</a>
+<span class="lineNum">     893 </span>            : const xmlChar *
+<span class="lineNum">     894 </span><span class="lineNoCov">          0 : xmlUTF8Strpos(const xmlChar *utf, int pos) {</span>
+<span class="lineNum">     895 </span>            :     xmlChar ch;
+<span class="lineNum">     896 </span>            : 
+<span class="lineNum">     897 </span><span class="lineNoCov">          0 :     if (utf == NULL) return(NULL);</span>
+<span class="lineNum">     898 </span><span class="lineNoCov">          0 :     if (pos &lt; 0)</span>
+<span class="lineNum">     899 </span>            :         return(NULL);
+<span class="lineNum">     900 </span><span class="lineNoCov">          0 :     while (pos--) {</span>
+<span class="lineNum">     901 </span><span class="lineNoCov">          0 :         if ((ch=*utf++) == 0) return(NULL);</span>
+<span class="lineNum">     902 </span><span class="lineNoCov">          0 :         if ( ch &amp; 0x80 ) {</span>
+<span class="lineNum">     903 </span>            :             /* if not simple ascii, verify proper format */
+<span class="lineNum">     904 </span><span class="lineNoCov">          0 :             if ( (ch &amp; 0xc0) != 0xc0 )</span>
+<span class="lineNum">     905 </span>            :                 return(NULL);
+<span class="lineNum">     906 </span>            :             /* then skip over remaining bytes for this char */
+<span class="lineNum">     907 </span><span class="lineNoCov">          0 :             while ( (ch &lt;&lt;= 1) &amp; 0x80 )</span>
+<span class="lineNum">     908 </span><span class="lineNoCov">          0 :                 if ( (*utf++ &amp; 0xc0) != 0x80 )</span>
+<span class="lineNum">     909 </span>            :                     return(NULL);
+<span class="lineNum">     910 </span>            :         }
+<span class="lineNum">     911 </span>            :     }
+<span class="lineNum">     912 </span>            :     return((xmlChar *)utf);
+<span class="lineNum">     913 </span>            : }
+<span class="lineNum">     914 </span>            : 
+<span class="lineNum">     915 </span>            : /**
+<span class="lineNum">     916 </span>            :  * xmlUTF8Strloc:
+<span class="lineNum">     917 </span>            :  * @utf:  the input UTF8 *
+<span class="lineNum">     918 </span>            :  * @utfchar:  the UTF8 character to be found
+<span class="lineNum">     919 </span>            :  *
+<span class="lineNum">     920 </span>            :  * a function to provide the relative location of a UTF8 char
+<span class="lineNum">     921 </span>            :  *
+<span class="lineNum">     922 </span>            :  * Returns the relative character position of the desired char
+<span class="lineNum">     923 </span>            :  * or -1 if not found
+<a name="924"><span class="lineNum">     924 </span>            :  */</a>
+<span class="lineNum">     925 </span>            : int
+<span class="lineNum">     926 </span><span class="lineNoCov">          0 : xmlUTF8Strloc(const xmlChar *utf, const xmlChar *utfchar) {</span>
+<span class="lineNum">     927 </span>            :     int i, size;
+<span class="lineNum">     928 </span>            :     xmlChar ch;
+<span class="lineNum">     929 </span>            : 
+<span class="lineNum">     930 </span><span class="lineNoCov">          0 :     if (utf==NULL || utfchar==NULL) return -1;</span>
+<span class="lineNum">     931 </span><span class="lineNoCov">          0 :     size = xmlUTF8Strsize(utfchar, 1);</span>
+<span class="lineNum">     932 </span><span class="lineNoCov">          0 :         for(i=0; (ch=*utf) != 0; i++) {</span>
+<span class="lineNum">     933 </span><span class="lineNoCov">          0 :             if (xmlStrncmp(utf, utfchar, size)==0)</span>
+<span class="lineNum">     934 </span>            :                 return(i);
+<span class="lineNum">     935 </span><span class="lineNoCov">          0 :             utf++;</span>
+<span class="lineNum">     936 </span><span class="lineNoCov">          0 :             if ( ch &amp; 0x80 ) {</span>
+<span class="lineNum">     937 </span>            :                 /* if not simple ascii, verify proper format */
+<span class="lineNum">     938 </span><span class="lineNoCov">          0 :                 if ( (ch &amp; 0xc0) != 0xc0 )</span>
+<span class="lineNum">     939 </span>            :                     return(-1);
+<span class="lineNum">     940 </span>            :                 /* then skip over remaining bytes for this char */
+<span class="lineNum">     941 </span><span class="lineNoCov">          0 :                 while ( (ch &lt;&lt;= 1) &amp; 0x80 )</span>
+<span class="lineNum">     942 </span><span class="lineNoCov">          0 :                     if ( (*utf++ &amp; 0xc0) != 0x80 )</span>
+<span class="lineNum">     943 </span>            :                         return(-1);
+<span class="lineNum">     944 </span>            :             }
+<span class="lineNum">     945 </span>            :         }
+<span class="lineNum">     946 </span>            : 
+<span class="lineNum">     947 </span>            :     return(-1);
+<span class="lineNum">     948 </span>            : }
+<span class="lineNum">     949 </span>            : /**
+<span class="lineNum">     950 </span>            :  * xmlUTF8Strsub:
+<span class="lineNum">     951 </span>            :  * @utf:  a sequence of UTF-8 encoded bytes
+<span class="lineNum">     952 </span>            :  * @start: relative pos of first char
+<span class="lineNum">     953 </span>            :  * @len:   total number to copy
+<span class="lineNum">     954 </span>            :  *
+<span class="lineNum">     955 </span>            :  * Create a substring from a given UTF-8 string
+<span class="lineNum">     956 </span>            :  * Note:  positions are given in units of UTF-8 chars
+<span class="lineNum">     957 </span>            :  *
+<span class="lineNum">     958 </span>            :  * Returns a pointer to a newly created string
+<span class="lineNum">     959 </span>            :  * or NULL if any problem
+<span class="lineNum">     960 </span>            :  */
+<a name="961"><span class="lineNum">     961 </span>            : </a>
+<span class="lineNum">     962 </span>            : xmlChar *
+<span class="lineNum">     963 </span><span class="lineNoCov">          0 : xmlUTF8Strsub(const xmlChar *utf, int start, int len) {</span>
+<span class="lineNum">     964 </span>            :     int            i;
+<span class="lineNum">     965 </span>            :     xmlChar ch;
+<span class="lineNum">     966 </span>            : 
+<span class="lineNum">     967 </span><span class="lineNoCov">          0 :     if (utf == NULL) return(NULL);</span>
+<span class="lineNum">     968 </span><span class="lineNoCov">          0 :     if (start &lt; 0) return(NULL);</span>
+<span class="lineNum">     969 </span><span class="lineNoCov">          0 :     if (len &lt; 0) return(NULL);</span>
+<span class="lineNum">     970 </span>            : 
+<span class="lineNum">     971 </span>            :     /*
+<span class="lineNum">     972 </span>            :      * Skip over any leading chars
+<span class="lineNum">     973 </span>            :      */
+<span class="lineNum">     974 </span><span class="lineNoCov">          0 :     for (i = 0;i &lt; start;i++) {</span>
+<span class="lineNum">     975 </span><span class="lineNoCov">          0 :         if ((ch=*utf++) == 0) return(NULL);</span>
+<span class="lineNum">     976 </span><span class="lineNoCov">          0 :         if ( ch &amp; 0x80 ) {</span>
+<span class="lineNum">     977 </span>            :             /* if not simple ascii, verify proper format */
+<span class="lineNum">     978 </span><span class="lineNoCov">          0 :             if ( (ch &amp; 0xc0) != 0xc0 )</span>
+<span class="lineNum">     979 </span>            :                 return(NULL);
+<span class="lineNum">     980 </span>            :             /* then skip over remaining bytes for this char */
+<span class="lineNum">     981 </span><span class="lineNoCov">          0 :             while ( (ch &lt;&lt;= 1) &amp; 0x80 )</span>
+<span class="lineNum">     982 </span><span class="lineNoCov">          0 :                 if ( (*utf++ &amp; 0xc0) != 0x80 )</span>
+<span class="lineNum">     983 </span>            :                     return(NULL);
+<span class="lineNum">     984 </span>            :         }
+<span class="lineNum">     985 </span>            :     }
+<span class="lineNum">     986 </span>            : 
+<span class="lineNum">     987 </span><span class="lineNoCov">          0 :     return(xmlUTF8Strndup(utf, len));</span>
+<span class="lineNum">     988 </span>            : }
+<span class="lineNum">     989 </span>            : 
+<span class="lineNum">     990 </span>            : /**
+<span class="lineNum">     991 </span>            :  * xmlEscapeFormatString:
+<span class="lineNum">     992 </span>            :  * @msg:  a pointer to the string in which to escape '%' characters.
+<span class="lineNum">     993 </span>            :  * Must be a heap-allocated buffer created by libxml2 that may be
+<span class="lineNum">     994 </span>            :  * returned, or that may be freed and replaced.
+<span class="lineNum">     995 </span>            :  *
+<span class="lineNum">     996 </span>            :  * Replaces the string pointed to by 'msg' with an escaped string.
+<span class="lineNum">     997 </span>            :  * Returns the same string with all '%' characters escaped.
+<a name="998"><span class="lineNum">     998 </span>            :  */</a>
+<span class="lineNum">     999 </span>            : xmlChar *
+<span class="lineNum">    1000 </span><span class="lineNoCov">          0 : xmlEscapeFormatString(xmlChar **msg)</span>
+<span class="lineNum">    1001 </span>            : {
+<span class="lineNum">    1002 </span><span class="lineNoCov">          0 :     xmlChar *msgPtr = NULL;</span>
+<span class="lineNum">    1003 </span><span class="lineNoCov">          0 :     xmlChar *result = NULL;</span>
+<span class="lineNum">    1004 </span><span class="lineNoCov">          0 :     xmlChar *resultPtr = NULL;</span>
+<span class="lineNum">    1005 </span><span class="lineNoCov">          0 :     size_t count = 0;</span>
+<span class="lineNum">    1006 </span><span class="lineNoCov">          0 :     size_t msgLen = 0;</span>
+<span class="lineNum">    1007 </span><span class="lineNoCov">          0 :     size_t resultLen = 0;</span>
+<span class="lineNum">    1008 </span>            : 
+<span class="lineNum">    1009 </span><span class="lineNoCov">          0 :     if (!msg || !*msg)</span>
+<span class="lineNum">    1010 </span>            :         return(NULL);
+<span class="lineNum">    1011 </span>            : 
+<span class="lineNum">    1012 </span><span class="lineNoCov">          0 :     for (msgPtr = *msg; *msgPtr != '\0'; ++msgPtr) {</span>
+<span class="lineNum">    1013 </span><span class="lineNoCov">          0 :         ++msgLen;</span>
+<span class="lineNum">    1014 </span><span class="lineNoCov">          0 :         if (*msgPtr == '%')</span>
+<span class="lineNum">    1015 </span><span class="lineNoCov">          0 :             ++count;</span>
+<span class="lineNum">    1016 </span>            :     }
+<span class="lineNum">    1017 </span>            : 
+<span class="lineNum">    1018 </span><span class="lineNoCov">          0 :     if (count == 0)</span>
+<span class="lineNum">    1019 </span>            :         return(*msg);
+<span class="lineNum">    1020 </span>            : 
+<span class="lineNum">    1021 </span><span class="lineNoCov">          0 :     resultLen = msgLen + count + 1;</span>
+<span class="lineNum">    1022 </span><span class="lineNoCov">          0 :     result = (xmlChar *) xmlMallocAtomic(resultLen * sizeof(xmlChar));</span>
+<span class="lineNum">    1023 </span><span class="lineNoCov">          0 :     if (result == NULL) {</span>
+<span class="lineNum">    1024 </span>            :         /* Clear *msg to prevent format string vulnerabilities in
+<span class="lineNum">    1025 </span>            :            out-of-memory situations. */
+<span class="lineNum">    1026 </span><span class="lineNoCov">          0 :         xmlFree(*msg);</span>
+<span class="lineNum">    1027 </span><span class="lineNoCov">          0 :         *msg = NULL;</span>
+<span class="lineNum">    1028 </span><span class="lineNoCov">          0 :         xmlErrMemory(NULL, NULL);</span>
+<span class="lineNum">    1029 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">    1030 </span>            :     }
+<span class="lineNum">    1031 </span>            : 
+<span class="lineNum">    1032 </span><span class="lineNoCov">          0 :     for (msgPtr = *msg, resultPtr = result; *msgPtr != '\0'; ++msgPtr, ++resultPtr) {</span>
+<span class="lineNum">    1033 </span><span class="lineNoCov">          0 :         *resultPtr = *msgPtr;</span>
+<span class="lineNum">    1034 </span><span class="lineNoCov">          0 :         if (*msgPtr == '%')</span>
+<span class="lineNum">    1035 </span><span class="lineNoCov">          0 :             *(++resultPtr) = '%';</span>
+<span class="lineNum">    1036 </span>            :     }
+<span class="lineNum">    1037 </span><span class="lineNoCov">          0 :     result[resultLen - 1] = '\0';</span>
+<span class="lineNum">    1038 </span>            : 
+<span class="lineNum">    1039 </span><span class="lineNoCov">          0 :     xmlFree(*msg);</span>
+<span class="lineNum">    1040 </span><span class="lineNoCov">          0 :     *msg = result;</span>
+<span class="lineNum">    1041 </span>            : 
+<span class="lineNum">    1042 </span><span class="lineNoCov">          0 :     return *msg;</span>
+<span class="lineNum">    1043 </span>            : }
+<span class="lineNum">    1044 </span>            : 
+<span class="lineNum">    1045 </span>            : #define bottom_xmlstring
+<span class="lineNum">    1046 </span>            : #include &quot;elfgcchack.h&quot;
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

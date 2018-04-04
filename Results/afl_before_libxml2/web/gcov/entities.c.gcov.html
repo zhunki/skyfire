@@ -1,0 +1,1181 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - gcov/entities.c</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">gcov</a> - entities.c<span style="font-size: 80%;"> (source / <a href="entities.c.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">160</td>
+            <td class="headerCovTableEntry">457</td>
+            <td class="headerCovTableEntryLo">35.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-11-01</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">10</td>
+            <td class="headerCovTableEntry">23</td>
+            <td class="headerCovTableEntryLo">43.5 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /*</a>
+<span class="lineNum">       2 </span>            :  * entities.c : implementation for the XML entities handling
+<span class="lineNum">       3 </span>            :  *
+<span class="lineNum">       4 </span>            :  * See Copyright for the status of this software.
+<span class="lineNum">       5 </span>            :  *
+<span class="lineNum">       6 </span>            :  * daniel@veillard.com
+<span class="lineNum">       7 </span>            :  */
+<span class="lineNum">       8 </span>            : 
+<span class="lineNum">       9 </span>            : #define IN_LIBXML
+<span class="lineNum">      10 </span>            : #include &quot;libxml.h&quot;
+<span class="lineNum">      11 </span>            : 
+<span class="lineNum">      12 </span>            : #include &lt;string.h&gt;
+<span class="lineNum">      13 </span>            : #ifdef HAVE_STDLIB_H
+<span class="lineNum">      14 </span>            : #include &lt;stdlib.h&gt;
+<span class="lineNum">      15 </span>            : #endif
+<span class="lineNum">      16 </span>            : #include &lt;libxml/xmlmemory.h&gt;
+<span class="lineNum">      17 </span>            : #include &lt;libxml/hash.h&gt;
+<span class="lineNum">      18 </span>            : #include &lt;libxml/entities.h&gt;
+<span class="lineNum">      19 </span>            : #include &lt;libxml/parser.h&gt;
+<span class="lineNum">      20 </span>            : #include &lt;libxml/parserInternals.h&gt;
+<span class="lineNum">      21 </span>            : #include &lt;libxml/xmlerror.h&gt;
+<span class="lineNum">      22 </span>            : #include &lt;libxml/globals.h&gt;
+<span class="lineNum">      23 </span>            : #include &lt;libxml/dict.h&gt;
+<span class="lineNum">      24 </span>            : 
+<span class="lineNum">      25 </span>            : #include &quot;save.h&quot;
+<span class="lineNum">      26 </span>            : 
+<span class="lineNum">      27 </span>            : /*
+<span class="lineNum">      28 </span>            :  * The XML predefined entities.
+<span class="lineNum">      29 </span>            :  */
+<span class="lineNum">      30 </span>            : 
+<span class="lineNum">      31 </span>            : static xmlEntity xmlEntityLt = {
+<span class="lineNum">      32 </span>            :     NULL, XML_ENTITY_DECL, BAD_CAST &quot;lt&quot;,
+<span class="lineNum">      33 </span>            :     NULL, NULL, NULL, NULL, NULL, NULL,
+<span class="lineNum">      34 </span>            :     BAD_CAST &quot;&lt;&quot;, BAD_CAST &quot;&lt;&quot;, 1,
+<span class="lineNum">      35 </span>            :     XML_INTERNAL_PREDEFINED_ENTITY,
+<span class="lineNum">      36 </span>            :     NULL, NULL, NULL, NULL, 0, 1
+<span class="lineNum">      37 </span>            : };
+<span class="lineNum">      38 </span>            : static xmlEntity xmlEntityGt = {
+<span class="lineNum">      39 </span>            :     NULL, XML_ENTITY_DECL, BAD_CAST &quot;gt&quot;,
+<span class="lineNum">      40 </span>            :     NULL, NULL, NULL, NULL, NULL, NULL,
+<span class="lineNum">      41 </span>            :     BAD_CAST &quot;&gt;&quot;, BAD_CAST &quot;&gt;&quot;, 1,
+<span class="lineNum">      42 </span>            :     XML_INTERNAL_PREDEFINED_ENTITY,
+<span class="lineNum">      43 </span>            :     NULL, NULL, NULL, NULL, 0, 1
+<span class="lineNum">      44 </span>            : };
+<span class="lineNum">      45 </span>            : static xmlEntity xmlEntityAmp = {
+<span class="lineNum">      46 </span>            :     NULL, XML_ENTITY_DECL, BAD_CAST &quot;amp&quot;,
+<span class="lineNum">      47 </span>            :     NULL, NULL, NULL, NULL, NULL, NULL,
+<span class="lineNum">      48 </span>            :     BAD_CAST &quot;&amp;&quot;, BAD_CAST &quot;&amp;&quot;, 1,
+<span class="lineNum">      49 </span>            :     XML_INTERNAL_PREDEFINED_ENTITY,
+<span class="lineNum">      50 </span>            :     NULL, NULL, NULL, NULL, 0, 1
+<span class="lineNum">      51 </span>            : };
+<span class="lineNum">      52 </span>            : static xmlEntity xmlEntityQuot = {
+<span class="lineNum">      53 </span>            :     NULL, XML_ENTITY_DECL, BAD_CAST &quot;quot&quot;,
+<span class="lineNum">      54 </span>            :     NULL, NULL, NULL, NULL, NULL, NULL,
+<span class="lineNum">      55 </span>            :     BAD_CAST &quot;\&quot;&quot;, BAD_CAST &quot;\&quot;&quot;, 1,
+<span class="lineNum">      56 </span>            :     XML_INTERNAL_PREDEFINED_ENTITY,
+<span class="lineNum">      57 </span>            :     NULL, NULL, NULL, NULL, 0, 1
+<span class="lineNum">      58 </span>            : };
+<span class="lineNum">      59 </span>            : static xmlEntity xmlEntityApos = {
+<span class="lineNum">      60 </span>            :     NULL, XML_ENTITY_DECL, BAD_CAST &quot;apos&quot;,
+<span class="lineNum">      61 </span>            :     NULL, NULL, NULL, NULL, NULL, NULL,
+<span class="lineNum">      62 </span>            :     BAD_CAST &quot;'&quot;, BAD_CAST &quot;'&quot;, 1,
+<span class="lineNum">      63 </span>            :     XML_INTERNAL_PREDEFINED_ENTITY,
+<span class="lineNum">      64 </span>            :     NULL, NULL, NULL, NULL, 0, 1
+<span class="lineNum">      65 </span>            : };
+<span class="lineNum">      66 </span>            : 
+<span class="lineNum">      67 </span>            : /**
+<span class="lineNum">      68 </span>            :  * xmlEntitiesErrMemory:
+<span class="lineNum">      69 </span>            :  * @extra:  extra informations
+<span class="lineNum">      70 </span>            :  *
+<span class="lineNum">      71 </span>            :  * Handle an out of memory condition
+<span class="lineNum">      72 </span>            :  */
+<span class="lineNum">      73 </span>            : static void
+<a name="74"><span class="lineNum">      74 </span>            : xmlEntitiesErrMemory(const char *extra)</a>
+<span class="lineNum">      75 </span>            : {
+<span class="lineNum">      76 </span><span class="lineNoCov">          0 :     __xmlSimpleError(XML_FROM_TREE, XML_ERR_NO_MEMORY, NULL, NULL, extra);</span>
+<span class="lineNum">      77 </span>            : }
+<span class="lineNum">      78 </span>            : 
+<span class="lineNum">      79 </span>            : /**
+<span class="lineNum">      80 </span>            :  * xmlEntitiesErr:
+<span class="lineNum">      81 </span>            :  * @code:  the error code
+<span class="lineNum">      82 </span>            :  * @msg:  the message
+<span class="lineNum">      83 </span>            :  *
+<span class="lineNum">      84 </span>            :  * Handle an out of memory condition
+<span class="lineNum">      85 </span>            :  */
+<span class="lineNum">      86 </span>            : static void LIBXML_ATTR_FORMAT(2,0)
+<a name="87"><span class="lineNum">      87 </span>            : xmlEntitiesErr(xmlParserErrors code, const char *msg)</a>
+<span class="lineNum">      88 </span>            : {
+<span class="lineNum">      89 </span><span class="lineNoCov">          0 :     __xmlSimpleError(XML_FROM_TREE, code, NULL, msg, NULL);</span>
+<span class="lineNum">      90 </span>            : }
+<span class="lineNum">      91 </span>            : 
+<span class="lineNum">      92 </span>            : /*
+<span class="lineNum">      93 </span>            :  * xmlFreeEntity : clean-up an entity record.
+<a name="94"><span class="lineNum">      94 </span>            :  */</a>
+<span class="lineNum">      95 </span>            : static void
+<span class="lineNum">      96 </span><span class="lineCov">        390 : xmlFreeEntity(xmlEntityPtr entity)</span>
+<span class="lineNum">      97 </span>            : {
+<span class="lineNum">      98 </span><span class="lineCov">        390 :     xmlDictPtr dict = NULL;</span>
+<span class="lineNum">      99 </span>            : 
+<span class="lineNum">     100 </span><span class="lineCov">        390 :     if (entity == NULL)</span>
+<span class="lineNum">     101 </span><span class="lineCov">        390 :         return;</span>
+<span class="lineNum">     102 </span>            : 
+<span class="lineNum">     103 </span><span class="lineCov">        390 :     if (entity-&gt;doc != NULL)</span>
+<span class="lineNum">     104 </span><span class="lineCov">        390 :         dict = entity-&gt;doc-&gt;dict;</span>
+<span class="lineNum">     105 </span>            : 
+<span class="lineNum">     106 </span>            : 
+<span class="lineNum">     107 </span><span class="lineCov">        470 :     if ((entity-&gt;children) &amp;&amp; (entity-&gt;owner == 1) &amp;&amp;</span>
+<span class="lineNum">     108 </span><span class="lineCov">         80 :         (entity == (xmlEntityPtr) entity-&gt;children-&gt;parent))</span>
+<span class="lineNum">     109 </span><span class="lineCov">         80 :         xmlFreeNodeList(entity-&gt;children);</span>
+<span class="lineNum">     110 </span><span class="lineCov">        390 :     if (dict != NULL) {</span>
+<span class="lineNum">     111 </span><span class="lineCov">        390 :         if ((entity-&gt;name != NULL) &amp;&amp; (!xmlDictOwns(dict, entity-&gt;name)))</span>
+<span class="lineNum">     112 </span><span class="lineNoCov">          0 :             xmlFree((char *) entity-&gt;name);</span>
+<span class="lineNum">     113 </span><span class="lineCov">        392 :         if ((entity-&gt;ExternalID != NULL) &amp;&amp;</span>
+<span class="lineNum">     114 </span><span class="lineCov">          2 :             (!xmlDictOwns(dict, entity-&gt;ExternalID)))</span>
+<span class="lineNum">     115 </span><span class="lineNoCov">          0 :             xmlFree((char *) entity-&gt;ExternalID);</span>
+<span class="lineNum">     116 </span><span class="lineCov">        403 :         if ((entity-&gt;SystemID != NULL) &amp;&amp;</span>
+<span class="lineNum">     117 </span><span class="lineCov">         13 :             (!xmlDictOwns(dict, entity-&gt;SystemID)))</span>
+<span class="lineNum">     118 </span><span class="lineNoCov">          0 :             xmlFree((char *) entity-&gt;SystemID);</span>
+<span class="lineNum">     119 </span><span class="lineCov">        390 :         if ((entity-&gt;URI != NULL) &amp;&amp; (!xmlDictOwns(dict, entity-&gt;URI)))</span>
+<span class="lineNum">     120 </span><span class="lineCov">         13 :             xmlFree((char *) entity-&gt;URI);</span>
+<span class="lineNum">     121 </span><span class="lineCov">        390 :         if ((entity-&gt;content != NULL)</span>
+<span class="lineNum">     122 </span><span class="lineCov">        379 :             &amp;&amp; (!xmlDictOwns(dict, entity-&gt;content)))</span>
+<span class="lineNum">     123 </span><span class="lineCov">        222 :             xmlFree((char *) entity-&gt;content);</span>
+<span class="lineNum">     124 </span><span class="lineCov">        390 :         if ((entity-&gt;orig != NULL) &amp;&amp; (!xmlDictOwns(dict, entity-&gt;orig)))</span>
+<span class="lineNum">     125 </span><span class="lineCov">        377 :             xmlFree((char *) entity-&gt;orig);</span>
+<span class="lineNum">     126 </span>            :     } else {
+<span class="lineNum">     127 </span><span class="lineNoCov">          0 :         if (entity-&gt;name != NULL)</span>
+<span class="lineNum">     128 </span><span class="lineNoCov">          0 :             xmlFree((char *) entity-&gt;name);</span>
+<span class="lineNum">     129 </span><span class="lineNoCov">          0 :         if (entity-&gt;ExternalID != NULL)</span>
+<span class="lineNum">     130 </span><span class="lineNoCov">          0 :             xmlFree((char *) entity-&gt;ExternalID);</span>
+<span class="lineNum">     131 </span><span class="lineNoCov">          0 :         if (entity-&gt;SystemID != NULL)</span>
+<span class="lineNum">     132 </span><span class="lineNoCov">          0 :             xmlFree((char *) entity-&gt;SystemID);</span>
+<span class="lineNum">     133 </span><span class="lineNoCov">          0 :         if (entity-&gt;URI != NULL)</span>
+<span class="lineNum">     134 </span><span class="lineNoCov">          0 :             xmlFree((char *) entity-&gt;URI);</span>
+<span class="lineNum">     135 </span><span class="lineNoCov">          0 :         if (entity-&gt;content != NULL)</span>
+<span class="lineNum">     136 </span><span class="lineNoCov">          0 :             xmlFree((char *) entity-&gt;content);</span>
+<span class="lineNum">     137 </span><span class="lineNoCov">          0 :         if (entity-&gt;orig != NULL)</span>
+<span class="lineNum">     138 </span><span class="lineNoCov">          0 :             xmlFree((char *) entity-&gt;orig);</span>
+<span class="lineNum">     139 </span>            :     }
+<span class="lineNum">     140 </span><span class="lineCov">        390 :     xmlFree(entity);</span>
+<span class="lineNum">     141 </span>            : }
+<span class="lineNum">     142 </span>            : 
+<span class="lineNum">     143 </span>            : /*
+<span class="lineNum">     144 </span>            :  * xmlCreateEntity:
+<span class="lineNum">     145 </span>            :  *
+<span class="lineNum">     146 </span>            :  * internal routine doing the entity node strutures allocations
+<span class="lineNum">     147 </span>            :  */
+<span class="lineNum">     148 </span>            : static xmlEntityPtr
+<span class="lineNum">     149 </span><span class="lineCov">        390 : xmlCreateEntity(xmlDictPtr dict, const xmlChar *name, int type,</span>
+<span class="lineNum">     150 </span>            :                 const xmlChar *ExternalID, const xmlChar *SystemID,
+<span class="lineNum">     151 </span>            :                 const xmlChar *content) {
+<span class="lineNum">     152 </span>            :     xmlEntityPtr ret;
+<span class="lineNum">     153 </span>            : 
+<span class="lineNum">     154 </span><span class="lineCov">        390 :     ret = (xmlEntityPtr) xmlMalloc(sizeof(xmlEntity));</span>
+<span class="lineNum">     155 </span><span class="lineCov">        390 :     if (ret == NULL) {</span>
+<span class="lineNum">     156 </span>            :         xmlEntitiesErrMemory(&quot;xmlCreateEntity: malloc failed&quot;);
+<span class="lineNum">     157 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">     158 </span>            :     }
+<span class="lineNum">     159 </span>            :     memset(ret, 0, sizeof(xmlEntity));
+<span class="lineNum">     160 </span><span class="lineCov">        390 :     ret-&gt;type = XML_ENTITY_DECL;</span>
+<span class="lineNum">     161 </span><span class="lineCov">        390 :     ret-&gt;checked = 0;</span>
+<span class="lineNum">     162 </span>            : 
+<span class="lineNum">     163 </span>            :     /*
+<span class="lineNum">     164 </span>            :      * fill the structure.
+<span class="lineNum">     165 </span>            :      */
+<span class="lineNum">     166 </span><span class="lineCov">        390 :     ret-&gt;etype = (xmlEntityType) type;</span>
+<span class="lineNum">     167 </span><span class="lineCov">        390 :     if (dict == NULL) {</span>
+<span class="lineNum">     168 </span><span class="lineNoCov">          0 :         ret-&gt;name = xmlStrdup(name);</span>
+<span class="lineNum">     169 </span><span class="lineNoCov">          0 :         if (ExternalID != NULL)</span>
+<span class="lineNum">     170 </span><span class="lineNoCov">          0 :             ret-&gt;ExternalID = xmlStrdup(ExternalID);</span>
+<span class="lineNum">     171 </span><span class="lineNoCov">          0 :         if (SystemID != NULL)</span>
+<span class="lineNum">     172 </span><span class="lineNoCov">          0 :             ret-&gt;SystemID = xmlStrdup(SystemID);</span>
+<span class="lineNum">     173 </span>            :     } else {
+<span class="lineNum">     174 </span><span class="lineCov">        390 :         ret-&gt;name = xmlDictLookup(dict, name, -1);</span>
+<span class="lineNum">     175 </span><span class="lineCov">        390 :         if (ExternalID != NULL)</span>
+<span class="lineNum">     176 </span><span class="lineCov">          2 :             ret-&gt;ExternalID = xmlDictLookup(dict, ExternalID, -1);</span>
+<span class="lineNum">     177 </span><span class="lineCov">        390 :         if (SystemID != NULL)</span>
+<span class="lineNum">     178 </span><span class="lineCov">         13 :             ret-&gt;SystemID = xmlDictLookup(dict, SystemID, -1);</span>
+<span class="lineNum">     179 </span>            :     }
+<span class="lineNum">     180 </span><span class="lineCov">        390 :     if (content != NULL) {</span>
+<span class="lineNum">     181 </span><span class="lineCov">        379 :         ret-&gt;length = xmlStrlen(content);</span>
+<span class="lineNum">     182 </span><span class="lineCov">        379 :         if ((dict != NULL) &amp;&amp; (ret-&gt;length &lt; 5))</span>
+<span class="lineNum">     183 </span><span class="lineCov">        157 :             ret-&gt;content = (xmlChar *)</span>
+<span class="lineNum">     184 </span><span class="lineCov">        157 :                            xmlDictLookup(dict, content, ret-&gt;length);</span>
+<span class="lineNum">     185 </span>            :         else
+<span class="lineNum">     186 </span><span class="lineCov">        222 :             ret-&gt;content = xmlStrndup(content, ret-&gt;length);</span>
+<span class="lineNum">     187 </span>            :      } else {
+<span class="lineNum">     188 </span><span class="lineCov">         11 :         ret-&gt;length = 0;</span>
+<span class="lineNum">     189 </span><span class="lineCov">         11 :         ret-&gt;content = NULL;</span>
+<span class="lineNum">     190 </span>            :     }
+<span class="lineNum">     191 </span><span class="lineCov">        390 :     ret-&gt;URI = NULL; /* to be computed by the layer knowing</span>
+<span class="lineNum">     192 </span>            :                         the defining entity */
+<span class="lineNum">     193 </span><span class="lineCov">        390 :     ret-&gt;orig = NULL;</span>
+<span class="lineNum">     194 </span><span class="lineCov">        390 :     ret-&gt;owner = 0;</span>
+<span class="lineNum">     195 </span>            : 
+<span class="lineNum">     196 </span><span class="lineCov">        390 :     return(ret);</span>
+<span class="lineNum">     197 </span>            : }
+<span class="lineNum">     198 </span>            : 
+<span class="lineNum">     199 </span>            : /*
+<span class="lineNum">     200 </span>            :  * xmlAddEntity : register a new entity for an entities table.
+<a name="201"><span class="lineNum">     201 </span>            :  */</a>
+<span class="lineNum">     202 </span>            : static xmlEntityPtr
+<span class="lineNum">     203 </span><span class="lineCov">        390 : xmlAddEntity(xmlDtdPtr dtd, const xmlChar *name, int type,</span>
+<span class="lineNum">     204 </span>            :           const xmlChar *ExternalID, const xmlChar *SystemID,
+<span class="lineNum">     205 </span>            :           const xmlChar *content) {
+<span class="lineNum">     206 </span><span class="lineCov">        390 :     xmlDictPtr dict = NULL;</span>
+<span class="lineNum">     207 </span><span class="lineCov">        390 :     xmlEntitiesTablePtr table = NULL;</span>
+<span class="lineNum">     208 </span>            :     xmlEntityPtr ret;
+<span class="lineNum">     209 </span>            : 
+<span class="lineNum">     210 </span><span class="lineCov">        390 :     if (name == NULL)</span>
+<span class="lineNum">     211 </span>            :         return(NULL);
+<span class="lineNum">     212 </span><span class="lineCov">        390 :     if (dtd == NULL)</span>
+<span class="lineNum">     213 </span>            :         return(NULL);
+<span class="lineNum">     214 </span><span class="lineCov">        390 :     if (dtd-&gt;doc != NULL)</span>
+<span class="lineNum">     215 </span><span class="lineCov">        390 :         dict = dtd-&gt;doc-&gt;dict;</span>
+<span class="lineNum">     216 </span>            : 
+<span class="lineNum">     217 </span><span class="lineCov">        390 :     switch (type) {</span>
+<span class="lineNum">     218 </span>            :         case XML_INTERNAL_GENERAL_ENTITY:
+<span class="lineNum">     219 </span>            :         case XML_EXTERNAL_GENERAL_PARSED_ENTITY:
+<span class="lineNum">     220 </span>            :         case XML_EXTERNAL_GENERAL_UNPARSED_ENTITY:
+<span class="lineNum">     221 </span><span class="lineCov">        369 :             if (dtd-&gt;entities == NULL)</span>
+<span class="lineNum">     222 </span><span class="lineCov">         50 :                 dtd-&gt;entities = xmlHashCreateDict(0, dict);</span>
+<span class="lineNum">     223 </span><span class="lineCov">        369 :             table = dtd-&gt;entities;</span>
+<span class="lineNum">     224 </span><span class="lineCov">        369 :             break;</span>
+<span class="lineNum">     225 </span>            :         case XML_INTERNAL_PARAMETER_ENTITY:
+<span class="lineNum">     226 </span>            :         case XML_EXTERNAL_PARAMETER_ENTITY:
+<span class="lineNum">     227 </span><span class="lineCov">         21 :             if (dtd-&gt;pentities == NULL)</span>
+<span class="lineNum">     228 </span><span class="lineCov">         11 :                 dtd-&gt;pentities = xmlHashCreateDict(0, dict);</span>
+<span class="lineNum">     229 </span><span class="lineCov">         21 :             table = dtd-&gt;pentities;</span>
+<span class="lineNum">     230 </span><span class="lineCov">         21 :             break;</span>
+<span class="lineNum">     231 </span>            :         case XML_INTERNAL_PREDEFINED_ENTITY:
+<span class="lineNum">     232 </span>            :             return(NULL);
+<span class="lineNum">     233 </span>            :     }
+<span class="lineNum">     234 </span><span class="lineCov">        390 :     if (table == NULL)</span>
+<span class="lineNum">     235 </span>            :         return(NULL);
+<span class="lineNum">     236 </span><span class="lineCov">        390 :     ret = xmlCreateEntity(dict, name, type, ExternalID, SystemID, content);</span>
+<span class="lineNum">     237 </span><span class="lineCov">        390 :     if (ret == NULL)</span>
+<span class="lineNum">     238 </span>            :         return(NULL);
+<span class="lineNum">     239 </span><span class="lineCov">        390 :     ret-&gt;doc = dtd-&gt;doc;</span>
+<span class="lineNum">     240 </span>            : 
+<span class="lineNum">     241 </span><span class="lineCov">        390 :     if (xmlHashAddEntry(table, name, ret)) {</span>
+<span class="lineNum">     242 </span>            :         /*
+<span class="lineNum">     243 </span>            :          * entity was already defined at another level.
+<span class="lineNum">     244 </span>            :          */
+<span class="lineNum">     245 </span><span class="lineNoCov">          0 :         xmlFreeEntity(ret);</span>
+<span class="lineNum">     246 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">     247 </span>            :     }
+<span class="lineNum">     248 </span>            :     return(ret);
+<span class="lineNum">     249 </span>            : }
+<span class="lineNum">     250 </span>            : 
+<span class="lineNum">     251 </span>            : /**
+<span class="lineNum">     252 </span>            :  * xmlGetPredefinedEntity:
+<span class="lineNum">     253 </span>            :  * @name:  the entity name
+<span class="lineNum">     254 </span>            :  *
+<span class="lineNum">     255 </span>            :  * Check whether this name is an predefined entity.
+<span class="lineNum">     256 </span>            :  *
+<span class="lineNum">     257 </span>            :  * Returns NULL if not, otherwise the entity
+<a name="258"><span class="lineNum">     258 </span>            :  */</a>
+<span class="lineNum">     259 </span>            : xmlEntityPtr
+<span class="lineNum">     260 </span><span class="lineCov">      53059 : xmlGetPredefinedEntity(const xmlChar *name) {</span>
+<span class="lineNum">     261 </span><span class="lineCov">      53059 :     if (name == NULL) return(NULL);</span>
+<span class="lineNum">     262 </span><span class="lineCov">      53059 :     switch (name[0]) {</span>
+<span class="lineNum">     263 </span>            :         case 'l':
+<span class="lineNum">     264 </span><span class="lineCov">       3574 :             if (xmlStrEqual(name, BAD_CAST &quot;lt&quot;))</span>
+<span class="lineNum">     265 </span>            :                 return(&amp;xmlEntityLt);
+<span class="lineNum">     266 </span>            :             break;
+<span class="lineNum">     267 </span>            :         case 'g':
+<span class="lineNum">     268 </span><span class="lineCov">        205 :             if (xmlStrEqual(name, BAD_CAST &quot;gt&quot;))</span>
+<span class="lineNum">     269 </span>            :                 return(&amp;xmlEntityGt);
+<span class="lineNum">     270 </span>            :             break;
+<span class="lineNum">     271 </span>            :         case 'a':
+<span class="lineNum">     272 </span><span class="lineCov">        301 :             if (xmlStrEqual(name, BAD_CAST &quot;amp&quot;))</span>
+<span class="lineNum">     273 </span>            :                 return(&amp;xmlEntityAmp);
+<span class="lineNum">     274 </span><span class="lineCov">         93 :             if (xmlStrEqual(name, BAD_CAST &quot;apos&quot;))</span>
+<span class="lineNum">     275 </span>            :                 return(&amp;xmlEntityApos);
+<span class="lineNum">     276 </span>            :             break;
+<span class="lineNum">     277 </span>            :         case 'q':
+<span class="lineNum">     278 </span><span class="lineCov">         14 :             if (xmlStrEqual(name, BAD_CAST &quot;quot&quot;))</span>
+<span class="lineNum">     279 </span>            :                 return(&amp;xmlEntityQuot);
+<span class="lineNum">     280 </span>            :             break;
+<span class="lineNum">     281 </span>            :         default:
+<span class="lineNum">     282 </span>            :             break;
+<span class="lineNum">     283 </span>            :     }
+<span class="lineNum">     284 </span>            :     return(NULL);
+<span class="lineNum">     285 </span>            : }
+<span class="lineNum">     286 </span>            : 
+<span class="lineNum">     287 </span>            : /**
+<span class="lineNum">     288 </span>            :  * xmlAddDtdEntity:
+<span class="lineNum">     289 </span>            :  * @doc:  the document
+<span class="lineNum">     290 </span>            :  * @name:  the entity name
+<span class="lineNum">     291 </span>            :  * @type:  the entity type XML_xxx_yyy_ENTITY
+<span class="lineNum">     292 </span>            :  * @ExternalID:  the entity external ID if available
+<span class="lineNum">     293 </span>            :  * @SystemID:  the entity system ID if available
+<span class="lineNum">     294 </span>            :  * @content:  the entity content
+<span class="lineNum">     295 </span>            :  *
+<span class="lineNum">     296 </span>            :  * Register a new entity for this document DTD external subset.
+<span class="lineNum">     297 </span>            :  *
+<span class="lineNum">     298 </span>            :  * Returns a pointer to the entity or NULL in case of error
+<span class="lineNum">     299 </span>            :  */
+<span class="lineNum">     300 </span>            : xmlEntityPtr
+<span class="lineNum">     301 </span><span class="lineNoCov">          0 : xmlAddDtdEntity(xmlDocPtr doc, const xmlChar *name, int type,</span>
+<span class="lineNum">     302 </span>            :                 const xmlChar *ExternalID, const xmlChar *SystemID,
+<span class="lineNum">     303 </span>            :                 const xmlChar *content) {
+<span class="lineNum">     304 </span>            :     xmlEntityPtr ret;
+<span class="lineNum">     305 </span>            :     xmlDtdPtr dtd;
+<span class="lineNum">     306 </span>            : 
+<span class="lineNum">     307 </span><span class="lineNoCov">          0 :     if (doc == NULL) {</span>
+<span class="lineNum">     308 </span>            :         xmlEntitiesErr(XML_DTD_NO_DOC,
+<span class="lineNum">     309 </span>            :                 &quot;xmlAddDtdEntity: document is NULL&quot;);
+<span class="lineNum">     310 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">     311 </span>            :     }
+<span class="lineNum">     312 </span><span class="lineNoCov">          0 :     if (doc-&gt;extSubset == NULL) {</span>
+<span class="lineNum">     313 </span>            :         xmlEntitiesErr(XML_DTD_NO_DTD,
+<span class="lineNum">     314 </span>            :                 &quot;xmlAddDtdEntity: document without external subset&quot;);
+<span class="lineNum">     315 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">     316 </span>            :     }
+<span class="lineNum">     317 </span><span class="lineNoCov">          0 :     dtd = doc-&gt;extSubset;</span>
+<span class="lineNum">     318 </span><span class="lineNoCov">          0 :     ret = xmlAddEntity(dtd, name, type, ExternalID, SystemID, content);</span>
+<span class="lineNum">     319 </span><span class="lineNoCov">          0 :     if (ret == NULL) return(NULL);</span>
+<span class="lineNum">     320 </span>            : 
+<span class="lineNum">     321 </span>            :     /*
+<span class="lineNum">     322 </span>            :      * Link it to the DTD
+<span class="lineNum">     323 </span>            :      */
+<span class="lineNum">     324 </span><span class="lineNoCov">          0 :     ret-&gt;parent = dtd;</span>
+<span class="lineNum">     325 </span><span class="lineNoCov">          0 :     ret-&gt;doc = dtd-&gt;doc;</span>
+<span class="lineNum">     326 </span><span class="lineNoCov">          0 :     if (dtd-&gt;last == NULL) {</span>
+<span class="lineNum">     327 </span><span class="lineNoCov">          0 :         dtd-&gt;children = dtd-&gt;last = (xmlNodePtr) ret;</span>
+<span class="lineNum">     328 </span>            :     } else {
+<span class="lineNum">     329 </span><span class="lineNoCov">          0 :         dtd-&gt;last-&gt;next = (xmlNodePtr) ret;</span>
+<span class="lineNum">     330 </span><span class="lineNoCov">          0 :         ret-&gt;prev = dtd-&gt;last;</span>
+<span class="lineNum">     331 </span><span class="lineNoCov">          0 :         dtd-&gt;last = (xmlNodePtr) ret;</span>
+<span class="lineNum">     332 </span>            :     }
+<span class="lineNum">     333 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">     334 </span>            : }
+<span class="lineNum">     335 </span>            : 
+<span class="lineNum">     336 </span>            : /**
+<span class="lineNum">     337 </span>            :  * xmlAddDocEntity:
+<span class="lineNum">     338 </span>            :  * @doc:  the document
+<span class="lineNum">     339 </span>            :  * @name:  the entity name
+<span class="lineNum">     340 </span>            :  * @type:  the entity type XML_xxx_yyy_ENTITY
+<span class="lineNum">     341 </span>            :  * @ExternalID:  the entity external ID if available
+<span class="lineNum">     342 </span>            :  * @SystemID:  the entity system ID if available
+<span class="lineNum">     343 </span>            :  * @content:  the entity content
+<span class="lineNum">     344 </span>            :  *
+<span class="lineNum">     345 </span>            :  * Register a new entity for this document.
+<span class="lineNum">     346 </span>            :  *
+<span class="lineNum">     347 </span>            :  * Returns a pointer to the entity or NULL in case of error
+<span class="lineNum">     348 </span>            :  */
+<span class="lineNum">     349 </span>            : xmlEntityPtr
+<span class="lineNum">     350 </span><span class="lineCov">        390 : xmlAddDocEntity(xmlDocPtr doc, const xmlChar *name, int type,</span>
+<span class="lineNum">     351 </span>            :                 const xmlChar *ExternalID, const xmlChar *SystemID,
+<span class="lineNum">     352 </span>            :                 const xmlChar *content) {
+<span class="lineNum">     353 </span>            :     xmlEntityPtr ret;
+<span class="lineNum">     354 </span>            :     xmlDtdPtr dtd;
+<span class="lineNum">     355 </span>            : 
+<span class="lineNum">     356 </span><span class="lineCov">        390 :     if (doc == NULL) {</span>
+<span class="lineNum">     357 </span>            :         xmlEntitiesErr(XML_DTD_NO_DOC,
+<span class="lineNum">     358 </span>            :                 &quot;xmlAddDocEntity: document is NULL&quot;);
+<span class="lineNum">     359 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">     360 </span>            :     }
+<span class="lineNum">     361 </span><span class="lineCov">        390 :     if (doc-&gt;intSubset == NULL) {</span>
+<span class="lineNum">     362 </span>            :         xmlEntitiesErr(XML_DTD_NO_DTD,
+<span class="lineNum">     363 </span>            :                 &quot;xmlAddDocEntity: document without internal subset&quot;);
+<span class="lineNum">     364 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">     365 </span>            :     }
+<span class="lineNum">     366 </span><span class="lineCov">        390 :     dtd = doc-&gt;intSubset;</span>
+<span class="lineNum">     367 </span><span class="lineCov">        390 :     ret = xmlAddEntity(dtd, name, type, ExternalID, SystemID, content);</span>
+<span class="lineNum">     368 </span><span class="lineCov">        390 :     if (ret == NULL) return(NULL);</span>
+<span class="lineNum">     369 </span>            : 
+<span class="lineNum">     370 </span>            :     /*
+<span class="lineNum">     371 </span>            :      * Link it to the DTD
+<span class="lineNum">     372 </span>            :      */
+<span class="lineNum">     373 </span><span class="lineCov">        390 :     ret-&gt;parent = dtd;</span>
+<span class="lineNum">     374 </span><span class="lineCov">        390 :     ret-&gt;doc = dtd-&gt;doc;</span>
+<span class="lineNum">     375 </span><span class="lineCov">        390 :     if (dtd-&gt;last == NULL) {</span>
+<span class="lineNum">     376 </span><span class="lineCov">         38 :         dtd-&gt;children = dtd-&gt;last = (xmlNodePtr) ret;</span>
+<span class="lineNum">     377 </span>            :     } else {
+<span class="lineNum">     378 </span><span class="lineCov">        352 :         dtd-&gt;last-&gt;next = (xmlNodePtr) ret;</span>
+<span class="lineNum">     379 </span><span class="lineCov">        352 :         ret-&gt;prev = dtd-&gt;last;</span>
+<span class="lineNum">     380 </span><span class="lineCov">        352 :         dtd-&gt;last = (xmlNodePtr) ret;</span>
+<span class="lineNum">     381 </span>            :     }
+<span class="lineNum">     382 </span><span class="lineCov">        390 :     return(ret);</span>
+<span class="lineNum">     383 </span>            : }
+<span class="lineNum">     384 </span>            : 
+<span class="lineNum">     385 </span>            : /**
+<span class="lineNum">     386 </span>            :  * xmlNewEntity:
+<span class="lineNum">     387 </span>            :  * @doc:  the document
+<span class="lineNum">     388 </span>            :  * @name:  the entity name
+<span class="lineNum">     389 </span>            :  * @type:  the entity type XML_xxx_yyy_ENTITY
+<span class="lineNum">     390 </span>            :  * @ExternalID:  the entity external ID if available
+<span class="lineNum">     391 </span>            :  * @SystemID:  the entity system ID if available
+<span class="lineNum">     392 </span>            :  * @content:  the entity content
+<span class="lineNum">     393 </span>            :  *
+<span class="lineNum">     394 </span>            :  * Create a new entity, this differs from xmlAddDocEntity() that if
+<span class="lineNum">     395 </span>            :  * the document is NULL or has no internal subset defined, then an
+<span class="lineNum">     396 </span>            :  * unlinked entity structure will be returned, it is then the responsability
+<span class="lineNum">     397 </span>            :  * of the caller to link it to the document later or free it when not needed
+<span class="lineNum">     398 </span>            :  * anymore.
+<span class="lineNum">     399 </span>            :  *
+<span class="lineNum">     400 </span>            :  * Returns a pointer to the entity or NULL in case of error
+<a name="401"><span class="lineNum">     401 </span>            :  */</a>
+<span class="lineNum">     402 </span>            : xmlEntityPtr
+<span class="lineNum">     403 </span><span class="lineNoCov">          0 : xmlNewEntity(xmlDocPtr doc, const xmlChar *name, int type,</span>
+<span class="lineNum">     404 </span>            :              const xmlChar *ExternalID, const xmlChar *SystemID,
+<span class="lineNum">     405 </span>            :              const xmlChar *content) {
+<span class="lineNum">     406 </span>            :     xmlEntityPtr ret;
+<span class="lineNum">     407 </span>            :     xmlDictPtr dict;
+<span class="lineNum">     408 </span>            : 
+<span class="lineNum">     409 </span><span class="lineNoCov">          0 :     if ((doc != NULL) &amp;&amp; (doc-&gt;intSubset != NULL)) {</span>
+<span class="lineNum">     410 </span><span class="lineNoCov">          0 :         return(xmlAddDocEntity(doc, name, type, ExternalID, SystemID, content));</span>
+<span class="lineNum">     411 </span>            :     }
+<span class="lineNum">     412 </span><span class="lineNoCov">          0 :     if (doc != NULL)</span>
+<span class="lineNum">     413 </span><span class="lineNoCov">          0 :         dict = doc-&gt;dict;</span>
+<span class="lineNum">     414 </span>            :     else
+<span class="lineNum">     415 </span>            :         dict = NULL;
+<span class="lineNum">     416 </span><span class="lineNoCov">          0 :     ret = xmlCreateEntity(dict, name, type, ExternalID, SystemID, content);</span>
+<span class="lineNum">     417 </span><span class="lineNoCov">          0 :     if (ret == NULL)</span>
+<span class="lineNum">     418 </span>            :         return(NULL);
+<span class="lineNum">     419 </span><span class="lineNoCov">          0 :     ret-&gt;doc = doc;</span>
+<span class="lineNum">     420 </span><span class="lineNoCov">          0 :     return(ret);</span>
+<span class="lineNum">     421 </span>            : }
+<span class="lineNum">     422 </span>            : 
+<span class="lineNum">     423 </span>            : /**
+<span class="lineNum">     424 </span>            :  * xmlGetEntityFromTable:
+<span class="lineNum">     425 </span>            :  * @table:  an entity table
+<span class="lineNum">     426 </span>            :  * @name:  the entity name
+<span class="lineNum">     427 </span>            :  * @parameter:  look for parameter entities
+<span class="lineNum">     428 </span>            :  *
+<span class="lineNum">     429 </span>            :  * Do an entity lookup in the table.
+<span class="lineNum">     430 </span>            :  * returns the corresponding parameter entity, if found.
+<span class="lineNum">     431 </span>            :  *
+<span class="lineNum">     432 </span>            :  * Returns A pointer to the entity structure or NULL if not found.
+<span class="lineNum">     433 </span>            :  */
+<a name="434"><span class="lineNum">     434 </span>            : static xmlEntityPtr</a>
+<span class="lineNum">     435 </span>            : xmlGetEntityFromTable(xmlEntitiesTablePtr table, const xmlChar *name) {
+<span class="lineNum">     436 </span><span class="lineCov">      50642 :     return((xmlEntityPtr) xmlHashLookup(table, name));</span>
+<span class="lineNum">     437 </span>            : }
+<span class="lineNum">     438 </span>            : 
+<span class="lineNum">     439 </span>            : /**
+<span class="lineNum">     440 </span>            :  * xmlGetParameterEntity:
+<span class="lineNum">     441 </span>            :  * @doc:  the document referencing the entity
+<span class="lineNum">     442 </span>            :  * @name:  the entity name
+<span class="lineNum">     443 </span>            :  *
+<span class="lineNum">     444 </span>            :  * Do an entity lookup in the internal and external subsets and
+<span class="lineNum">     445 </span>            :  * returns the corresponding parameter entity, if found.
+<span class="lineNum">     446 </span>            :  *
+<span class="lineNum">     447 </span>            :  * Returns A pointer to the entity structure or NULL if not found.
+<span class="lineNum">     448 </span>            :  */
+<span class="lineNum">     449 </span>            : xmlEntityPtr
+<span class="lineNum">     450 </span><span class="lineCov">         57 : xmlGetParameterEntity(xmlDocPtr doc, const xmlChar *name) {</span>
+<span class="lineNum">     451 </span>            :     xmlEntitiesTablePtr table;
+<span class="lineNum">     452 </span>            :     xmlEntityPtr ret;
+<span class="lineNum">     453 </span>            : 
+<span class="lineNum">     454 </span><span class="lineCov">         57 :     if (doc == NULL)</span>
+<span class="lineNum">     455 </span>            :         return(NULL);
+<span class="lineNum">     456 </span><span class="lineCov">         57 :     if ((doc-&gt;intSubset != NULL) &amp;&amp; (doc-&gt;intSubset-&gt;pentities != NULL)) {</span>
+<span class="lineNum">     457 </span><span class="lineCov">         53 :         table = (xmlEntitiesTablePtr) doc-&gt;intSubset-&gt;pentities;</span>
+<span class="lineNum">     458 </span><span class="lineCov">         53 :         ret = xmlGetEntityFromTable(table, name);</span>
+<span class="lineNum">     459 </span><span class="lineCov">         53 :         if (ret != NULL)</span>
+<span class="lineNum">     460 </span>            :             return(ret);
+<span class="lineNum">     461 </span>            :     }
+<span class="lineNum">     462 </span><span class="lineCov">          4 :     if ((doc-&gt;extSubset != NULL) &amp;&amp; (doc-&gt;extSubset-&gt;pentities != NULL)) {</span>
+<span class="lineNum">     463 </span><span class="lineNoCov">          0 :         table = (xmlEntitiesTablePtr) doc-&gt;extSubset-&gt;pentities;</span>
+<span class="lineNum">     464 </span><span class="lineNoCov">          0 :         return(xmlGetEntityFromTable(table, name));</span>
+<span class="lineNum">     465 </span>            :     }
+<span class="lineNum">     466 </span>            :     return(NULL);
+<span class="lineNum">     467 </span>            : }
+<span class="lineNum">     468 </span>            : 
+<span class="lineNum">     469 </span>            : /**
+<span class="lineNum">     470 </span>            :  * xmlGetDtdEntity:
+<span class="lineNum">     471 </span>            :  * @doc:  the document referencing the entity
+<span class="lineNum">     472 </span>            :  * @name:  the entity name
+<span class="lineNum">     473 </span>            :  *
+<span class="lineNum">     474 </span>            :  * Do an entity lookup in the DTD entity hash table and
+<span class="lineNum">     475 </span>            :  * returns the corresponding entity, if found.
+<span class="lineNum">     476 </span>            :  * Note: the first argument is the document node, not the DTD node.
+<span class="lineNum">     477 </span>            :  *
+<span class="lineNum">     478 </span>            :  * Returns A pointer to the entity structure or NULL if not found.
+<span class="lineNum">     479 </span>            :  */
+<span class="lineNum">     480 </span>            : xmlEntityPtr
+<span class="lineNum">     481 </span><span class="lineNoCov">          0 : xmlGetDtdEntity(xmlDocPtr doc, const xmlChar *name) {</span>
+<span class="lineNum">     482 </span>            :     xmlEntitiesTablePtr table;
+<span class="lineNum">     483 </span>            : 
+<span class="lineNum">     484 </span><span class="lineNoCov">          0 :     if (doc == NULL)</span>
+<span class="lineNum">     485 </span>            :         return(NULL);
+<span class="lineNum">     486 </span><span class="lineNoCov">          0 :     if ((doc-&gt;extSubset != NULL) &amp;&amp; (doc-&gt;extSubset-&gt;entities != NULL)) {</span>
+<span class="lineNum">     487 </span><span class="lineNoCov">          0 :         table = (xmlEntitiesTablePtr) doc-&gt;extSubset-&gt;entities;</span>
+<span class="lineNum">     488 </span><span class="lineNoCov">          0 :         return(xmlGetEntityFromTable(table, name));</span>
+<span class="lineNum">     489 </span>            :     }
+<span class="lineNum">     490 </span>            :     return(NULL);
+<span class="lineNum">     491 </span>            : }
+<span class="lineNum">     492 </span>            : 
+<span class="lineNum">     493 </span>            : /**
+<span class="lineNum">     494 </span>            :  * xmlGetDocEntity:
+<span class="lineNum">     495 </span>            :  * @doc:  the document referencing the entity
+<span class="lineNum">     496 </span>            :  * @name:  the entity name
+<span class="lineNum">     497 </span>            :  *
+<span class="lineNum">     498 </span>            :  * Do an entity lookup in the document entity hash table and
+<span class="lineNum">     499 </span>            :  * returns the corresponding entity, otherwise a lookup is done
+<span class="lineNum">     500 </span>            :  * in the predefined entities too.
+<span class="lineNum">     501 </span>            :  *
+<span class="lineNum">     502 </span>            :  * Returns A pointer to the entity structure or NULL if not found.
+<span class="lineNum">     503 </span>            :  */
+<span class="lineNum">     504 </span>            : xmlEntityPtr
+<span class="lineNum">     505 </span><span class="lineCov">      50731 : xmlGetDocEntity(const xmlDoc *doc, const xmlChar *name) {</span>
+<span class="lineNum">     506 </span>            :     xmlEntityPtr cur;
+<span class="lineNum">     507 </span>            :     xmlEntitiesTablePtr table;
+<span class="lineNum">     508 </span>            : 
+<span class="lineNum">     509 </span><span class="lineCov">      50731 :     if (doc != NULL) {</span>
+<span class="lineNum">     510 </span><span class="lineCov">      50731 :         if ((doc-&gt;intSubset != NULL) &amp;&amp; (doc-&gt;intSubset-&gt;entities != NULL)) {</span>
+<span class="lineNum">     511 </span><span class="lineCov">      50589 :             table = (xmlEntitiesTablePtr) doc-&gt;intSubset-&gt;entities;</span>
+<span class="lineNum">     512 </span><span class="lineCov">      50589 :             cur = xmlGetEntityFromTable(table, name);</span>
+<span class="lineNum">     513 </span><span class="lineCov">      50589 :             if (cur != NULL)</span>
+<span class="lineNum">     514 </span>            :                 return(cur);
+<span class="lineNum">     515 </span>            :         }
+<span class="lineNum">     516 </span><span class="lineCov">        145 :         if (doc-&gt;standalone != 1) {</span>
+<span class="lineNum">     517 </span><span class="lineCov">        143 :             if ((doc-&gt;extSubset != NULL) &amp;&amp;</span>
+<span class="lineNum">     518 </span><span class="lineNoCov">          0 :                 (doc-&gt;extSubset-&gt;entities != NULL)) {</span>
+<span class="lineNum">     519 </span><span class="lineNoCov">          0 :                 table = (xmlEntitiesTablePtr) doc-&gt;extSubset-&gt;entities;</span>
+<span class="lineNum">     520 </span><span class="lineNoCov">          0 :                 cur = xmlGetEntityFromTable(table, name);</span>
+<span class="lineNum">     521 </span><span class="lineNoCov">          0 :                 if (cur != NULL)</span>
+<span class="lineNum">     522 </span>            :                     return(cur);
+<span class="lineNum">     523 </span>            :             }
+<span class="lineNum">     524 </span>            :         }
+<span class="lineNum">     525 </span>            :     }
+<span class="lineNum">     526 </span><span class="lineCov">        145 :     return(xmlGetPredefinedEntity(name));</span>
+<span class="lineNum">     527 </span>            : }
+<span class="lineNum">     528 </span>            : 
+<span class="lineNum">     529 </span>            : /*
+<span class="lineNum">     530 </span>            :  * Macro used to grow the current buffer.
+<span class="lineNum">     531 </span>            :  */
+<span class="lineNum">     532 </span>            : #define growBufferReentrant() {                                         \
+<span class="lineNum">     533 </span>            :     xmlChar *tmp;                                                       \
+<span class="lineNum">     534 </span>            :     size_t new_size = buffer_size * 2;                                  \
+<span class="lineNum">     535 </span>            :     if (new_size &lt; buffer_size) goto mem_error;                         \
+<span class="lineNum">     536 </span>            :     tmp = (xmlChar *) xmlRealloc(buffer, new_size);                     \
+<span class="lineNum">     537 </span>            :     if (tmp == NULL) goto mem_error;                                    \
+<span class="lineNum">     538 </span>            :     buffer = tmp;                                                       \
+<span class="lineNum">     539 </span>            :     buffer_size = new_size;                                             \
+<span class="lineNum">     540 </span>            : }
+<span class="lineNum">     541 </span>            : 
+<span class="lineNum">     542 </span>            : /**
+<span class="lineNum">     543 </span>            :  * xmlEncodeEntitiesInternal:
+<span class="lineNum">     544 </span>            :  * @doc:  the document containing the string
+<span class="lineNum">     545 </span>            :  * @input:  A string to convert to XML.
+<span class="lineNum">     546 </span>            :  * @attr: are we handling an atrbute value
+<span class="lineNum">     547 </span>            :  *
+<span class="lineNum">     548 </span>            :  * Do a global encoding of a string, replacing the predefined entities
+<span class="lineNum">     549 </span>            :  * and non ASCII values with their entities and CharRef counterparts.
+<span class="lineNum">     550 </span>            :  * Contrary to xmlEncodeEntities, this routine is reentrant, and result
+<span class="lineNum">     551 </span>            :  * must be deallocated.
+<span class="lineNum">     552 </span>            :  *
+<span class="lineNum">     553 </span>            :  * Returns A newly allocated string with the substitution done.
+<span class="lineNum">     554 </span>            :  */
+<span class="lineNum">     555 </span>            : static xmlChar *
+<span class="lineNum">     556 </span><span class="lineNoCov">          0 : xmlEncodeEntitiesInternal(xmlDocPtr doc, const xmlChar *input, int attr) {</span>
+<span class="lineNum">     557 </span><span class="lineNoCov">          0 :     const xmlChar *cur = input;</span>
+<span class="lineNum">     558 </span><span class="lineNoCov">          0 :     xmlChar *buffer = NULL;</span>
+<span class="lineNum">     559 </span><span class="lineNoCov">          0 :     xmlChar *out = NULL;</span>
+<span class="lineNum">     560 </span><span class="lineNoCov">          0 :     size_t buffer_size = 0;</span>
+<span class="lineNum">     561 </span><span class="lineNoCov">          0 :     int html = 0;</span>
+<span class="lineNum">     562 </span>            : 
+<span class="lineNum">     563 </span><span class="lineNoCov">          0 :     if (input == NULL) return(NULL);</span>
+<span class="lineNum">     564 </span><span class="lineNoCov">          0 :     if (doc != NULL)</span>
+<span class="lineNum">     565 </span><span class="lineNoCov">          0 :         html = (doc-&gt;type == XML_HTML_DOCUMENT_NODE);</span>
+<span class="lineNum">     566 </span>            : 
+<span class="lineNum">     567 </span>            :     /*
+<span class="lineNum">     568 </span>            :      * allocate an translation buffer.
+<span class="lineNum">     569 </span>            :      */
+<span class="lineNum">     570 </span><span class="lineNoCov">          0 :     buffer_size = 1000;</span>
+<span class="lineNum">     571 </span><span class="lineNoCov">          0 :     buffer = (xmlChar *) xmlMalloc(buffer_size * sizeof(xmlChar));</span>
+<span class="lineNum">     572 </span><span class="lineNoCov">          0 :     if (buffer == NULL) {</span>
+<span class="lineNum">     573 </span>            :         xmlEntitiesErrMemory(&quot;xmlEncodeEntities: malloc failed&quot;);
+<span class="lineNum">     574 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">     575 </span>            :     }
+<span class="lineNum">     576 </span>            :     out = buffer;
+<span class="lineNum">     577 </span>            : 
+<span class="lineNum">     578 </span><span class="lineNoCov">          0 :     while (*cur != '\0') {</span>
+<span class="lineNum">     579 </span><span class="lineNoCov">          0 :         size_t indx = out - buffer;</span>
+<span class="lineNum">     580 </span><span class="lineNoCov">          0 :         if (indx + 100 &gt; buffer_size) {</span>
+<span class="lineNum">     581 </span>            : 
+<span class="lineNum">     582 </span><span class="lineNoCov">          0 :             growBufferReentrant();</span>
+<span class="lineNum">     583 </span><span class="lineNoCov">          0 :             out = &amp;buffer[indx];</span>
+<span class="lineNum">     584 </span>            :         }
+<span class="lineNum">     585 </span>            : 
+<span class="lineNum">     586 </span>            :         /*
+<span class="lineNum">     587 </span>            :          * By default one have to encode at least '&lt;', '&gt;', '&quot;' and '&amp;' !
+<span class="lineNum">     588 </span>            :          */
+<span class="lineNum">     589 </span><span class="lineNoCov">          0 :         if (*cur == '&lt;') {</span>
+<span class="lineNum">     590 </span>            :             const xmlChar *end;
+<span class="lineNum">     591 </span>            : 
+<span class="lineNum">     592 </span>            :             /*
+<span class="lineNum">     593 </span>            :              * Special handling of server side include in HTML attributes
+<span class="lineNum">     594 </span>            :              */
+<span class="lineNum">     595 </span><span class="lineNoCov">          0 :             if (html &amp;&amp; attr &amp;&amp;</span>
+<span class="lineNum">     596 </span><span class="lineNoCov">          0 :                 (cur[1] == '!') &amp;&amp; (cur[2] == '-') &amp;&amp; (cur[3] == '-') &amp;&amp;</span>
+<span class="lineNum">     597 </span>            :                 ((end = xmlStrstr(cur, BAD_CAST &quot;--&gt;&quot;)) != NULL)) {
+<span class="lineNum">     598 </span><span class="lineNoCov">          0 :                 while (cur != end) {</span>
+<span class="lineNum">     599 </span><span class="lineNoCov">          0 :                     *out++ = *cur++;</span>
+<span class="lineNum">     600 </span><span class="lineNoCov">          0 :                     indx = out - buffer;</span>
+<span class="lineNum">     601 </span><span class="lineNoCov">          0 :                     if (indx + 100 &gt; buffer_size) {</span>
+<span class="lineNum">     602 </span><span class="lineNoCov">          0 :                         growBufferReentrant();</span>
+<span class="lineNum">     603 </span><span class="lineNoCov">          0 :                         out = &amp;buffer[indx];</span>
+<span class="lineNum">     604 </span>            :                     }
+<span class="lineNum">     605 </span>            :                 }
+<span class="lineNum">     606 </span><span class="lineNoCov">          0 :                 *out++ = *cur++;</span>
+<span class="lineNum">     607 </span><span class="lineNoCov">          0 :                 *out++ = *cur++;</span>
+<span class="lineNum">     608 </span><span class="lineNoCov">          0 :                 *out++ = *cur++;</span>
+<span class="lineNum">     609 </span><span class="lineNoCov">          0 :                 continue;</span>
+<span class="lineNum">     610 </span>            :             }
+<span class="lineNum">     611 </span><span class="lineNoCov">          0 :             *out++ = '&amp;';</span>
+<span class="lineNum">     612 </span><span class="lineNoCov">          0 :             *out++ = 'l';</span>
+<span class="lineNum">     613 </span><span class="lineNoCov">          0 :             *out++ = 't';</span>
+<span class="lineNum">     614 </span><span class="lineNoCov">          0 :             *out++ = ';';</span>
+<span class="lineNum">     615 </span><span class="lineNoCov">          0 :         } else if (*cur == '&gt;') {</span>
+<span class="lineNum">     616 </span><span class="lineNoCov">          0 :             *out++ = '&amp;';</span>
+<span class="lineNum">     617 </span><span class="lineNoCov">          0 :             *out++ = 'g';</span>
+<span class="lineNum">     618 </span><span class="lineNoCov">          0 :             *out++ = 't';</span>
+<span class="lineNum">     619 </span><span class="lineNoCov">          0 :             *out++ = ';';</span>
+<span class="lineNum">     620 </span><span class="lineNoCov">          0 :         } else if (*cur == '&amp;') {</span>
+<span class="lineNum">     621 </span>            :             /*
+<span class="lineNum">     622 </span>            :              * Special handling of &amp;{...} construct from HTML 4, see
+<span class="lineNum">     623 </span>            :              * http://www.w3.org/TR/html401/appendix/notes.html#h-B.7.1
+<span class="lineNum">     624 </span>            :              */
+<span class="lineNum">     625 </span><span class="lineNoCov">          0 :             if (html &amp;&amp; attr &amp;&amp; (cur[1] == '{') &amp;&amp;</span>
+<span class="lineNum">     626 </span><span class="lineNoCov">          0 :                 (strchr((const char *) cur, '}'))) {</span>
+<span class="lineNum">     627 </span><span class="lineNoCov">          0 :                 while (*cur != '}') {</span>
+<span class="lineNum">     628 </span><span class="lineNoCov">          0 :                     *out++ = *cur++;</span>
+<span class="lineNum">     629 </span><span class="lineNoCov">          0 :                     indx = out - buffer;</span>
+<span class="lineNum">     630 </span><span class="lineNoCov">          0 :                     if (indx + 100 &gt; buffer_size) {</span>
+<span class="lineNum">     631 </span><span class="lineNoCov">          0 :                         growBufferReentrant();</span>
+<span class="lineNum">     632 </span><span class="lineNoCov">          0 :                         out = &amp;buffer[indx];</span>
+<span class="lineNum">     633 </span>            :                     }
+<span class="lineNum">     634 </span>            :                 }
+<span class="lineNum">     635 </span><span class="lineNoCov">          0 :                 *out++ = *cur++;</span>
+<span class="lineNum">     636 </span><span class="lineNoCov">          0 :                 continue;</span>
+<span class="lineNum">     637 </span>            :             }
+<span class="lineNum">     638 </span><span class="lineNoCov">          0 :             *out++ = '&amp;';</span>
+<span class="lineNum">     639 </span><span class="lineNoCov">          0 :             *out++ = 'a';</span>
+<span class="lineNum">     640 </span><span class="lineNoCov">          0 :             *out++ = 'm';</span>
+<span class="lineNum">     641 </span><span class="lineNoCov">          0 :             *out++ = 'p';</span>
+<span class="lineNum">     642 </span><span class="lineNoCov">          0 :             *out++ = ';';</span>
+<span class="lineNum">     643 </span><span class="lineNoCov">          0 :         } else if (((*cur &gt;= 0x20) &amp;&amp; (*cur &lt; 0x80)) ||</span>
+<span class="lineNum">     644 </span><span class="lineNoCov">          0 :             (*cur == '\n') || (*cur == '\t') || ((html) &amp;&amp; (*cur == '\r'))) {</span>
+<span class="lineNum">     645 </span>            :             /*
+<span class="lineNum">     646 </span>            :              * default case, just copy !
+<span class="lineNum">     647 </span>            :              */
+<span class="lineNum">     648 </span><span class="lineNoCov">          0 :             *out++ = *cur;</span>
+<span class="lineNum">     649 </span><span class="lineNoCov">          0 :         } else if (*cur &gt;= 0x80) {</span>
+<span class="lineNum">     650 </span><span class="lineNoCov">          0 :             if (((doc != NULL) &amp;&amp; (doc-&gt;encoding != NULL)) || (html)) {</span>
+<span class="lineNum">     651 </span>            :                 /*
+<span class="lineNum">     652 </span>            :                  * Bjørn Reese &lt;br@sseusa.com&gt; provided the patch
+<span class="lineNum">     653 </span>            :                 xmlChar xc;
+<span class="lineNum">     654 </span>            :                 xc = (*cur &amp; 0x3F) &lt;&lt; 6;
+<span class="lineNum">     655 </span>            :                 if (cur[1] != 0) {
+<span class="lineNum">     656 </span>            :                     xc += *(++cur) &amp; 0x3F;
+<span class="lineNum">     657 </span>            :                     *out++ = xc;
+<span class="lineNum">     658 </span>            :                 } else
+<span class="lineNum">     659 </span>            :                  */
+<span class="lineNum">     660 </span><span class="lineNoCov">          0 :                 *out++ = *cur;</span>
+<span class="lineNum">     661 </span>            :             } else {
+<span class="lineNum">     662 </span>            :                 /*
+<span class="lineNum">     663 </span>            :                  * We assume we have UTF-8 input.
+<span class="lineNum">     664 </span>            :                  */
+<span class="lineNum">     665 </span>            :                 char buf[11], *ptr;
+<span class="lineNum">     666 </span><span class="lineNoCov">          0 :                 int val = 0, l = 1;</span>
+<span class="lineNum">     667 </span>            : 
+<span class="lineNum">     668 </span><span class="lineNoCov">          0 :                 if (*cur &lt; 0xC0) {</span>
+<span class="lineNum">     669 </span>            :                     xmlEntitiesErr(XML_CHECK_NOT_UTF8,
+<span class="lineNum">     670 </span>            :                             &quot;xmlEncodeEntities: input not UTF-8&quot;);
+<span class="lineNum">     671 </span><span class="lineNoCov">          0 :                     if (doc != NULL)</span>
+<span class="lineNum">     672 </span><span class="lineNoCov">          0 :                         doc-&gt;encoding = xmlStrdup(BAD_CAST &quot;ISO-8859-1&quot;);</span>
+<span class="lineNum">     673 </span><span class="lineNoCov">          0 :                     snprintf(buf, sizeof(buf), &quot;&amp;#%d;&quot;, *cur);</span>
+<span class="lineNum">     674 </span><span class="lineNoCov">          0 :                     buf[sizeof(buf) - 1] = 0;</span>
+<span class="lineNum">     675 </span><span class="lineNoCov">          0 :                     ptr = buf;</span>
+<span class="lineNum">     676 </span><span class="lineNoCov">          0 :                     while (*ptr != 0) *out++ = *ptr++;</span>
+<span class="lineNum">     677 </span><span class="lineNoCov">          0 :                     cur++;</span>
+<span class="lineNum">     678 </span><span class="lineNoCov">          0 :                     continue;</span>
+<span class="lineNum">     679 </span><span class="lineNoCov">          0 :                 } else if (*cur &lt; 0xE0) {</span>
+<span class="lineNum">     680 </span><span class="lineNoCov">          0 :                     val = (cur[0]) &amp; 0x1F;</span>
+<span class="lineNum">     681 </span><span class="lineNoCov">          0 :                     val &lt;&lt;= 6;</span>
+<span class="lineNum">     682 </span><span class="lineNoCov">          0 :                     val |= (cur[1]) &amp; 0x3F;</span>
+<span class="lineNum">     683 </span><span class="lineNoCov">          0 :                     l = 2;</span>
+<span class="lineNum">     684 </span><span class="lineNoCov">          0 :                 } else if (*cur &lt; 0xF0) {</span>
+<span class="lineNum">     685 </span><span class="lineNoCov">          0 :                     val = (cur[0]) &amp; 0x0F;</span>
+<span class="lineNum">     686 </span><span class="lineNoCov">          0 :                     val &lt;&lt;= 6;</span>
+<span class="lineNum">     687 </span><span class="lineNoCov">          0 :                     val |= (cur[1]) &amp; 0x3F;</span>
+<span class="lineNum">     688 </span><span class="lineNoCov">          0 :                     val &lt;&lt;= 6;</span>
+<span class="lineNum">     689 </span><span class="lineNoCov">          0 :                     val |= (cur[2]) &amp; 0x3F;</span>
+<span class="lineNum">     690 </span><span class="lineNoCov">          0 :                     l = 3;</span>
+<span class="lineNum">     691 </span><span class="lineNoCov">          0 :                 } else if (*cur &lt; 0xF8) {</span>
+<span class="lineNum">     692 </span><span class="lineNoCov">          0 :                     val = (cur[0]) &amp; 0x07;</span>
+<span class="lineNum">     693 </span><span class="lineNoCov">          0 :                     val &lt;&lt;= 6;</span>
+<span class="lineNum">     694 </span><span class="lineNoCov">          0 :                     val |= (cur[1]) &amp; 0x3F;</span>
+<span class="lineNum">     695 </span><span class="lineNoCov">          0 :                     val &lt;&lt;= 6;</span>
+<span class="lineNum">     696 </span><span class="lineNoCov">          0 :                     val |= (cur[2]) &amp; 0x3F;</span>
+<span class="lineNum">     697 </span><span class="lineNoCov">          0 :                     val &lt;&lt;= 6;</span>
+<span class="lineNum">     698 </span><span class="lineNoCov">          0 :                     val |= (cur[3]) &amp; 0x3F;</span>
+<span class="lineNum">     699 </span><span class="lineNoCov">          0 :                     l = 4;</span>
+<span class="lineNum">     700 </span>            :                 }
+<span class="lineNum">     701 </span><span class="lineNoCov">          0 :                 if ((l == 1) || (!IS_CHAR(val))) {</span>
+<span class="lineNum">     702 </span>            :                     xmlEntitiesErr(XML_ERR_INVALID_CHAR,
+<span class="lineNum">     703 </span>            :                         &quot;xmlEncodeEntities: char out of range\n&quot;);
+<span class="lineNum">     704 </span><span class="lineNoCov">          0 :                     if (doc != NULL)</span>
+<span class="lineNum">     705 </span><span class="lineNoCov">          0 :                         doc-&gt;encoding = xmlStrdup(BAD_CAST &quot;ISO-8859-1&quot;);</span>
+<span class="lineNum">     706 </span><span class="lineNoCov">          0 :                     snprintf(buf, sizeof(buf), &quot;&amp;#%d;&quot;, *cur);</span>
+<span class="lineNum">     707 </span><span class="lineNoCov">          0 :                     buf[sizeof(buf) - 1] = 0;</span>
+<span class="lineNum">     708 </span><span class="lineNoCov">          0 :                     ptr = buf;</span>
+<span class="lineNum">     709 </span><span class="lineNoCov">          0 :                     while (*ptr != 0) *out++ = *ptr++;</span>
+<span class="lineNum">     710 </span><span class="lineNoCov">          0 :                     cur++;</span>
+<span class="lineNum">     711 </span><span class="lineNoCov">          0 :                     continue;</span>
+<span class="lineNum">     712 </span>            :                 }
+<span class="lineNum">     713 </span>            :                 /*
+<span class="lineNum">     714 </span>            :                  * We could do multiple things here. Just save as a char ref
+<span class="lineNum">     715 </span>            :                  */
+<span class="lineNum">     716 </span>            :                 snprintf(buf, sizeof(buf), &quot;&amp;#x%X;&quot;, val);
+<span class="lineNum">     717 </span><span class="lineNoCov">          0 :                 buf[sizeof(buf) - 1] = 0;</span>
+<span class="lineNum">     718 </span><span class="lineNoCov">          0 :                 ptr = buf;</span>
+<span class="lineNum">     719 </span><span class="lineNoCov">          0 :                 while (*ptr != 0) *out++ = *ptr++;</span>
+<span class="lineNum">     720 </span><span class="lineNoCov">          0 :                 cur += l;</span>
+<span class="lineNum">     721 </span><span class="lineNoCov">          0 :                 continue;</span>
+<span class="lineNum">     722 </span>            :             }
+<span class="lineNum">     723 </span><span class="lineNoCov">          0 :         } else if (IS_BYTE_CHAR(*cur)) {</span>
+<span class="lineNum">     724 </span>            :             char buf[11], *ptr;
+<span class="lineNum">     725 </span>            : 
+<span class="lineNum">     726 </span><span class="lineNoCov">          0 :             snprintf(buf, sizeof(buf), &quot;&amp;#%d;&quot;, *cur);</span>
+<span class="lineNum">     727 </span><span class="lineNoCov">          0 :             buf[sizeof(buf) - 1] = 0;</span>
+<span class="lineNum">     728 </span><span class="lineNoCov">          0 :             ptr = buf;</span>
+<span class="lineNum">     729 </span><span class="lineNoCov">          0 :             while (*ptr != 0) *out++ = *ptr++;</span>
+<span class="lineNum">     730 </span>            :         }
+<span class="lineNum">     731 </span><span class="lineNoCov">          0 :         cur++;</span>
+<span class="lineNum">     732 </span>            :     }
+<span class="lineNum">     733 </span><span class="lineNoCov">          0 :     *out = 0;</span>
+<span class="lineNum">     734 </span><span class="lineNoCov">          0 :     return(buffer);</span>
+<span class="lineNum">     735 </span>            : 
+<span class="lineNum">     736 </span>            : mem_error:
+<span class="lineNum">     737 </span>            :     xmlEntitiesErrMemory(&quot;xmlEncodeEntities: realloc failed&quot;);
+<span class="lineNum">     738 </span><span class="lineNoCov">          0 :     xmlFree(buffer);</span>
+<span class="lineNum">     739 </span><span class="lineNoCov">          0 :     return(NULL);</span>
+<span class="lineNum">     740 </span>            : }
+<span class="lineNum">     741 </span>            : 
+<span class="lineNum">     742 </span>            : /**
+<span class="lineNum">     743 </span>            :  * xmlEncodeAttributeEntities:
+<span class="lineNum">     744 </span>            :  * @doc:  the document containing the string
+<span class="lineNum">     745 </span>            :  * @input:  A string to convert to XML.
+<span class="lineNum">     746 </span>            :  *
+<span class="lineNum">     747 </span>            :  * Do a global encoding of a string, replacing the predefined entities
+<span class="lineNum">     748 </span>            :  * and non ASCII values with their entities and CharRef counterparts for
+<span class="lineNum">     749 </span>            :  * attribute values.
+<span class="lineNum">     750 </span>            :  *
+<span class="lineNum">     751 </span>            :  * Returns A newly allocated string with the substitution done.
+<a name="752"><span class="lineNum">     752 </span>            :  */</a>
+<span class="lineNum">     753 </span>            : xmlChar *
+<span class="lineNum">     754 </span><span class="lineNoCov">          0 : xmlEncodeAttributeEntities(xmlDocPtr doc, const xmlChar *input) {</span>
+<span class="lineNum">     755 </span><span class="lineNoCov">          0 :     return xmlEncodeEntitiesInternal(doc, input, 1);</span>
+<span class="lineNum">     756 </span>            : }
+<span class="lineNum">     757 </span>            : 
+<span class="lineNum">     758 </span>            : /**
+<span class="lineNum">     759 </span>            :  * xmlEncodeEntitiesReentrant:
+<span class="lineNum">     760 </span>            :  * @doc:  the document containing the string
+<span class="lineNum">     761 </span>            :  * @input:  A string to convert to XML.
+<span class="lineNum">     762 </span>            :  *
+<span class="lineNum">     763 </span>            :  * Do a global encoding of a string, replacing the predefined entities
+<span class="lineNum">     764 </span>            :  * and non ASCII values with their entities and CharRef counterparts.
+<span class="lineNum">     765 </span>            :  * Contrary to xmlEncodeEntities, this routine is reentrant, and result
+<span class="lineNum">     766 </span>            :  * must be deallocated.
+<span class="lineNum">     767 </span>            :  *
+<span class="lineNum">     768 </span>            :  * Returns A newly allocated string with the substitution done.
+<a name="769"><span class="lineNum">     769 </span>            :  */</a>
+<span class="lineNum">     770 </span>            : xmlChar *
+<span class="lineNum">     771 </span><span class="lineNoCov">          0 : xmlEncodeEntitiesReentrant(xmlDocPtr doc, const xmlChar *input) {</span>
+<span class="lineNum">     772 </span><span class="lineNoCov">          0 :     return xmlEncodeEntitiesInternal(doc, input, 0);</span>
+<span class="lineNum">     773 </span>            : }
+<span class="lineNum">     774 </span>            : 
+<span class="lineNum">     775 </span>            : /**
+<span class="lineNum">     776 </span>            :  * xmlEncodeSpecialChars:
+<span class="lineNum">     777 </span>            :  * @doc:  the document containing the string
+<span class="lineNum">     778 </span>            :  * @input:  A string to convert to XML.
+<span class="lineNum">     779 </span>            :  *
+<span class="lineNum">     780 </span>            :  * Do a global encoding of a string, replacing the predefined entities
+<span class="lineNum">     781 </span>            :  * this routine is reentrant, and result must be deallocated.
+<span class="lineNum">     782 </span>            :  *
+<span class="lineNum">     783 </span>            :  * Returns A newly allocated string with the substitution done.
+<span class="lineNum">     784 </span>            :  */
+<span class="lineNum">     785 </span>            : xmlChar *
+<span class="lineNum">     786 </span><span class="lineNoCov">          0 : xmlEncodeSpecialChars(const xmlDoc *doc ATTRIBUTE_UNUSED, const xmlChar *input) {</span>
+<span class="lineNum">     787 </span><span class="lineNoCov">          0 :     const xmlChar *cur = input;</span>
+<span class="lineNum">     788 </span><span class="lineNoCov">          0 :     xmlChar *buffer = NULL;</span>
+<span class="lineNum">     789 </span><span class="lineNoCov">          0 :     xmlChar *out = NULL;</span>
+<span class="lineNum">     790 </span><span class="lineNoCov">          0 :     size_t buffer_size = 0;</span>
+<span class="lineNum">     791 </span><span class="lineNoCov">          0 :     if (input == NULL) return(NULL);</span>
+<span class="lineNum">     792 </span>            : 
+<span class="lineNum">     793 </span>            :     /*
+<span class="lineNum">     794 </span>            :      * allocate an translation buffer.
+<span class="lineNum">     795 </span>            :      */
+<span class="lineNum">     796 </span><span class="lineNoCov">          0 :     buffer_size = 1000;</span>
+<span class="lineNum">     797 </span><span class="lineNoCov">          0 :     buffer = (xmlChar *) xmlMalloc(buffer_size * sizeof(xmlChar));</span>
+<span class="lineNum">     798 </span><span class="lineNoCov">          0 :     if (buffer == NULL) {</span>
+<span class="lineNum">     799 </span>            :         xmlEntitiesErrMemory(&quot;xmlEncodeSpecialChars: malloc failed&quot;);
+<span class="lineNum">     800 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">     801 </span>            :     }
+<span class="lineNum">     802 </span>            :     out = buffer;
+<span class="lineNum">     803 </span>            : 
+<span class="lineNum">     804 </span><span class="lineNoCov">          0 :     while (*cur != '\0') {</span>
+<span class="lineNum">     805 </span><span class="lineNoCov">          0 :         size_t indx = out - buffer;</span>
+<span class="lineNum">     806 </span><span class="lineNoCov">          0 :         if (indx + 10 &gt; buffer_size) {</span>
+<span class="lineNum">     807 </span>            : 
+<span class="lineNum">     808 </span><span class="lineNoCov">          0 :             growBufferReentrant();</span>
+<span class="lineNum">     809 </span><span class="lineNoCov">          0 :             out = &amp;buffer[indx];</span>
+<span class="lineNum">     810 </span>            :         }
+<span class="lineNum">     811 </span>            : 
+<span class="lineNum">     812 </span>            :         /*
+<span class="lineNum">     813 </span>            :          * By default one have to encode at least '&lt;', '&gt;', '&quot;' and '&amp;' !
+<span class="lineNum">     814 </span>            :          */
+<span class="lineNum">     815 </span><span class="lineNoCov">          0 :         if (*cur == '&lt;') {</span>
+<span class="lineNum">     816 </span><span class="lineNoCov">          0 :             *out++ = '&amp;';</span>
+<span class="lineNum">     817 </span><span class="lineNoCov">          0 :             *out++ = 'l';</span>
+<span class="lineNum">     818 </span><span class="lineNoCov">          0 :             *out++ = 't';</span>
+<span class="lineNum">     819 </span><span class="lineNoCov">          0 :             *out++ = ';';</span>
+<span class="lineNum">     820 </span><span class="lineNoCov">          0 :         } else if (*cur == '&gt;') {</span>
+<span class="lineNum">     821 </span><span class="lineNoCov">          0 :             *out++ = '&amp;';</span>
+<span class="lineNum">     822 </span><span class="lineNoCov">          0 :             *out++ = 'g';</span>
+<span class="lineNum">     823 </span><span class="lineNoCov">          0 :             *out++ = 't';</span>
+<span class="lineNum">     824 </span><span class="lineNoCov">          0 :             *out++ = ';';</span>
+<span class="lineNum">     825 </span><span class="lineNoCov">          0 :         } else if (*cur == '&amp;') {</span>
+<span class="lineNum">     826 </span><span class="lineNoCov">          0 :             *out++ = '&amp;';</span>
+<span class="lineNum">     827 </span><span class="lineNoCov">          0 :             *out++ = 'a';</span>
+<span class="lineNum">     828 </span><span class="lineNoCov">          0 :             *out++ = 'm';</span>
+<span class="lineNum">     829 </span><span class="lineNoCov">          0 :             *out++ = 'p';</span>
+<span class="lineNum">     830 </span><span class="lineNoCov">          0 :             *out++ = ';';</span>
+<span class="lineNum">     831 </span><span class="lineNoCov">          0 :         } else if (*cur == '&quot;') {</span>
+<span class="lineNum">     832 </span><span class="lineNoCov">          0 :             *out++ = '&amp;';</span>
+<span class="lineNum">     833 </span><span class="lineNoCov">          0 :             *out++ = 'q';</span>
+<span class="lineNum">     834 </span><span class="lineNoCov">          0 :             *out++ = 'u';</span>
+<span class="lineNum">     835 </span><span class="lineNoCov">          0 :             *out++ = 'o';</span>
+<span class="lineNum">     836 </span><span class="lineNoCov">          0 :             *out++ = 't';</span>
+<span class="lineNum">     837 </span><span class="lineNoCov">          0 :             *out++ = ';';</span>
+<span class="lineNum">     838 </span><span class="lineNoCov">          0 :         } else if (*cur == '\r') {</span>
+<span class="lineNum">     839 </span><span class="lineNoCov">          0 :             *out++ = '&amp;';</span>
+<span class="lineNum">     840 </span><span class="lineNoCov">          0 :             *out++ = '#';</span>
+<span class="lineNum">     841 </span><span class="lineNoCov">          0 :             *out++ = '1';</span>
+<span class="lineNum">     842 </span><span class="lineNoCov">          0 :             *out++ = '3';</span>
+<span class="lineNum">     843 </span><span class="lineNoCov">          0 :             *out++ = ';';</span>
+<span class="lineNum">     844 </span>            :         } else {
+<span class="lineNum">     845 </span>            :             /*
+<span class="lineNum">     846 </span>            :              * Works because on UTF-8, all extended sequences cannot
+<span class="lineNum">     847 </span>            :              * result in bytes in the ASCII range.
+<span class="lineNum">     848 </span>            :              */
+<span class="lineNum">     849 </span><span class="lineNoCov">          0 :             *out++ = *cur;</span>
+<span class="lineNum">     850 </span>            :         }
+<span class="lineNum">     851 </span><span class="lineNoCov">          0 :         cur++;</span>
+<span class="lineNum">     852 </span>            :     }
+<span class="lineNum">     853 </span><span class="lineNoCov">          0 :     *out = 0;</span>
+<span class="lineNum">     854 </span><span class="lineNoCov">          0 :     return(buffer);</span>
+<span class="lineNum">     855 </span>            : 
+<span class="lineNum">     856 </span>            : mem_error:
+<span class="lineNum">     857 </span>            :     xmlEntitiesErrMemory(&quot;xmlEncodeSpecialChars: realloc failed&quot;);
+<span class="lineNum">     858 </span><span class="lineNoCov">          0 :     xmlFree(buffer);</span>
+<span class="lineNum">     859 </span><span class="lineNoCov">          0 :     return(NULL);</span>
+<span class="lineNum">     860 </span>            : }
+<span class="lineNum">     861 </span>            : 
+<span class="lineNum">     862 </span>            : /**
+<span class="lineNum">     863 </span>            :  * xmlCreateEntitiesTable:
+<span class="lineNum">     864 </span>            :  *
+<span class="lineNum">     865 </span>            :  * create and initialize an empty entities hash table.
+<span class="lineNum">     866 </span>            :  * This really doesn't make sense and should be deprecated
+<span class="lineNum">     867 </span>            :  *
+<span class="lineNum">     868 </span>            :  * Returns the xmlEntitiesTablePtr just created or NULL in case of error.
+<a name="869"><span class="lineNum">     869 </span>            :  */</a>
+<span class="lineNum">     870 </span>            : xmlEntitiesTablePtr
+<span class="lineNum">     871 </span><span class="lineNoCov">          0 : xmlCreateEntitiesTable(void) {</span>
+<span class="lineNum">     872 </span><span class="lineNoCov">          0 :     return((xmlEntitiesTablePtr) xmlHashCreate(0));</span>
+<span class="lineNum">     873 </span>            : }
+<span class="lineNum">     874 </span>            : 
+<span class="lineNum">     875 </span>            : /**
+<span class="lineNum">     876 </span>            :  * xmlFreeEntityWrapper:
+<span class="lineNum">     877 </span>            :  * @entity:  An entity
+<span class="lineNum">     878 </span>            :  * @name:  its name
+<span class="lineNum">     879 </span>            :  *
+<span class="lineNum">     880 </span>            :  * Deallocate the memory used by an entities in the hash table.
+<a name="881"><span class="lineNum">     881 </span>            :  */</a>
+<span class="lineNum">     882 </span>            : static void
+<span class="lineNum">     883 </span><span class="lineCov">        390 : xmlFreeEntityWrapper(xmlEntityPtr entity,</span>
+<span class="lineNum">     884 </span>            :                        const xmlChar *name ATTRIBUTE_UNUSED) {
+<span class="lineNum">     885 </span><span class="lineCov">        390 :     if (entity != NULL)</span>
+<span class="lineNum">     886 </span><span class="lineCov">        390 :         xmlFreeEntity(entity);</span>
+<span class="lineNum">     887 </span><span class="lineCov">        390 : }</span>
+<span class="lineNum">     888 </span>            : 
+<span class="lineNum">     889 </span>            : /**
+<span class="lineNum">     890 </span>            :  * xmlFreeEntitiesTable:
+<span class="lineNum">     891 </span>            :  * @table:  An entity table
+<span class="lineNum">     892 </span>            :  *
+<span class="lineNum">     893 </span>            :  * Deallocate the memory used by an entities hash table.
+<a name="894"><span class="lineNum">     894 </span>            :  */</a>
+<span class="lineNum">     895 </span>            : void
+<span class="lineNum">     896 </span><span class="lineCov">         61 : xmlFreeEntitiesTable(xmlEntitiesTablePtr table) {</span>
+<span class="lineNum">     897 </span><span class="lineCov">         61 :     xmlHashFree(table, (xmlHashDeallocator) xmlFreeEntityWrapper);</span>
+<span class="lineNum">     898 </span><span class="lineCov">         61 : }</span>
+<span class="lineNum">     899 </span>            : 
+<span class="lineNum">     900 </span>            : #ifdef LIBXML_TREE_ENABLED
+<span class="lineNum">     901 </span>            : /**
+<span class="lineNum">     902 </span>            :  * xmlCopyEntity:
+<span class="lineNum">     903 </span>            :  * @ent:  An entity
+<span class="lineNum">     904 </span>            :  *
+<span class="lineNum">     905 </span>            :  * Build a copy of an entity
+<span class="lineNum">     906 </span>            :  *
+<span class="lineNum">     907 </span>            :  * Returns the new xmlEntitiesPtr or NULL in case of error.
+<span class="lineNum">     908 </span>            :  */
+<span class="lineNum">     909 </span>            : static xmlEntityPtr
+<span class="lineNum">     910 </span><span class="lineNoCov">          0 : xmlCopyEntity(xmlEntityPtr ent) {</span>
+<span class="lineNum">     911 </span>            :     xmlEntityPtr cur;
+<span class="lineNum">     912 </span>            : 
+<span class="lineNum">     913 </span><span class="lineNoCov">          0 :     cur = (xmlEntityPtr) xmlMalloc(sizeof(xmlEntity));</span>
+<span class="lineNum">     914 </span><span class="lineNoCov">          0 :     if (cur == NULL) {</span>
+<span class="lineNum">     915 </span>            :         xmlEntitiesErrMemory(&quot;xmlCopyEntity:: malloc failed&quot;);
+<span class="lineNum">     916 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">     917 </span>            :     }
+<span class="lineNum">     918 </span>            :     memset(cur, 0, sizeof(xmlEntity));
+<span class="lineNum">     919 </span><span class="lineNoCov">          0 :     cur-&gt;type = XML_ENTITY_DECL;</span>
+<span class="lineNum">     920 </span>            : 
+<span class="lineNum">     921 </span><span class="lineNoCov">          0 :     cur-&gt;etype = ent-&gt;etype;</span>
+<span class="lineNum">     922 </span><span class="lineNoCov">          0 :     if (ent-&gt;name != NULL)</span>
+<span class="lineNum">     923 </span><span class="lineNoCov">          0 :         cur-&gt;name = xmlStrdup(ent-&gt;name);</span>
+<span class="lineNum">     924 </span><span class="lineNoCov">          0 :     if (ent-&gt;ExternalID != NULL)</span>
+<span class="lineNum">     925 </span><span class="lineNoCov">          0 :         cur-&gt;ExternalID = xmlStrdup(ent-&gt;ExternalID);</span>
+<span class="lineNum">     926 </span><span class="lineNoCov">          0 :     if (ent-&gt;SystemID != NULL)</span>
+<span class="lineNum">     927 </span><span class="lineNoCov">          0 :         cur-&gt;SystemID = xmlStrdup(ent-&gt;SystemID);</span>
+<span class="lineNum">     928 </span><span class="lineNoCov">          0 :     if (ent-&gt;content != NULL)</span>
+<span class="lineNum">     929 </span><span class="lineNoCov">          0 :         cur-&gt;content = xmlStrdup(ent-&gt;content);</span>
+<span class="lineNum">     930 </span><span class="lineNoCov">          0 :     if (ent-&gt;orig != NULL)</span>
+<span class="lineNum">     931 </span><span class="lineNoCov">          0 :         cur-&gt;orig = xmlStrdup(ent-&gt;orig);</span>
+<span class="lineNum">     932 </span><span class="lineNoCov">          0 :     if (ent-&gt;URI != NULL)</span>
+<span class="lineNum">     933 </span><span class="lineNoCov">          0 :         cur-&gt;URI = xmlStrdup(ent-&gt;URI);</span>
+<span class="lineNum">     934 </span><span class="lineNoCov">          0 :     return(cur);</span>
+<span class="lineNum">     935 </span>            : }
+<span class="lineNum">     936 </span>            : 
+<span class="lineNum">     937 </span>            : /**
+<span class="lineNum">     938 </span>            :  * xmlCopyEntitiesTable:
+<span class="lineNum">     939 </span>            :  * @table:  An entity table
+<span class="lineNum">     940 </span>            :  *
+<span class="lineNum">     941 </span>            :  * Build a copy of an entity table.
+<span class="lineNum">     942 </span>            :  *
+<span class="lineNum">     943 </span>            :  * Returns the new xmlEntitiesTablePtr or NULL in case of error.
+<a name="944"><span class="lineNum">     944 </span>            :  */</a>
+<span class="lineNum">     945 </span>            : xmlEntitiesTablePtr
+<span class="lineNum">     946 </span><span class="lineNoCov">          0 : xmlCopyEntitiesTable(xmlEntitiesTablePtr table) {</span>
+<span class="lineNum">     947 </span><span class="lineNoCov">          0 :     return(xmlHashCopy(table, (xmlHashCopier) xmlCopyEntity));</span>
+<span class="lineNum">     948 </span>            : }
+<span class="lineNum">     949 </span>            : #endif /* LIBXML_TREE_ENABLED */
+<span class="lineNum">     950 </span>            : 
+<span class="lineNum">     951 </span>            : #ifdef LIBXML_OUTPUT_ENABLED
+<span class="lineNum">     952 </span>            : 
+<span class="lineNum">     953 </span>            : /**
+<span class="lineNum">     954 </span>            :  * xmlDumpEntityContent:
+<span class="lineNum">     955 </span>            :  * @buf:  An XML buffer.
+<span class="lineNum">     956 </span>            :  * @content:  The entity content.
+<span class="lineNum">     957 </span>            :  *
+<span class="lineNum">     958 </span>            :  * This will dump the quoted string value, taking care of the special
+<span class="lineNum">     959 </span>            :  * treatment required by %
+<a name="960"><span class="lineNum">     960 </span>            :  */</a>
+<span class="lineNum">     961 </span>            : static void
+<span class="lineNum">     962 </span><span class="lineNoCov">          0 : xmlDumpEntityContent(xmlBufferPtr buf, const xmlChar *content) {</span>
+<span class="lineNum">     963 </span><span class="lineNoCov">          0 :     if (buf-&gt;alloc == XML_BUFFER_ALLOC_IMMUTABLE) return;</span>
+<span class="lineNum">     964 </span><span class="lineNoCov">          0 :     if (xmlStrchr(content, '%')) {</span>
+<span class="lineNum">     965 </span>            :         const xmlChar * base, *cur;
+<span class="lineNum">     966 </span>            : 
+<span class="lineNum">     967 </span><span class="lineNoCov">          0 :         xmlBufferCCat(buf, &quot;\&quot;&quot;);</span>
+<span class="lineNum">     968 </span><span class="lineNoCov">          0 :         base = cur = content;</span>
+<span class="lineNum">     969 </span><span class="lineNoCov">          0 :         while (*cur != 0) {</span>
+<span class="lineNum">     970 </span><span class="lineNoCov">          0 :             if (*cur == '&quot;') {</span>
+<span class="lineNum">     971 </span><span class="lineNoCov">          0 :                 if (base != cur)</span>
+<span class="lineNum">     972 </span><span class="lineNoCov">          0 :                     xmlBufferAdd(buf, base, cur - base);</span>
+<span class="lineNum">     973 </span><span class="lineNoCov">          0 :                 xmlBufferAdd(buf, BAD_CAST &quot;&amp;quot;&quot;, 6);</span>
+<span class="lineNum">     974 </span><span class="lineNoCov">          0 :                 cur++;</span>
+<span class="lineNum">     975 </span><span class="lineNoCov">          0 :                 base = cur;</span>
+<span class="lineNum">     976 </span><span class="lineNoCov">          0 :             } else if (*cur == '%') {</span>
+<span class="lineNum">     977 </span><span class="lineNoCov">          0 :                 if (base != cur)</span>
+<span class="lineNum">     978 </span><span class="lineNoCov">          0 :                     xmlBufferAdd(buf, base, cur - base);</span>
+<span class="lineNum">     979 </span><span class="lineNoCov">          0 :                 xmlBufferAdd(buf, BAD_CAST &quot;&amp;#x25;&quot;, 6);</span>
+<span class="lineNum">     980 </span><span class="lineNoCov">          0 :                 cur++;</span>
+<span class="lineNum">     981 </span><span class="lineNoCov">          0 :                 base = cur;</span>
+<span class="lineNum">     982 </span>            :             } else {
+<span class="lineNum">     983 </span><span class="lineNoCov">          0 :                 cur++;</span>
+<span class="lineNum">     984 </span>            :             }
+<span class="lineNum">     985 </span>            :         }
+<span class="lineNum">     986 </span><span class="lineNoCov">          0 :         if (base != cur)</span>
+<span class="lineNum">     987 </span><span class="lineNoCov">          0 :             xmlBufferAdd(buf, base, cur - base);</span>
+<span class="lineNum">     988 </span><span class="lineNoCov">          0 :         xmlBufferCCat(buf, &quot;\&quot;&quot;);</span>
+<span class="lineNum">     989 </span>            :     } else {
+<span class="lineNum">     990 </span><span class="lineNoCov">          0 :         xmlBufferWriteQuotedString(buf, content);</span>
+<span class="lineNum">     991 </span>            :     }
+<span class="lineNum">     992 </span>            : }
+<span class="lineNum">     993 </span>            : 
+<span class="lineNum">     994 </span>            : /**
+<span class="lineNum">     995 </span>            :  * xmlDumpEntityDecl:
+<span class="lineNum">     996 </span>            :  * @buf:  An XML buffer.
+<span class="lineNum">     997 </span>            :  * @ent:  An entity table
+<span class="lineNum">     998 </span>            :  *
+<span class="lineNum">     999 </span>            :  * This will dump the content of the entity table as an XML DTD definition
+<span class="lineNum">    1000 </span>            :  */
+<span class="lineNum">    1001 </span>            : void
+<span class="lineNum">    1002 </span><span class="lineCov">        229 : xmlDumpEntityDecl(xmlBufferPtr buf, xmlEntityPtr ent) {</span>
+<span class="lineNum">    1003 </span><span class="lineCov">        458 :     if ((buf == NULL) || (ent == NULL)) return;</span>
+<span class="lineNum">    1004 </span><span class="lineCov">        229 :     switch (ent-&gt;etype) {</span>
+<span class="lineNum">    1005 </span>            :         case XML_INTERNAL_GENERAL_ENTITY:
+<span class="lineNum">    1006 </span><span class="lineCov">        208 :             xmlBufferWriteChar(buf, &quot;&lt;!ENTITY &quot;);</span>
+<span class="lineNum">    1007 </span><span class="lineCov">        208 :             xmlBufferWriteCHAR(buf, ent-&gt;name);</span>
+<span class="lineNum">    1008 </span><span class="lineCov">        208 :             xmlBufferWriteChar(buf, &quot; &quot;);</span>
+<span class="lineNum">    1009 </span><span class="lineCov">        208 :             if (ent-&gt;orig != NULL)</span>
+<span class="lineNum">    1010 </span><span class="lineCov">        208 :                 xmlBufferWriteQuotedString(buf, ent-&gt;orig);</span>
+<span class="lineNum">    1011 </span>            :             else
+<span class="lineNum">    1012 </span><span class="lineNoCov">          0 :                 xmlDumpEntityContent(buf, ent-&gt;content);</span>
+<span class="lineNum">    1013 </span><span class="lineCov">        208 :             xmlBufferWriteChar(buf, &quot;&gt;\n&quot;);</span>
+<span class="lineNum">    1014 </span><span class="lineCov">        208 :             break;</span>
+<span class="lineNum">    1015 </span>            :         case XML_EXTERNAL_GENERAL_PARSED_ENTITY:
+<span class="lineNum">    1016 </span><span class="lineCov">          9 :             xmlBufferWriteChar(buf, &quot;&lt;!ENTITY &quot;);</span>
+<span class="lineNum">    1017 </span><span class="lineCov">          9 :             xmlBufferWriteCHAR(buf, ent-&gt;name);</span>
+<span class="lineNum">    1018 </span><span class="lineCov">          9 :             if (ent-&gt;ExternalID != NULL) {</span>
+<span class="lineNum">    1019 </span><span class="lineCov">          2 :                  xmlBufferWriteChar(buf, &quot; PUBLIC &quot;);</span>
+<span class="lineNum">    1020 </span><span class="lineCov">          2 :                  xmlBufferWriteQuotedString(buf, ent-&gt;ExternalID);</span>
+<span class="lineNum">    1021 </span><span class="lineCov">          2 :                  xmlBufferWriteChar(buf, &quot; &quot;);</span>
+<span class="lineNum">    1022 </span><span class="lineCov">          2 :                  xmlBufferWriteQuotedString(buf, ent-&gt;SystemID);</span>
+<span class="lineNum">    1023 </span>            :             } else {
+<span class="lineNum">    1024 </span><span class="lineCov">          7 :                  xmlBufferWriteChar(buf, &quot; SYSTEM &quot;);</span>
+<span class="lineNum">    1025 </span><span class="lineCov">          7 :                  xmlBufferWriteQuotedString(buf, ent-&gt;SystemID);</span>
+<span class="lineNum">    1026 </span>            :             }
+<span class="lineNum">    1027 </span><span class="lineCov">          9 :             xmlBufferWriteChar(buf, &quot;&gt;\n&quot;);</span>
+<span class="lineNum">    1028 </span><span class="lineCov">          9 :             break;</span>
+<span class="lineNum">    1029 </span>            :         case XML_EXTERNAL_GENERAL_UNPARSED_ENTITY:
+<span class="lineNum">    1030 </span><span class="lineCov">          2 :             xmlBufferWriteChar(buf, &quot;&lt;!ENTITY &quot;);</span>
+<span class="lineNum">    1031 </span><span class="lineCov">          2 :             xmlBufferWriteCHAR(buf, ent-&gt;name);</span>
+<span class="lineNum">    1032 </span><span class="lineCov">          2 :             if (ent-&gt;ExternalID != NULL) {</span>
+<span class="lineNum">    1033 </span><span class="lineNoCov">          0 :                  xmlBufferWriteChar(buf, &quot; PUBLIC &quot;);</span>
+<span class="lineNum">    1034 </span><span class="lineNoCov">          0 :                  xmlBufferWriteQuotedString(buf, ent-&gt;ExternalID);</span>
+<span class="lineNum">    1035 </span><span class="lineNoCov">          0 :                  xmlBufferWriteChar(buf, &quot; &quot;);</span>
+<span class="lineNum">    1036 </span><span class="lineNoCov">          0 :                  xmlBufferWriteQuotedString(buf, ent-&gt;SystemID);</span>
+<span class="lineNum">    1037 </span>            :             } else {
+<span class="lineNum">    1038 </span><span class="lineCov">          2 :                  xmlBufferWriteChar(buf, &quot; SYSTEM &quot;);</span>
+<span class="lineNum">    1039 </span><span class="lineCov">          2 :                  xmlBufferWriteQuotedString(buf, ent-&gt;SystemID);</span>
+<span class="lineNum">    1040 </span>            :             }
+<span class="lineNum">    1041 </span><span class="lineCov">          2 :             if (ent-&gt;content != NULL) { /* Should be true ! */</span>
+<span class="lineNum">    1042 </span><span class="lineCov">          2 :                 xmlBufferWriteChar(buf, &quot; NDATA &quot;);</span>
+<span class="lineNum">    1043 </span><span class="lineCov">          2 :                 if (ent-&gt;orig != NULL)</span>
+<span class="lineNum">    1044 </span><span class="lineNoCov">          0 :                     xmlBufferWriteCHAR(buf, ent-&gt;orig);</span>
+<span class="lineNum">    1045 </span>            :                 else
+<span class="lineNum">    1046 </span><span class="lineCov">          2 :                     xmlBufferWriteCHAR(buf, ent-&gt;content);</span>
+<span class="lineNum">    1047 </span>            :             }
+<span class="lineNum">    1048 </span><span class="lineCov">          2 :             xmlBufferWriteChar(buf, &quot;&gt;\n&quot;);</span>
+<span class="lineNum">    1049 </span><span class="lineCov">          2 :             break;</span>
+<span class="lineNum">    1050 </span>            :         case XML_INTERNAL_PARAMETER_ENTITY:
+<span class="lineNum">    1051 </span><span class="lineCov">          9 :             xmlBufferWriteChar(buf, &quot;&lt;!ENTITY % &quot;);</span>
+<span class="lineNum">    1052 </span><span class="lineCov">          9 :             xmlBufferWriteCHAR(buf, ent-&gt;name);</span>
+<span class="lineNum">    1053 </span><span class="lineCov">          9 :             xmlBufferWriteChar(buf, &quot; &quot;);</span>
+<span class="lineNum">    1054 </span><span class="lineCov">          9 :             if (ent-&gt;orig == NULL)</span>
+<span class="lineNum">    1055 </span><span class="lineNoCov">          0 :                 xmlDumpEntityContent(buf, ent-&gt;content);</span>
+<span class="lineNum">    1056 </span>            :             else
+<span class="lineNum">    1057 </span><span class="lineCov">          9 :                 xmlBufferWriteQuotedString(buf, ent-&gt;orig);</span>
+<span class="lineNum">    1058 </span><span class="lineCov">          9 :             xmlBufferWriteChar(buf, &quot;&gt;\n&quot;);</span>
+<span class="lineNum">    1059 </span><span class="lineCov">          9 :             break;</span>
+<span class="lineNum">    1060 </span>            :         case XML_EXTERNAL_PARAMETER_ENTITY:
+<span class="lineNum">    1061 </span><span class="lineCov">          1 :             xmlBufferWriteChar(buf, &quot;&lt;!ENTITY % &quot;);</span>
+<span class="lineNum">    1062 </span><span class="lineCov">          1 :             xmlBufferWriteCHAR(buf, ent-&gt;name);</span>
+<span class="lineNum">    1063 </span><span class="lineCov">          1 :             if (ent-&gt;ExternalID != NULL) {</span>
+<span class="lineNum">    1064 </span><span class="lineNoCov">          0 :                  xmlBufferWriteChar(buf, &quot; PUBLIC &quot;);</span>
+<span class="lineNum">    1065 </span><span class="lineNoCov">          0 :                  xmlBufferWriteQuotedString(buf, ent-&gt;ExternalID);</span>
+<span class="lineNum">    1066 </span><span class="lineNoCov">          0 :                  xmlBufferWriteChar(buf, &quot; &quot;);</span>
+<span class="lineNum">    1067 </span><span class="lineNoCov">          0 :                  xmlBufferWriteQuotedString(buf, ent-&gt;SystemID);</span>
+<span class="lineNum">    1068 </span>            :             } else {
+<span class="lineNum">    1069 </span><span class="lineCov">          1 :                  xmlBufferWriteChar(buf, &quot; SYSTEM &quot;);</span>
+<span class="lineNum">    1070 </span><span class="lineCov">          1 :                  xmlBufferWriteQuotedString(buf, ent-&gt;SystemID);</span>
+<span class="lineNum">    1071 </span>            :             }
+<span class="lineNum">    1072 </span><span class="lineCov">          1 :             xmlBufferWriteChar(buf, &quot;&gt;\n&quot;);</span>
+<span class="lineNum">    1073 </span><span class="lineCov">          1 :             break;</span>
+<span class="lineNum">    1074 </span>            :         default:
+<span class="lineNum">    1075 </span>            :             xmlEntitiesErr(XML_DTD_UNKNOWN_ENTITY,
+<span class="lineNum">    1076 </span>            :                 &quot;xmlDumpEntitiesDecl: internal: unknown type entity type&quot;);
+<span class="lineNum">    1077 </span>            :     }
+<span class="lineNum">    1078 </span>            : }
+<span class="lineNum">    1079 </span>            : 
+<span class="lineNum">    1080 </span>            : /**
+<span class="lineNum">    1081 </span>            :  * xmlDumpEntityDeclScan:
+<span class="lineNum">    1082 </span>            :  * @ent:  An entity table
+<span class="lineNum">    1083 </span>            :  * @buf:  An XML buffer.
+<span class="lineNum">    1084 </span>            :  *
+<span class="lineNum">    1085 </span>            :  * When using the hash table scan function, arguments need to be reversed
+<a name="1086"><span class="lineNum">    1086 </span>            :  */</a>
+<span class="lineNum">    1087 </span>            : static void
+<span class="lineNum">    1088 </span><span class="lineNoCov">          0 : xmlDumpEntityDeclScan(xmlEntityPtr ent, xmlBufferPtr buf) {</span>
+<span class="lineNum">    1089 </span><span class="lineNoCov">          0 :     xmlDumpEntityDecl(buf, ent);</span>
+<span class="lineNum">    1090 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">    1091 </span>            : 
+<span class="lineNum">    1092 </span>            : /**
+<span class="lineNum">    1093 </span>            :  * xmlDumpEntitiesTable:
+<span class="lineNum">    1094 </span>            :  * @buf:  An XML buffer.
+<span class="lineNum">    1095 </span>            :  * @table:  An entity table
+<span class="lineNum">    1096 </span>            :  *
+<span class="lineNum">    1097 </span>            :  * This will dump the content of the entity table as an XML DTD definition
+<a name="1098"><span class="lineNum">    1098 </span>            :  */</a>
+<span class="lineNum">    1099 </span>            : void
+<span class="lineNum">    1100 </span><span class="lineNoCov">          0 : xmlDumpEntitiesTable(xmlBufferPtr buf, xmlEntitiesTablePtr table) {</span>
+<span class="lineNum">    1101 </span><span class="lineNoCov">          0 :     xmlHashScan(table, (xmlHashScanner)xmlDumpEntityDeclScan, buf);</span>
+<span class="lineNum">    1102 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">    1103 </span>            : #endif /* LIBXML_OUTPUT_ENABLED */
+<span class="lineNum">    1104 </span>            : #define bottom_entities
+<span class="lineNum">    1105 </span>            : #include &quot;elfgcchack.h&quot;
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

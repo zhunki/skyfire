@@ -1,0 +1,389 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - libexslt/saxon.c</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">libexslt</a> - saxon.c<span style="font-size: 80%;"> (source / <a href="saxon.c.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">8</td>
+            <td class="headerCovTableEntry">86</td>
+            <td class="headerCovTableEntryLo">9.3 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-10-30</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntry">8</td>
+            <td class="headerCovTableEntryLo">12.5 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #define IN_LIBEXSLT</a>
+<span class="lineNum">       2 </span>            : #include &quot;libexslt/libexslt.h&quot;
+<span class="lineNum">       3 </span>            : 
+<span class="lineNum">       4 </span>            : #if defined(WIN32) &amp;&amp; !defined (__CYGWIN__) &amp;&amp; (!__MINGW32__)
+<span class="lineNum">       5 </span>            : #include &lt;win32config.h&gt;
+<span class="lineNum">       6 </span>            : #else
+<span class="lineNum">       7 </span>            : #include &quot;config.h&quot;
+<span class="lineNum">       8 </span>            : #endif
+<span class="lineNum">       9 </span>            : 
+<span class="lineNum">      10 </span>            : #include &lt;libxml/tree.h&gt;
+<span class="lineNum">      11 </span>            : #include &lt;libxml/xpath.h&gt;
+<span class="lineNum">      12 </span>            : #include &lt;libxml/xpathInternals.h&gt;
+<span class="lineNum">      13 </span>            : #include &lt;libxml/parser.h&gt;
+<span class="lineNum">      14 </span>            : #include &lt;libxml/hash.h&gt;
+<span class="lineNum">      15 </span>            : 
+<span class="lineNum">      16 </span>            : #include &lt;libxslt/xsltconfig.h&gt;
+<span class="lineNum">      17 </span>            : #include &lt;libxslt/xsltutils.h&gt;
+<span class="lineNum">      18 </span>            : #include &lt;libxslt/xsltInternals.h&gt;
+<span class="lineNum">      19 </span>            : #include &lt;libxslt/extensions.h&gt;
+<span class="lineNum">      20 </span>            : 
+<span class="lineNum">      21 </span>            : #include &quot;exslt.h&quot;
+<span class="lineNum">      22 </span>            : 
+<span class="lineNum">      23 </span>            : /**
+<span class="lineNum">      24 </span>            :  * exsltSaxonInit:
+<span class="lineNum">      25 </span>            :  * @ctxt: an XSLT transformation context
+<span class="lineNum">      26 </span>            :  * @URI: the namespace URI for the extension
+<span class="lineNum">      27 </span>            :  *
+<span class="lineNum">      28 </span>            :  * Initializes the SAXON module.
+<span class="lineNum">      29 </span>            :  *
+<span class="lineNum">      30 </span>            :  * Returns the data for this transformation
+<a name="31"><span class="lineNum">      31 </span>            :  */</a>
+<span class="lineNum">      32 </span>            : static xmlHashTablePtr
+<span class="lineNum">      33 </span><span class="lineNoCov">          0 : exsltSaxonInit (xsltTransformContextPtr ctxt ATTRIBUTE_UNUSED,</span>
+<span class="lineNum">      34 </span>            :                 const xmlChar *URI ATTRIBUTE_UNUSED) {
+<span class="lineNum">      35 </span><span class="lineNoCov">          0 :     return xmlHashCreate(1);</span>
+<span class="lineNum">      36 </span>            : }
+<span class="lineNum">      37 </span>            : 
+<span class="lineNum">      38 </span>            : /**
+<span class="lineNum">      39 </span>            :  * exsltSaxonShutdown:
+<span class="lineNum">      40 </span>            :  * @ctxt: an XSLT transformation context
+<span class="lineNum">      41 </span>            :  * @URI: the namespace URI for the extension
+<span class="lineNum">      42 </span>            :  * @data: the module data to free up
+<span class="lineNum">      43 </span>            :  *
+<span class="lineNum">      44 </span>            :  * Shutdown the SAXON extension module
+<a name="45"><span class="lineNum">      45 </span>            :  */</a>
+<span class="lineNum">      46 </span>            : static void
+<span class="lineNum">      47 </span><span class="lineNoCov">          0 : exsltSaxonShutdown (xsltTransformContextPtr ctxt ATTRIBUTE_UNUSED,</span>
+<span class="lineNum">      48 </span>            :                     const xmlChar *URI ATTRIBUTE_UNUSED,
+<span class="lineNum">      49 </span>            :                     xmlHashTablePtr data) {
+<span class="lineNum">      50 </span><span class="lineNoCov">          0 :     xmlHashFree(data, (xmlHashDeallocator) xmlXPathFreeCompExpr);</span>
+<span class="lineNum">      51 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">      52 </span>            : 
+<span class="lineNum">      53 </span>            : 
+<span class="lineNum">      54 </span>            : /**
+<span class="lineNum">      55 </span>            :  * exsltSaxonExpressionFunction:
+<span class="lineNum">      56 </span>            :  * @ctxt: an XPath parser context
+<span class="lineNum">      57 </span>            :  * @nargs: the number of arguments
+<span class="lineNum">      58 </span>            :  *
+<span class="lineNum">      59 </span>            :  * The supplied string must contain an XPath expression. The result of
+<span class="lineNum">      60 </span>            :  * the function is a stored expression, which may be supplied as an
+<span class="lineNum">      61 </span>            :  * argument to other extension functions such as saxon:eval(),
+<span class="lineNum">      62 </span>            :  * saxon:sum() and saxon:distinct(). The result of the expression will
+<span class="lineNum">      63 </span>            :  * usually depend on the current node. The expression may contain
+<span class="lineNum">      64 </span>            :  * references to variables that are in scope at the point where
+<span class="lineNum">      65 </span>            :  * saxon:expression() is called: these variables will be replaced in
+<span class="lineNum">      66 </span>            :  * the stored expression with the values they take at the time
+<span class="lineNum">      67 </span>            :  * saxon:expression() is called, not the values of the variables at
+<span class="lineNum">      68 </span>            :  * the time the stored expression is evaluated.  Similarly, if the
+<span class="lineNum">      69 </span>            :  * expression contains namespace prefixes, these are interpreted in
+<span class="lineNum">      70 </span>            :  * terms of the namespace declarations in scope at the point where the
+<span class="lineNum">      71 </span>            :  * saxon:expression() function is called, not those in scope where the
+<span class="lineNum">      72 </span>            :  * stored expression is evaluated.
+<span class="lineNum">      73 </span>            :  *
+<span class="lineNum">      74 </span>            :  * TODO: current implementation doesn't conform to SAXON behaviour
+<span class="lineNum">      75 </span>            :  * regarding context and namespaces.
+<a name="76"><span class="lineNum">      76 </span>            :  */</a>
+<span class="lineNum">      77 </span>            : static void
+<span class="lineNum">      78 </span><span class="lineNoCov">          0 : exsltSaxonExpressionFunction (xmlXPathParserContextPtr ctxt, int nargs) {</span>
+<span class="lineNum">      79 </span>            :     xmlChar *arg;
+<span class="lineNum">      80 </span>            :     xmlXPathCompExprPtr ret;
+<span class="lineNum">      81 </span>            :     xmlHashTablePtr hash;
+<span class="lineNum">      82 </span><span class="lineNoCov">          0 :     xsltTransformContextPtr tctxt = xsltXPathGetTransformContext(ctxt);</span>
+<span class="lineNum">      83 </span>            : 
+<span class="lineNum">      84 </span><span class="lineNoCov">          0 :     if (nargs != 1) {</span>
+<span class="lineNum">      85 </span><span class="lineNoCov">          0 :         xmlXPathSetArityError(ctxt);</span>
+<span class="lineNum">      86 </span>            :         return;
+<span class="lineNum">      87 </span>            :     }
+<span class="lineNum">      88 </span>            : 
+<span class="lineNum">      89 </span><span class="lineNoCov">          0 :     arg = xmlXPathPopString(ctxt);</span>
+<span class="lineNum">      90 </span><span class="lineNoCov">          0 :     if (xmlXPathCheckError(ctxt) || (arg == NULL)) {</span>
+<span class="lineNum">      91 </span><span class="lineNoCov">          0 :         xmlXPathSetTypeError(ctxt);</span>
+<span class="lineNum">      92 </span>            :         return;
+<span class="lineNum">      93 </span>            :     }
+<span class="lineNum">      94 </span>            : 
+<span class="lineNum">      95 </span><span class="lineNoCov">          0 :     hash = (xmlHashTablePtr) xsltGetExtData(tctxt,</span>
+<span class="lineNum">      96 </span><span class="lineNoCov">          0 :                                             ctxt-&gt;context-&gt;functionURI);</span>
+<span class="lineNum">      97 </span>            : 
+<span class="lineNum">      98 </span><span class="lineNoCov">          0 :     ret = xmlHashLookup(hash, arg);</span>
+<span class="lineNum">      99 </span>            : 
+<span class="lineNum">     100 </span><span class="lineNoCov">          0 :     if (ret == NULL) {</span>
+<span class="lineNum">     101 </span><span class="lineNoCov">          0 :          ret = xmlXPathCompile(arg);</span>
+<span class="lineNum">     102 </span><span class="lineNoCov">          0 :          if (ret == NULL) {</span>
+<span class="lineNum">     103 </span><span class="lineNoCov">          0 :               xmlFree(arg);</span>
+<span class="lineNum">     104 </span><span class="lineNoCov">          0 :               xmlXPathSetError(ctxt, XPATH_EXPR_ERROR);</span>
+<span class="lineNum">     105 </span>            :               return;
+<span class="lineNum">     106 </span>            :          }
+<span class="lineNum">     107 </span><span class="lineNoCov">          0 :          xmlHashAddEntry(hash, arg, (void *) ret);</span>
+<span class="lineNum">     108 </span>            :     }
+<span class="lineNum">     109 </span>            : 
+<span class="lineNum">     110 </span><span class="lineNoCov">          0 :     xmlFree(arg);</span>
+<span class="lineNum">     111 </span>            : 
+<span class="lineNum">     112 </span><span class="lineNoCov">          0 :     xmlXPathReturnExternal(ctxt, ret);</span>
+<span class="lineNum">     113 </span>            : }
+<span class="lineNum">     114 </span>            : 
+<span class="lineNum">     115 </span>            : /**
+<span class="lineNum">     116 </span>            :  * exsltSaxonEvalFunction:
+<span class="lineNum">     117 </span>            :  * @ctxt:  an XPath parser context
+<span class="lineNum">     118 </span>            :  * @nargs:  number of arguments
+<span class="lineNum">     119 </span>            :  *
+<span class="lineNum">     120 </span>            :  * Implements de SAXON eval() function:
+<span class="lineNum">     121 </span>            :  *    object saxon:eval (saxon:stored-expression)
+<span class="lineNum">     122 </span>            :  * Returns the result of evaluating the supplied stored expression.
+<span class="lineNum">     123 </span>            :  * A stored expression may be obtained as the result of calling
+<span class="lineNum">     124 </span>            :  * the saxon:expression() function.
+<span class="lineNum">     125 </span>            :  * The stored expression is evaluated in the current context, that
+<span class="lineNum">     126 </span>            :  * is, the context node is the current node, and the context position
+<span class="lineNum">     127 </span>            :  * and context size are the same as the result of calling position()
+<span class="lineNum">     128 </span>            :  * or last() respectively.
+<a name="129"><span class="lineNum">     129 </span>            :  */</a>
+<span class="lineNum">     130 </span>            : static void
+<span class="lineNum">     131 </span><span class="lineNoCov">          0 : exsltSaxonEvalFunction (xmlXPathParserContextPtr ctxt, int nargs) {</span>
+<span class="lineNum">     132 </span>            :      xmlXPathCompExprPtr expr;
+<span class="lineNum">     133 </span>            :      xmlXPathObjectPtr ret;
+<span class="lineNum">     134 </span>            : 
+<span class="lineNum">     135 </span><span class="lineNoCov">          0 :      if (nargs != 1) {</span>
+<span class="lineNum">     136 </span><span class="lineNoCov">          0 :           xmlXPathSetArityError(ctxt);</span>
+<span class="lineNum">     137 </span>            :           return;
+<span class="lineNum">     138 </span>            :      }
+<span class="lineNum">     139 </span>            : 
+<span class="lineNum">     140 </span><span class="lineNoCov">          0 :      if (!xmlXPathStackIsExternal(ctxt)) {</span>
+<span class="lineNum">     141 </span><span class="lineNoCov">          0 :           xmlXPathSetTypeError(ctxt);</span>
+<span class="lineNum">     142 </span>            :           return;
+<span class="lineNum">     143 </span>            :      }
+<span class="lineNum">     144 </span>            : 
+<span class="lineNum">     145 </span><span class="lineNoCov">          0 :      expr = (xmlXPathCompExprPtr) xmlXPathPopExternal(ctxt);</span>
+<span class="lineNum">     146 </span>            : 
+<span class="lineNum">     147 </span><span class="lineNoCov">          0 :      ret = xmlXPathCompiledEval(expr, ctxt-&gt;context);</span>
+<span class="lineNum">     148 </span><span class="lineNoCov">          0 :      if (ret == NULL) {</span>
+<span class="lineNum">     149 </span><span class="lineNoCov">          0 :           xmlXPathSetError(ctxt, XPATH_EXPR_ERROR);</span>
+<span class="lineNum">     150 </span>            :           return;
+<span class="lineNum">     151 </span>            :      }
+<span class="lineNum">     152 </span>            : 
+<span class="lineNum">     153 </span><span class="lineNoCov">          0 :      valuePush(ctxt, ret);</span>
+<span class="lineNum">     154 </span>            : }
+<span class="lineNum">     155 </span>            : 
+<span class="lineNum">     156 </span>            : /**
+<span class="lineNum">     157 </span>            :  * exsltSaxonEvaluateFunction:
+<span class="lineNum">     158 </span>            :  * @ctxt:  an XPath parser context
+<span class="lineNum">     159 </span>            :  * @nargs: number of arguments
+<span class="lineNum">     160 </span>            :  *
+<span class="lineNum">     161 </span>            :  * Implements the SAXON evaluate() function
+<span class="lineNum">     162 </span>            :  *     object saxon:evaluate (string)
+<span class="lineNum">     163 </span>            :  * The supplied string must contain an XPath expression. The result of
+<span class="lineNum">     164 </span>            :  * the function is the result of evaluating the XPath expression. This
+<span class="lineNum">     165 </span>            :  * is useful where an expression needs to be constructed at run-time or
+<span class="lineNum">     166 </span>            :  * passed to the stylesheet as a parameter, for example where the sort
+<span class="lineNum">     167 </span>            :  * key is determined dynamically. The context for the expression (e.g.
+<span class="lineNum">     168 </span>            :  * which variables and namespaces are available) is exactly the same as
+<span class="lineNum">     169 </span>            :  * if the expression were written explicitly at this point in the
+<span class="lineNum">     170 </span>            :  * stylesheet. The function saxon:evaluate(string) is shorthand for
+<span class="lineNum">     171 </span>            :  * saxon:eval(saxon:expression(string)).
+<a name="172"><span class="lineNum">     172 </span>            :  */</a>
+<span class="lineNum">     173 </span>            : static void
+<span class="lineNum">     174 </span><span class="lineNoCov">          0 : exsltSaxonEvaluateFunction (xmlXPathParserContextPtr ctxt, int nargs) {</span>
+<span class="lineNum">     175 </span><span class="lineNoCov">          0 :      if (nargs != 1) {</span>
+<span class="lineNum">     176 </span><span class="lineNoCov">          0 :           xmlXPathSetArityError(ctxt);</span>
+<span class="lineNum">     177 </span><span class="lineNoCov">          0 :           return;</span>
+<span class="lineNum">     178 </span>            :      }
+<span class="lineNum">     179 </span>            : 
+<span class="lineNum">     180 </span><span class="lineNoCov">          0 :      exsltSaxonExpressionFunction(ctxt, 1);</span>
+<span class="lineNum">     181 </span><span class="lineNoCov">          0 :      exsltSaxonEvalFunction(ctxt, 1);</span>
+<span class="lineNum">     182 </span>            : }
+<span class="lineNum">     183 </span>            : 
+<span class="lineNum">     184 </span>            : /**
+<span class="lineNum">     185 </span>            :  * exsltSaxonSystemIdFunction:
+<span class="lineNum">     186 </span>            :  * @ctxt:  an XPath parser context
+<span class="lineNum">     187 </span>            :  * @nargs: number of arguments
+<span class="lineNum">     188 </span>            :  *
+<span class="lineNum">     189 </span>            :  * Implements the SAXON systemId() function
+<span class="lineNum">     190 </span>            :  *     string saxon:systemId ()
+<span class="lineNum">     191 </span>            :  * This function returns the system ID of the document being styled.
+<a name="192"><span class="lineNum">     192 </span>            :  */</a>
+<span class="lineNum">     193 </span>            : static void
+<span class="lineNum">     194 </span><span class="lineNoCov">          0 : exsltSaxonSystemIdFunction(xmlXPathParserContextPtr ctxt, int nargs)</span>
+<span class="lineNum">     195 </span>            : {
+<span class="lineNum">     196 </span><span class="lineNoCov">          0 :     if (ctxt == NULL)</span>
+<span class="lineNum">     197 </span>            :         return;
+<span class="lineNum">     198 </span><span class="lineNoCov">          0 :     if (nargs != 0) {</span>
+<span class="lineNum">     199 </span><span class="lineNoCov">          0 :         xmlXPathSetArityError(ctxt);</span>
+<span class="lineNum">     200 </span>            :         return;
+<span class="lineNum">     201 </span>            :     }
+<span class="lineNum">     202 </span>            : 
+<span class="lineNum">     203 </span><span class="lineNoCov">          0 :     if ((ctxt-&gt;context) &amp;&amp; (ctxt-&gt;context-&gt;doc) &amp;&amp;</span>
+<span class="lineNum">     204 </span><span class="lineNoCov">          0 :         (ctxt-&gt;context-&gt;doc-&gt;URL))</span>
+<span class="lineNum">     205 </span><span class="lineNoCov">          0 :         valuePush(ctxt, xmlXPathNewString(ctxt-&gt;context-&gt;doc-&gt;URL));</span>
+<span class="lineNum">     206 </span>            :     else
+<span class="lineNum">     207 </span><span class="lineNoCov">          0 :         valuePush(ctxt, xmlXPathNewString(BAD_CAST &quot;&quot;));</span>
+<span class="lineNum">     208 </span>            : }
+<span class="lineNum">     209 </span>            : 
+<span class="lineNum">     210 </span>            : /**
+<span class="lineNum">     211 </span>            :  * exsltSaxonLineNumberFunction:
+<span class="lineNum">     212 </span>            :  * @ctxt:  an XPath parser context
+<span class="lineNum">     213 </span>            :  * @nargs: number of arguments
+<span class="lineNum">     214 </span>            :  *
+<span class="lineNum">     215 </span>            :  * Implements the SAXON line-number() function
+<span class="lineNum">     216 </span>            :  *     integer saxon:line-number()
+<span class="lineNum">     217 </span>            :  *
+<span class="lineNum">     218 </span>            :  * This returns the line number of the context node in the source document
+<span class="lineNum">     219 </span>            :  * within the entity that contains it. There are no arguments. If line numbers
+<span class="lineNum">     220 </span>            :  * are not maintained for the current document, the function returns -1. (To
+<span class="lineNum">     221 </span>            :  * ensure that line numbers are maintained, use the -l option on the command
+<span class="lineNum">     222 </span>            :  * line)
+<span class="lineNum">     223 </span>            :  *
+<span class="lineNum">     224 </span>            :  * The extension has been extended to have the following form:
+<span class="lineNum">     225 </span>            :  *     integer saxon:line-number([node-set-1])
+<span class="lineNum">     226 </span>            :  * If a node-set is given, this extension will return the line number of the
+<span class="lineNum">     227 </span>            :  * node in the argument node-set that is first in document order.
+<a name="228"><span class="lineNum">     228 </span>            :  */</a>
+<span class="lineNum">     229 </span>            : static void
+<span class="lineNum">     230 </span><span class="lineNoCov">          0 : exsltSaxonLineNumberFunction(xmlXPathParserContextPtr ctxt, int nargs) {</span>
+<span class="lineNum">     231 </span><span class="lineNoCov">          0 :     xmlNodePtr cur = NULL;</span>
+<span class="lineNum">     232 </span><span class="lineNoCov">          0 :     xmlXPathObjectPtr obj = NULL;</span>
+<span class="lineNum">     233 </span><span class="lineNoCov">          0 :     long lineNo = -1;</span>
+<span class="lineNum">     234 </span>            : 
+<span class="lineNum">     235 </span><span class="lineNoCov">          0 :     if (nargs == 0) {</span>
+<span class="lineNum">     236 </span><span class="lineNoCov">          0 :         cur = ctxt-&gt;context-&gt;node;</span>
+<span class="lineNum">     237 </span><span class="lineNoCov">          0 :     } else if (nargs == 1) {</span>
+<span class="lineNum">     238 </span>            :         xmlNodeSetPtr nodelist;
+<span class="lineNum">     239 </span>            :         int i;
+<span class="lineNum">     240 </span>            : 
+<span class="lineNum">     241 </span><span class="lineNoCov">          0 :         if ((ctxt-&gt;value == NULL) || (ctxt-&gt;value-&gt;type != XPATH_NODESET)) {</span>
+<span class="lineNum">     242 </span><span class="lineNoCov">          0 :             xsltTransformError(xsltXPathGetTransformContext(ctxt), NULL, NULL,</span>
+<span class="lineNum">     243 </span>            :                 &quot;saxon:line-number() : invalid arg expecting a node-set\n&quot;);
+<span class="lineNum">     244 </span><span class="lineNoCov">          0 :             ctxt-&gt;error = XPATH_INVALID_TYPE;</span>
+<span class="lineNum">     245 </span><span class="lineNoCov">          0 :             return;</span>
+<span class="lineNum">     246 </span>            :         }
+<span class="lineNum">     247 </span>            : 
+<span class="lineNum">     248 </span><span class="lineNoCov">          0 :         obj = valuePop(ctxt);</span>
+<span class="lineNum">     249 </span><span class="lineNoCov">          0 :         nodelist = obj-&gt;nodesetval;</span>
+<span class="lineNum">     250 </span><span class="lineNoCov">          0 :         if ((nodelist != NULL) &amp;&amp; (nodelist-&gt;nodeNr &gt; 0)) {</span>
+<span class="lineNum">     251 </span><span class="lineNoCov">          0 :             cur = nodelist-&gt;nodeTab[0];</span>
+<span class="lineNum">     252 </span><span class="lineNoCov">          0 :             for (i = 1;i &lt; nodelist-&gt;nodeNr;i++) {</span>
+<span class="lineNum">     253 </span><span class="lineNoCov">          0 :                 int ret = xmlXPathCmpNodes(cur, nodelist-&gt;nodeTab[i]);</span>
+<span class="lineNum">     254 </span><span class="lineNoCov">          0 :                 if (ret == -1)</span>
+<span class="lineNum">     255 </span><span class="lineNoCov">          0 :                     cur = nodelist-&gt;nodeTab[i];</span>
+<span class="lineNum">     256 </span>            :             }
+<span class="lineNum">     257 </span>            :         }
+<span class="lineNum">     258 </span>            :     } else {
+<span class="lineNum">     259 </span><span class="lineNoCov">          0 :         xsltTransformError(xsltXPathGetTransformContext(ctxt), NULL, NULL,</span>
+<span class="lineNum">     260 </span>            :                 &quot;saxon:line-number() : invalid number of args %d\n&quot;,
+<span class="lineNum">     261 </span>            :                 nargs);
+<span class="lineNum">     262 </span><span class="lineNoCov">          0 :         ctxt-&gt;error = XPATH_INVALID_ARITY;</span>
+<span class="lineNum">     263 </span><span class="lineNoCov">          0 :         return;</span>
+<span class="lineNum">     264 </span>            :     }
+<span class="lineNum">     265 </span>            : 
+<span class="lineNum">     266 </span><span class="lineNoCov">          0 :     if ((cur != NULL) &amp;&amp; (cur-&gt;type == XML_NAMESPACE_DECL)) {</span>
+<span class="lineNum">     267 </span>            :         /*
+<span class="lineNum">     268 </span>            :         * The XPath module sets the owner element of a ns-node on
+<span class="lineNum">     269 </span>            :         * the ns-&gt;next field.
+<span class="lineNum">     270 </span>            :         */
+<span class="lineNum">     271 </span><span class="lineNoCov">          0 :         cur = (xmlNodePtr) ((xmlNsPtr) cur)-&gt;next;</span>
+<span class="lineNum">     272 </span><span class="lineNoCov">          0 :         if (cur == NULL || cur-&gt;type != XML_ELEMENT_NODE) {</span>
+<span class="lineNum">     273 </span><span class="lineNoCov">          0 :             xsltGenericError(xsltGenericErrorContext,</span>
+<span class="lineNum">     274 </span>            :                 &quot;Internal error in exsltSaxonLineNumberFunction: &quot;
+<span class="lineNum">     275 </span>            :                 &quot;Cannot retrieve the doc of a namespace node.\n&quot;);
+<span class="lineNum">     276 </span><span class="lineNoCov">          0 :             cur = NULL;</span>
+<span class="lineNum">     277 </span>            :         }
+<span class="lineNum">     278 </span>            :     }
+<span class="lineNum">     279 </span>            : 
+<span class="lineNum">     280 </span><span class="lineNoCov">          0 :     if (cur != NULL)</span>
+<span class="lineNum">     281 </span><span class="lineNoCov">          0 :         lineNo = xmlGetLineNo(cur);</span>
+<span class="lineNum">     282 </span>            : 
+<span class="lineNum">     283 </span><span class="lineNoCov">          0 :     valuePush(ctxt, xmlXPathNewFloat(lineNo));</span>
+<span class="lineNum">     284 </span>            : 
+<span class="lineNum">     285 </span><span class="lineNoCov">          0 :     xmlXPathFreeObject(obj);</span>
+<span class="lineNum">     286 </span>            : }
+<span class="lineNum">     287 </span>            : 
+<span class="lineNum">     288 </span>            : /**
+<span class="lineNum">     289 </span>            :  * exsltSaxonRegister:
+<span class="lineNum">     290 </span>            :  *
+<span class="lineNum">     291 </span>            :  * Registers the SAXON extension module
+<a name="292"><span class="lineNum">     292 </span>            :  */</a>
+<span class="lineNum">     293 </span>            : void
+<span class="lineNum">     294 </span><span class="lineCov">       5527 : exsltSaxonRegister (void) {</span>
+<span class="lineNum">     295 </span><span class="lineCov">       5527 :      xsltRegisterExtModule (SAXON_NAMESPACE,</span>
+<span class="lineNum">     296 </span>            :                             (xsltExtInitFunction) exsltSaxonInit,
+<span class="lineNum">     297 </span>            :                             (xsltExtShutdownFunction) exsltSaxonShutdown);
+<span class="lineNum">     298 </span><span class="lineCov">       5527 :      xsltRegisterExtModuleFunction((const xmlChar *) &quot;expression&quot;,</span>
+<span class="lineNum">     299 </span>            :                                    SAXON_NAMESPACE,
+<span class="lineNum">     300 </span>            :                                    exsltSaxonExpressionFunction);
+<span class="lineNum">     301 </span><span class="lineCov">       5527 :      xsltRegisterExtModuleFunction((const xmlChar *) &quot;eval&quot;,</span>
+<span class="lineNum">     302 </span>            :                                    SAXON_NAMESPACE,
+<span class="lineNum">     303 </span>            :                                    exsltSaxonEvalFunction);
+<span class="lineNum">     304 </span><span class="lineCov">       5527 :      xsltRegisterExtModuleFunction((const xmlChar *) &quot;evaluate&quot;,</span>
+<span class="lineNum">     305 </span>            :                                    SAXON_NAMESPACE,
+<span class="lineNum">     306 </span>            :                                    exsltSaxonEvaluateFunction);
+<span class="lineNum">     307 </span><span class="lineCov">       5527 :     xsltRegisterExtModuleFunction ((const xmlChar *) &quot;line-number&quot;,</span>
+<span class="lineNum">     308 </span>            :                                    SAXON_NAMESPACE,
+<span class="lineNum">     309 </span>            :                                    exsltSaxonLineNumberFunction);
+<span class="lineNum">     310 </span><span class="lineCov">       5527 :     xsltRegisterExtModuleFunction ((const xmlChar *) &quot;systemId&quot;,</span>
+<span class="lineNum">     311 </span>            :                                    SAXON_NAMESPACE,
+<span class="lineNum">     312 </span>            :                                    exsltSaxonSystemIdFunction);
+<span class="lineNum">     313 </span><span class="lineCov">       5527 : }</span>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

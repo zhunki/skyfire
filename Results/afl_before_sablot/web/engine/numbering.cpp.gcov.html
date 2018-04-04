@@ -1,0 +1,526 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - engine/numbering.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">engine</a> - numbering.cpp<span style="font-size: 80%;"> (source / <a href="numbering.cpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">184</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-10-13</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">13</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* </a>
+<span class="lineNum">       2 </span>            :  * The contents of this file are subject to the Mozilla Public
+<span class="lineNum">       3 </span>            :  * License Version 1.1 (the &quot;License&quot;); you may not use this file
+<span class="lineNum">       4 </span>            :  * except in compliance with the License. You may obtain a copy of
+<span class="lineNum">       5 </span>            :  * the License at http://www.mozilla.org/MPL/
+<span class="lineNum">       6 </span>            :  * 
+<span class="lineNum">       7 </span>            :  * Software distributed under the License is distributed on an &quot;AS
+<span class="lineNum">       8 </span>            :  * IS&quot; basis, WITHOUT WARRANTY OF ANY KIND, either express or
+<span class="lineNum">       9 </span>            :  * implied. See the License for the specific language governing
+<span class="lineNum">      10 </span>            :  * rights and limitations under the License.
+<span class="lineNum">      11 </span>            :  * 
+<span class="lineNum">      12 </span>            :  * The Original Code is the Sablotron XSLT Processor.
+<span class="lineNum">      13 </span>            :  * 
+<span class="lineNum">      14 </span>            :  * The Initial Developer of the Original Code is Ginger Alliance Ltd.
+<span class="lineNum">      15 </span>            :  * Portions created by Ginger Alliance are Copyright (C) 2000-2002
+<span class="lineNum">      16 </span>            :  * Ginger Alliance Ltd. All Rights Reserved.
+<span class="lineNum">      17 </span>            :  * 
+<span class="lineNum">      18 </span>            :  * Contributor(s):
+<span class="lineNum">      19 </span>            :  * 
+<span class="lineNum">      20 </span>            :  * Alternatively, the contents of this file may be used under the
+<span class="lineNum">      21 </span>            :  * terms of the GNU General Public License Version 2 or later (the
+<span class="lineNum">      22 </span>            :  * &quot;GPL&quot;), in which case the provisions of the GPL are applicable 
+<span class="lineNum">      23 </span>            :  * instead of those above.  If you wish to allow use of your 
+<span class="lineNum">      24 </span>            :  * version of this file only under the terms of the GPL and not to
+<span class="lineNum">      25 </span>            :  * allow others to use your version of this file under the MPL,
+<span class="lineNum">      26 </span>            :  * indicate your decision by deleting the provisions above and
+<span class="lineNum">      27 </span>            :  * replace them with the notice and other provisions required by
+<span class="lineNum">      28 </span>            :  * the GPL.  If you do not delete the provisions above, a recipient
+<span class="lineNum">      29 </span>            :  * may use your version of this file under either the MPL or the
+<span class="lineNum">      30 </span>            :  * GPL.
+<span class="lineNum">      31 </span>            :  */
+<span class="lineNum">      32 </span>            : 
+<span class="lineNum">      33 </span>            : #include &quot;numbering.h&quot;
+<span class="lineNum">      34 </span>            : #include &quot;verts.h&quot;
+<span class="lineNum">      35 </span>            : #include &quot;expr.h&quot;
+<span class="lineNum">      36 </span>            : #include &quot;context.h&quot;
+<a name="37"><span class="lineNum">      37 </span>            : #include &quot;domprovider.h&quot;</a>
+<span class="lineNum">      38 </span>            : 
+<span class="lineNum">      39 </span><span class="lineNoCov">          0 : Bool cmpNames(Sit S, NodeHandle v, NodeHandle w)</span>
+<span class="lineNum">      40 </span>            : {
+<span class="lineNum">      41 </span><span class="lineNoCov">          0 :   int ret = 0;</span>
+<span class="lineNum">      42 </span>            :   const char *aux1, *aux2;
+<span class="lineNum">      43 </span><span class="lineNoCov">          0 :   aux1 = S.dom().getNodeNameLocal(v);</span>
+<span class="lineNum">      44 </span><span class="lineNoCov">          0 :   aux2 = S.dom().getNodeNameLocal(w);</span>
+<span class="lineNum">      45 </span><span class="lineNoCov">          0 :   ret = strcmp(aux1, aux2);</span>
+<span class="lineNum">      46 </span><span class="lineNoCov">          0 :   S.dom().freeName(v, (char*)aux1);</span>
+<span class="lineNum">      47 </span><span class="lineNoCov">          0 :   S.dom().freeName(w, (char*)aux2);</span>
+<span class="lineNum">      48 </span><span class="lineNoCov">          0 :   if (!ret) </span>
+<span class="lineNum">      49 </span>            :     {
+<span class="lineNum">      50 </span><span class="lineNoCov">          0 :       aux1 = S.dom().getNodeNameURI(v);</span>
+<span class="lineNum">      51 </span><span class="lineNoCov">          0 :       aux2 = S.dom().getNodeNameURI(w);</span>
+<span class="lineNum">      52 </span><span class="lineNoCov">          0 :       ret = strcmp(aux1, aux2);</span>
+<span class="lineNum">      53 </span><span class="lineNoCov">          0 :       S.dom().freeName(v, (char*)aux1);</span>
+<span class="lineNum">      54 </span><span class="lineNoCov">          0 :       S.dom().freeName(w, (char*)aux2);</span>
+<span class="lineNum">      55 </span>            :     }
+<span class="lineNum">      56 </span><span class="lineNoCov">          0 :   return ret;</span>
+<a name="57"><span class="lineNum">      57 </span>            : }</a>
+<span class="lineNum">      58 </span>            : 
+<span class="lineNum">      59 </span><span class="lineNoCov">          0 : Bool similarVerts(Sit S, NodeHandle v, NodeHandle w)</span>
+<span class="lineNum">      60 </span>            : {
+<span class="lineNum">      61 </span>            :   //some optimalization for native node may be done (compare QNames)
+<span class="lineNum">      62 </span><span class="lineNoCov">          0 :   sabassert(!nhNull(v) &amp;&amp; !nhNull(w));</span>
+<span class="lineNum">      63 </span><span class="lineNoCov">          0 :   SXP_NodeType typeV = S.dom().getNodeType(v);</span>
+<span class="lineNum">      64 </span>            :   // vertices of different types don't match
+<span class="lineNum">      65 </span><span class="lineNoCov">          0 :   if (typeV != S.dom().getNodeType(w) )</span>
+<span class="lineNum">      66 </span>            :     return FALSE;
+<span class="lineNum">      67 </span>            :   //test similarity
+<span class="lineNum">      68 </span><span class="lineNoCov">          0 :   switch(typeV)</span>
+<span class="lineNum">      69 </span>            :     {
+<span class="lineNum">      70 </span>            :     case DOCUMENT_NODE:
+<span class="lineNum">      71 </span>            :     case TEXT_NODE:
+<span class="lineNum">      72 </span>            :     case COMMENT_NODE:
+<span class="lineNum">      73 </span>            :       // no expanded name, they match
+<span class="lineNum">      74 </span>            :       return TRUE;
+<span class="lineNum">      75 </span>            :     case ELEMENT_NODE:
+<span class="lineNum">      76 </span>            :       //return toE(v) -&gt; getName() == toE(w) -&gt; getName();
+<span class="lineNum">      77 </span>            :     case NAMESPACE_NODE:
+<span class="lineNum">      78 </span>            :       //return toNS(v) -&gt; getName() == toNS(w) -&gt; getName();
+<span class="lineNum">      79 </span>            :     case ATTRIBUTE_NODE:
+<span class="lineNum">      80 </span>            :       //return toA(v) -&gt; getName() == toA(w) -&gt; getName();
+<span class="lineNum">      81 </span>            :     case PROCESSING_INSTRUCTION_NODE:
+<span class="lineNum">      82 </span>            :       //return toPI(v) -&gt; getName() == toPI(w) -&gt; getName();
+<span class="lineNum">      83 </span><span class="lineNoCov">          0 :       return !cmpNames(S, v, w);</span>
+<span class="lineNum">      84 </span>            :     default:
+<span class="lineNum">      85 </span>            :       // do this to keep compiler happy
+<span class="lineNum">      86 </span><span class="lineNoCov">          0 :       return FALSE;</span>
+<span class="lineNum">      87 </span>            :     }
+<a name="88"><span class="lineNum">      88 </span>            : }</a>
+<span class="lineNum">      89 </span>            : 
+<span class="lineNum">      90 </span><span class="lineNoCov">          0 : NodeHandle gotoPreceding(Sit S, NodeHandle v, Bool siblingOnly)</span>
+<span class="lineNum">      91 </span>            : {
+<span class="lineNum">      92 </span><span class="lineNoCov">          0 :     sabassert(v);</span>
+<span class="lineNum">      93 </span><span class="lineNoCov">          0 :     switch(S.dom().getNodeType(v))</span>
+<span class="lineNum">      94 </span>            :     {
+<span class="lineNum">      95 </span>            :     case DOCUMENT_NODE:
+<span class="lineNum">      96 </span>            :     case ATTRIBUTE_NODE:
+<span class="lineNum">      97 </span>            :     case NAMESPACE_NODE:
+<span class="lineNum">      98 </span>            :         // no preceding nodes according to XPath spec
+<span class="lineNum">      99 </span>            :         return NULL;
+<span class="lineNum">     100 </span>            :     default:
+<span class="lineNum">     101 </span>            :       {
+<span class="lineNum">     102 </span><span class="lineNoCov">          0 :         NodeHandle par = S.dom().getParent(v);</span>
+<span class="lineNum">     103 </span>            :         
+<span class="lineNum">     104 </span><span class="lineNoCov">          0 :         if (siblingOnly) </span>
+<span class="lineNum">     105 </span>            :           {
+<span class="lineNum">     106 </span><span class="lineNoCov">          0 :             return S.dom().getPreviousSibling(v);</span>
+<span class="lineNum">     107 </span>            :             //if (v -&gt; ordinal)
+<span class="lineNum">     108 </span>            :             //  return toD(par) -&gt; contents[v -&gt; ordinal - 1];
+<span class="lineNum">     109 </span>            :             //else
+<span class="lineNum">     110 </span>            :             //  return NULL;
+<span class="lineNum">     111 </span>            :           }
+<span class="lineNum">     112 </span>            :         else //preceding and ancestor-or-self union
+<span class="lineNum">     113 </span>            :           {
+<span class="lineNum">     114 </span>            :             //if we have preceding sibling we switch to it and dril
+<span class="lineNum">     115 </span><span class="lineNoCov">          0 :             NodeHandle w = S.dom().getPreviousSibling(v);</span>
+<span class="lineNum">     116 </span><span class="lineNoCov">          0 :             if (!nhNull(w)) </span>
+<span class="lineNum">     117 </span>            :               {
+<span class="lineNum">     118 </span><span class="lineNoCov">          0 :                 for (v = w;</span>
+<span class="lineNum">     119 </span><span class="lineNoCov">          0 :                      !nhNull(v) &amp;&amp; S.dom().getChildCount(v); </span>
+<span class="lineNum">     120 </span><span class="lineNoCov">          0 :                      v = S.dom().getChildNo(v, S.dom().getChildCount(v) - 1));</span>
+<span class="lineNum">     121 </span>            :                 return v;
+<span class="lineNum">     122 </span>            :               }
+<span class="lineNum">     123 </span>            :             else //go to parent
+<span class="lineNum">     124 </span>            :               {
+<span class="lineNum">     125 </span><span class="lineNoCov">          0 :                 return S.dom().getNodeType(par) == DOCUMENT_NODE ? NULL : par;</span>
+<span class="lineNum">     126 </span>            :               }
+<span class="lineNum">     127 </span>            :           }
+<span class="lineNum">     128 </span>            :       }
+<span class="lineNum">     129 </span>            :     }
+<a name="130"><span class="lineNum">     130 </span>            : }</a>
+<span class="lineNum">     131 </span>            : 
+<span class="lineNum">     132 </span><span class="lineNoCov">          0 : eFlag countMatchingSiblings(Sit S, int&amp; num, NodeHandle v, Expression *count)</span>
+<span class="lineNum">     133 </span>            : {
+<span class="lineNum">     134 </span><span class="lineNoCov">          0 :     num = 0;</span>
+<span class="lineNum">     135 </span>            :     NodeHandle w;
+<span class="lineNum">     136 </span>            :     Bool doesMatch;
+<span class="lineNum">     137 </span><span class="lineNoCov">          0 :     Context c(NULL); //_cn_ we're matching a pattern</span>
+<span class="lineNum">     138 </span><span class="lineNoCov">          0 :     for (w = v; !nhNull(w); w = gotoPreceding(S, w, /* siblingOnly = */ TRUE))</span>
+<span class="lineNum">     139 </span>            :     {
+<span class="lineNum">     140 </span><span class="lineNoCov">          0 :         if (count)</span>
+<span class="lineNum">     141 </span>            :         {
+<span class="lineNum">     142 </span><span class="lineNoCov">          0 :             c.deppendall();</span>
+<span class="lineNum">     143 </span><span class="lineNoCov">          0 :             c.set(w);</span>
+<span class="lineNum">     144 </span><span class="lineNoCov">          0 :             E( count -&gt; matchesPattern(S, &amp;c, doesMatch) );</span>
+<span class="lineNum">     145 </span>            :         }
+<span class="lineNum">     146 </span>            :         else
+<span class="lineNum">     147 </span><span class="lineNoCov">          0 :             doesMatch = similarVerts(S, v, w);</span>
+<span class="lineNum">     148 </span><span class="lineNoCov">          0 :         if (doesMatch)</span>
+<span class="lineNum">     149 </span><span class="lineNoCov">          0 :             num++;</span>
+<span class="lineNum">     150 </span>            :     }
+<span class="lineNum">     151 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     152 </span>            : }
+<span class="lineNum">     153 </span>            : 
+<span class="lineNum">     154 </span><span class="lineNoCov">          0 : eFlag xslNumberCount(</span>
+<span class="lineNum">     155 </span><span class="lineNoCov">          0 :     Sit S, NumberingLevel level, </span>
+<span class="lineNum">     156 </span>            :     Expression* count, Expression* from, 
+<span class="lineNum">     157 </span>            :     NodeHandle curr, ListInt&amp; result)
+<span class="lineNum">     158 </span>            : {
+<span class="lineNum">     159 </span>            :     result.deppendall();
+<span class="lineNum">     160 </span>            :     int num;
+<span class="lineNum">     161 </span><span class="lineNoCov">          0 :     NodeHandle w = NULL;</span>
+<span class="lineNum">     162 </span>            :     List&lt;NodeHandle&gt; matchingList;
+<span class="lineNum">     163 </span>            :     Bool doesMatch;
+<span class="lineNum">     164 </span><span class="lineNoCov">          0 :     Context c(NULL); //_cn_ we're matching a pattern</span>
+<span class="lineNum">     165 </span>            :     // construct the list of matching ancestors/preceding nodes
+<span class="lineNum">     166 </span><span class="lineNoCov">          0 :     for (w = curr; !nhNull(w); )</span>
+<span class="lineNum">     167 </span>            :     {
+<span class="lineNum">     168 </span><span class="lineNoCov">          0 :         c.deppendall();</span>
+<span class="lineNum">     169 </span><span class="lineNoCov">          0 :         c.set(w);</span>
+<span class="lineNum">     170 </span><span class="lineNoCov">          0 :         if  (from)</span>
+<span class="lineNum">     171 </span>            :         {
+<span class="lineNum">     172 </span><span class="lineNoCov">          0 :             E( from -&gt; matchesPattern(S, &amp;c, doesMatch) );</span>
+<span class="lineNum">     173 </span><span class="lineNoCov">          0 :             if (doesMatch) break; // leave the for loop</span>
+<span class="lineNum">     174 </span>            :         }
+<span class="lineNum">     175 </span><span class="lineNoCov">          0 :         if (count)</span>
+<span class="lineNum">     176 </span><span class="lineNoCov">          0 :             E( count -&gt; matchesPattern(S, &amp;c, doesMatch) )</span>
+<span class="lineNum">     177 </span>            :         else
+<span class="lineNum">     178 </span><span class="lineNoCov">          0 :             doesMatch = similarVerts(S, curr, w);</span>
+<span class="lineNum">     179 </span><span class="lineNoCov">          0 :         if (doesMatch)</span>
+<span class="lineNum">     180 </span>            :         {
+<span class="lineNum">     181 </span><span class="lineNoCov">          0 :             matchingList.append(w);</span>
+<span class="lineNum">     182 </span><span class="lineNoCov">          0 :             if (level == NUM_SINGLE) break; // leave the for loop after finding a match</span>
+<span class="lineNum">     183 </span>            :         }
+<span class="lineNum">     184 </span><span class="lineNoCov">          0 :         if (level == NUM_ANY)</span>
+<span class="lineNum">     185 </span><span class="lineNoCov">          0 :             w = gotoPreceding(S, w, /* siblingOnly = */ FALSE);</span>
+<span class="lineNum">     186 </span>            :         else
+<span class="lineNum">     187 </span><span class="lineNoCov">          0 :             w = S.dom().getParent(w);</span>
+<span class="lineNum">     188 </span>            :     }
+<span class="lineNum">     189 </span>            :     // construct the integer list out of matchingList
+<span class="lineNum">     190 </span><span class="lineNoCov">          0 :     if (level == NUM_ANY)</span>
+<span class="lineNum">     191 </span><span class="lineNoCov">          0 :         result.append(matchingList.number());</span>
+<span class="lineNum">     192 </span>            :     else
+<span class="lineNum">     193 </span><span class="lineNoCov">          0 :         for (int i = matchingList.number() - 1; i &gt;= 0; i--)</span>
+<span class="lineNum">     194 </span>            :         {
+<span class="lineNum">     195 </span><span class="lineNoCov">          0 :             E( countMatchingSiblings(S, num, matchingList[i], count) );</span>
+<span class="lineNum">     196 </span><span class="lineNoCov">          0 :             result.append(num);</span>
+<span class="lineNum">     197 </span>            :         }
+<span class="lineNum">     198 </span>            :     return OK;
+<a name="199"><span class="lineNum">     199 </span>            : }</a>
+<span class="lineNum">     200 </span>            : 
+<span class="lineNum">     201 </span><span class="lineNoCov">          0 : Bool isAlnumFToken(const Str&amp; s)</span>
+<span class="lineNum">     202 </span>            : {
+<span class="lineNum">     203 </span><span class="lineNoCov">          0 :     unsigned long c = utf8CharCode((const char*)s);</span>
+<span class="lineNum">     204 </span><span class="lineNoCov">          0 :     return utf8IsDigit(c) || utf8IsLetter(c);</span>
+<a name="205"><span class="lineNum">     205 </span>            : }</a>
+<span class="lineNum">     206 </span>            : 
+<span class="lineNum">     207 </span><span class="lineNoCov">          0 : Bool getFToken(const char *&amp;p, Str&amp; fmt)</span>
+<span class="lineNum">     208 </span>            : {
+<span class="lineNum">     209 </span><span class="lineNoCov">          0 :     if (!*p)</span>
+<span class="lineNum">     210 </span>            :         return FALSE;
+<span class="lineNum">     211 </span><span class="lineNoCov">          0 :     const char* pOrig = p;</span>
+<span class="lineNum">     212 </span><span class="lineNoCov">          0 :     Bool alnum = isAlnumFToken(p);</span>
+<span class="lineNum">     213 </span><span class="lineNoCov">          0 :     do</span>
+<span class="lineNum">     214 </span><span class="lineNoCov">          0 :         p += utf8SingleCharLength(p);</span>
+<span class="lineNum">     215 </span><span class="lineNoCov">          0 :     while(*p &amp;&amp; isAlnumFToken(p) == alnum);</span>
+<span class="lineNum">     216 </span><span class="lineNoCov">          0 :     fmt.nset(pOrig, (int)(p - pOrig));</span>
+<span class="lineNum">     217 </span><span class="lineNoCov">          0 :     return TRUE;</span>
+<a name="218"><span class="lineNum">     218 </span>            : }</a>
+<span class="lineNum">     219 </span>            : 
+<span class="lineNum">     220 </span><span class="lineNoCov">          0 : void getFTokenParams(const Str&amp; fmt, char&amp; type, int&amp; width)</span>
+<span class="lineNum">     221 </span>            : {
+<span class="lineNum">     222 </span>            :     // defaults:
+<span class="lineNum">     223 </span><span class="lineNoCov">          0 :     type = '1';</span>
+<span class="lineNum">     224 </span><span class="lineNoCov">          0 :     width = 1;</span>
+<span class="lineNum">     225 </span><span class="lineNoCov">          0 :     int len = utf8StrLength(fmt);</span>
+<span class="lineNum">     226 </span><span class="lineNoCov">          0 :     sabassert(len);</span>
+<span class="lineNum">     227 </span><span class="lineNoCov">          0 :     if (len &gt; 1 &amp;&amp; fmt[0] != '0') return; // with default values</span>
+<span class="lineNum">     228 </span><span class="lineNoCov">          0 :     switch(fmt[0])</span>
+<span class="lineNum">     229 </span>            :     {
+<span class="lineNum">     230 </span>            :     case 'A':
+<span class="lineNum">     231 </span>            :     case 'a':
+<span class="lineNum">     232 </span>            :     case 'I':
+<span class="lineNum">     233 </span>            :     case 'i':
+<span class="lineNum">     234 </span>            :     {
+<span class="lineNum">     235 </span><span class="lineNoCov">          0 :         type = fmt[0];</span>
+<span class="lineNum">     236 </span><span class="lineNoCov">          0 :         return;</span>
+<span class="lineNum">     237 </span>            :     }
+<span class="lineNum">     238 </span>            :     case '0':
+<span class="lineNum">     239 </span>            :         break;
+<span class="lineNum">     240 </span>            :     default:
+<span class="lineNum">     241 </span>            :         return;
+<span class="lineNum">     242 </span>            :     }
+<span class="lineNum">     243 </span>            :     // it remains to take care of the '0':
+<span class="lineNum">     244 </span><span class="lineNoCov">          0 :     for (int i = 1; i &lt; len - 1; i++)</span>
+<span class="lineNum">     245 </span><span class="lineNoCov">          0 :         if (fmt[i] != '0') return;</span>
+<span class="lineNum">     246 </span><span class="lineNoCov">          0 :     if (fmt[len - 1] != '1') return;</span>
+<span class="lineNum">     247 </span><span class="lineNoCov">          0 :     width = len;</span>
+<a name="248"><span class="lineNum">     248 </span>            : }</a>
+<span class="lineNum">     249 </span>            : 
+<span class="lineNum">     250 </span><span class="lineNoCov">          0 : void appendABC(int num, Bool uppercase, DStr&amp; result)</span>
+<span class="lineNum">     251 </span>            : {
+<span class="lineNum">     252 </span><span class="lineNoCov">          0 :     DStr reversed;</span>
+<span class="lineNum">     253 </span><span class="lineNoCov">          0 :     do</span>
+<span class="lineNum">     254 </span>            :     {
+<span class="lineNum">     255 </span><span class="lineNoCov">          0 :         num--;</span>
+<span class="lineNum">     256 </span><span class="lineNoCov">          0 :         reversed += (char)((uppercase ? 'A' : 'a') + num % 26);</span>
+<span class="lineNum">     257 </span><span class="lineNoCov">          0 :         num /= 26;</span>
+<span class="lineNum">     258 </span>            :     }
+<span class="lineNum">     259 </span>            :     while (num &gt; 0);
+<span class="lineNum">     260 </span><span class="lineNoCov">          0 :     for (int i = reversed.length() - 1; i &gt;= 0; i--)</span>
+<span class="lineNum">     261 </span><span class="lineNoCov">          0 :         result += reversed[i];</span>
+<span class="lineNum">     262 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">     263 </span>            : 
+<span class="lineNum">     264 </span>            : struct RomanDef
+<span class="lineNum">     265 </span>            : {
+<span class="lineNum">     266 </span>            :     int value;
+<span class="lineNum">     267 </span>            :     char symbol[3];
+<span class="lineNum">     268 </span>            : };
+<span class="lineNum">     269 </span>            : 
+<span class="lineNum">     270 </span>            : RomanDef romans[] =
+<span class="lineNum">     271 </span>            : {
+<span class="lineNum">     272 </span>            :     { 1000, &quot;mM&quot;},
+<span class="lineNum">     273 </span>            :     { 500, &quot;dD&quot;},
+<span class="lineNum">     274 </span>            :     { 100, &quot;cC&quot;},
+<span class="lineNum">     275 </span>            :     { 50, &quot;lL&quot;},
+<span class="lineNum">     276 </span>            :     { 10, &quot;xX&quot;},
+<span class="lineNum">     277 </span>            :     { 5, &quot;vV&quot;},
+<span class="lineNum">     278 </span>            :     { 1, &quot;iI&quot;},
+<span class="lineNum">     279 </span>            :     { 0, &quot;oO&quot;}
+<a name="280"><span class="lineNum">     280 </span>            : };</a>
+<span class="lineNum">     281 </span>            : 
+<span class="lineNum">     282 </span><span class="lineNoCov">          0 : void appendRoman(int num, Bool uppercase, DStr&amp; result)</span>
+<span class="lineNum">     283 </span>            : {
+<span class="lineNum">     284 </span><span class="lineNoCov">          0 :     int step = 0,</span>
+<span class="lineNum">     285 </span>            :         prefix,
+<span class="lineNum">     286 </span>            :         val;
+<span class="lineNum">     287 </span><span class="lineNoCov">          0 :     if (uppercase != 0)</span>
+<span class="lineNum">     288 </span><span class="lineNoCov">          0 :         uppercase = 1;</span>
+<span class="lineNum">     289 </span><span class="lineNoCov">          0 :     while (num &gt; 0)</span>
+<span class="lineNum">     290 </span>            :     {
+<span class="lineNum">     291 </span><span class="lineNoCov">          0 :         if (num &gt;= (val = romans[step].value))</span>
+<span class="lineNum">     292 </span>            :         {
+<span class="lineNum">     293 </span><span class="lineNoCov">          0 :             result += romans[step].symbol[uppercase];</span>
+<span class="lineNum">     294 </span><span class="lineNoCov">          0 :             num -= val;</span>
+<span class="lineNum">     295 </span>            :         }
+<span class="lineNum">     296 </span>            :         else 
+<span class="lineNum">     297 </span>            :         {
+<span class="lineNum">     298 </span><span class="lineNoCov">          0 :             prefix = step + 2 - step % 2;</span>
+<span class="lineNum">     299 </span><span class="lineNoCov">          0 :             if (val &gt; 1 &amp;&amp; num &gt;= (val - romans[prefix].value))</span>
+<span class="lineNum">     300 </span>            :             {
+<span class="lineNum">     301 </span><span class="lineNoCov">          0 :                 result += romans[prefix].symbol[uppercase];</span>
+<span class="lineNum">     302 </span><span class="lineNoCov">          0 :                 result += romans[step].symbol[uppercase];</span>
+<span class="lineNum">     303 </span><span class="lineNoCov">          0 :                 num -= (val - romans[prefix].value);</span>
+<span class="lineNum">     304 </span>            :             }
+<span class="lineNum">     305 </span>            :             else
+<span class="lineNum">     306 </span><span class="lineNoCov">          0 :                 step++;</span>
+<span class="lineNum">     307 </span>            :         }
+<span class="lineNum">     308 </span>            :     }
+<a name="309"><span class="lineNum">     309 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     310 </span>            : 
+<span class="lineNum">     311 </span><span class="lineNoCov">          0 : void appendArabic(</span>
+<span class="lineNum">     312 </span>            :     int num, int width, 
+<span class="lineNum">     313 </span>            :     const Str&amp; groupingSep, int groupingSize, DStr&amp; tempResult)
+<span class="lineNum">     314 </span>            : {
+<span class="lineNum">     315 </span>            :     // just put separators and leading zeroes in the number
+<span class="lineNum">     316 </span><span class="lineNoCov">          0 :     DStr sprFmt = DStr(&quot;%0&quot;) + width + &quot;d&quot;;</span>
+<span class="lineNum">     317 </span>            :     char buff[32],
+<span class="lineNum">     318 </span><span class="lineNoCov">          0 :         *p = buff;</span>
+<span class="lineNum">     319 </span><span class="lineNoCov">          0 :     int len = snprintf(buff, 32, (char*)sprFmt, num);</span>
+<span class="lineNum">     320 </span><span class="lineNoCov">          0 :     if (!groupingSize)</span>
+<span class="lineNum">     321 </span><span class="lineNoCov">          0 :         tempResult += buff;</span>
+<span class="lineNum">     322 </span>            :     else
+<span class="lineNum">     323 </span>            :     {
+<span class="lineNum">     324 </span><span class="lineNoCov">          0 :         int first = len % groupingSize;</span>
+<span class="lineNum">     325 </span><span class="lineNoCov">          0 :         if (first)</span>
+<span class="lineNum">     326 </span>            :         {
+<span class="lineNum">     327 </span><span class="lineNoCov">          0 :             tempResult.nadd(p, first);</span>
+<span class="lineNum">     328 </span><span class="lineNoCov">          0 :             p += first;</span>
+<span class="lineNum">     329 </span><span class="lineNoCov">          0 :             len -= first;</span>
+<span class="lineNum">     330 </span><span class="lineNoCov">          0 :             if (len)</span>
+<span class="lineNum">     331 </span><span class="lineNoCov">          0 :                 tempResult += groupingSep;</span>
+<span class="lineNum">     332 </span>            :         }
+<span class="lineNum">     333 </span><span class="lineNoCov">          0 :         for (; len &gt; 0; len -= groupingSize, p += groupingSize)</span>
+<span class="lineNum">     334 </span>            :         {
+<span class="lineNum">     335 </span><span class="lineNoCov">          0 :             tempResult.nadd(p, groupingSize);</span>
+<span class="lineNum">     336 </span><span class="lineNoCov">          0 :             if (len &gt; groupingSize)</span>
+<span class="lineNum">     337 </span><span class="lineNoCov">          0 :                 tempResult += groupingSep;</span>
+<span class="lineNum">     338 </span>            :         }
+<span class="lineNum">     339 </span><span class="lineNoCov">          0 :     }</span>
+<a name="340"><span class="lineNum">     340 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     341 </span>            : 
+<span class="lineNum">     342 </span><span class="lineNoCov">          0 : void formatSingleNumber(</span>
+<span class="lineNum">     343 </span>            :     Sit S, int num, const Str&amp; fmt, 
+<span class="lineNum">     344 </span>            :     const Str&amp; lang, NumberingLetterValue letterValue, 
+<span class="lineNum">     345 </span>            :     const Str&amp; groupingSep, int groupingSize, DStr&amp; tempResult)
+<span class="lineNum">     346 </span>            : {
+<span class="lineNum">     347 </span>            :     // we only add to tempResult, do not initialize it
+<span class="lineNum">     348 </span>            :     char type;
+<span class="lineNum">     349 </span>            :     int width;
+<span class="lineNum">     350 </span>            :     // check value of num
+<span class="lineNum">     351 </span><span class="lineNoCov">          0 :     if (num &lt;= 0)</span>
+<span class="lineNum">     352 </span>            :     {
+<span class="lineNum">     353 </span><span class="lineNoCov">          0 :         S.message(MT_WARN, W_NUMBER_NOT_POSITIVE, (char*)NULL, (char*)NULL);</span>
+<span class="lineNum">     354 </span><span class="lineNoCov">          0 :         num = num ? abs(num) : 1;</span>
+<span class="lineNum">     355 </span>            :     }
+<span class="lineNum">     356 </span><span class="lineNoCov">          0 :     getFTokenParams(fmt, type, width);</span>
+<span class="lineNum">     357 </span><span class="lineNoCov">          0 :     switch(type)</span>
+<span class="lineNum">     358 </span>            :     {
+<span class="lineNum">     359 </span>            :     case 'A':
+<span class="lineNum">     360 </span>            :     case 'a':
+<span class="lineNum">     361 </span><span class="lineNoCov">          0 :         appendABC(num, /* uppercase = */ type == 'A', tempResult);</span>
+<span class="lineNum">     362 </span>            :         break;
+<span class="lineNum">     363 </span>            :     case 'I':
+<span class="lineNum">     364 </span>            :     case 'i':
+<span class="lineNum">     365 </span><span class="lineNoCov">          0 :         appendRoman(num, /* uppercase = */ type == 'I', tempResult);</span>
+<span class="lineNum">     366 </span>            :         break;
+<span class="lineNum">     367 </span>            :     default:
+<span class="lineNum">     368 </span><span class="lineNoCov">          0 :         appendArabic(num, width, groupingSep, groupingSize, tempResult);</span>
+<span class="lineNum">     369 </span>            :     }
+<a name="370"><span class="lineNum">     370 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     371 </span>            : 
+<span class="lineNum">     372 </span><span class="lineNoCov">          0 : eFlag xslNumberFormat(</span>
+<span class="lineNum">     373 </span><span class="lineNoCov">          0 :     Sit S, ListInt&amp; nums, const Str&amp; format, </span>
+<span class="lineNum">     374 </span>            :     const Str&amp; lang, NumberingLetterValue letterValue, 
+<span class="lineNum">     375 </span>            :     const Str&amp; groupingSep, int groupingSize, Str&amp; result)
+<span class="lineNum">     376 </span>            : {
+<span class="lineNum">     377 </span><span class="lineNoCov">          0 :     DStr tempResult;</span>
+<span class="lineNum">     378 </span><span class="lineNoCov">          0 :     Str sep = &quot;.&quot;, </span>
+<span class="lineNum">     379 </span><span class="lineNoCov">          0 :         sepRightmost, </span>
+<span class="lineNum">     380 </span><span class="lineNoCov">          0 :         alpha = &quot;1&quot;,</span>
+<span class="lineNum">     381 </span><span class="lineNoCov">          0 :         firstToken;</span>
+<span class="lineNum">     382 </span>            : 
+<span class="lineNum">     383 </span><span class="lineNoCov">          0 :     const char *p = (const char*) format;</span>
+<span class="lineNum">     384 </span><span class="lineNoCov">          0 :     int ndx = 0;</span>
+<span class="lineNum">     385 </span>            : 
+<span class="lineNum">     386 </span><span class="lineNoCov">          0 :     if (getFToken(p, firstToken))</span>
+<span class="lineNum">     387 </span>            :     {
+<span class="lineNum">     388 </span><span class="lineNoCov">          0 :         if (isAlnumFToken(firstToken) &amp;&amp; nums.number())</span>
+<span class="lineNum">     389 </span>            :         {
+<span class="lineNum">     390 </span><span class="lineNoCov">          0 :             alpha = firstToken;</span>
+<span class="lineNum">     391 </span>            :             formatSingleNumber(
+<span class="lineNum">     392 </span><span class="lineNoCov">          0 :                 S, nums[0], alpha, lang, letterValue,</span>
+<span class="lineNum">     393 </span><span class="lineNoCov">          0 :                 groupingSep, groupingSize, tempResult);</span>
+<span class="lineNum">     394 </span>            :             ndx = 1;
+<span class="lineNum">     395 </span>            :         }
+<span class="lineNum">     396 </span>            :         else
+<span class="lineNum">     397 </span>            :         {
+<span class="lineNum">     398 </span>            :             // reset p to the beginning
+<span class="lineNum">     399 </span><span class="lineNoCov">          0 :             p = (const char*) format;</span>
+<span class="lineNum">     400 </span><span class="lineNoCov">          0 :             if (!nums.number())</span>
+<span class="lineNum">     401 </span><span class="lineNoCov">          0 :                 tempResult += sepRightmost = firstToken;;</span>
+<span class="lineNum">     402 </span>            :         }
+<span class="lineNum">     403 </span>            :     }
+<span class="lineNum">     404 </span>            :     // p points at the first separator (if any)
+<span class="lineNum">     405 </span><span class="lineNoCov">          0 :     Bool readAllFormat = *p ? FALSE : TRUE;</span>
+<span class="lineNum">     406 </span><span class="lineNoCov">          0 :     for (; ndx &lt; nums.number(); ndx++)</span>
+<span class="lineNum">     407 </span>            :     {
+<span class="lineNum">     408 </span><span class="lineNoCov">          0 :         if (!readAllFormat)</span>
+<span class="lineNum">     409 </span>            :         {
+<span class="lineNum">     410 </span>            :             // always update the rightmost separator
+<span class="lineNum">     411 </span><span class="lineNoCov">          0 :             if (getFToken(p, sepRightmost))</span>
+<span class="lineNum">     412 </span>            :             {
+<span class="lineNum">     413 </span><span class="lineNoCov">          0 :                 if (getFToken(p, alpha))</span>
+<span class="lineNum">     414 </span>            :                 {
+<span class="lineNum">     415 </span>            :                     // alpha token found
+<span class="lineNum">     416 </span>            :                     // use the current separator and reset the rightmost one
+<span class="lineNum">     417 </span><span class="lineNoCov">          0 :                     sep = sepRightmost;</span>
+<span class="lineNum">     418 </span><span class="lineNoCov">          0 :                     sepRightmost.empty();</span>
+<span class="lineNum">     419 </span>            :                 }
+<span class="lineNum">     420 </span>            :                 else
+<span class="lineNum">     421 </span>            :                 {
+<span class="lineNum">     422 </span>            :                     // no alpha token, use the same separator as last time
+<span class="lineNum">     423 </span>            :                     // keep current separator in sepRightmost
+<span class="lineNum">     424 </span><span class="lineNoCov">          0 :                     readAllFormat = TRUE;</span>
+<span class="lineNum">     425 </span><span class="lineNoCov">          0 :                     if (!ndx)</span>
+<span class="lineNum">     426 </span><span class="lineNoCov">          0 :                         sep = sepRightmost;</span>
+<span class="lineNum">     427 </span>            :                 }
+<span class="lineNum">     428 </span>            :                 
+<span class="lineNum">     429 </span>            :             }
+<span class="lineNum">     430 </span>            :             else
+<span class="lineNum">     431 </span>            :                 // both empty, use the same separator and alpha as last time
+<span class="lineNum">     432 </span>            :                 readAllFormat = TRUE;
+<span class="lineNum">     433 </span>            :         } // if (!readAllFormat)
+<span class="lineNum">     434 </span>            :         // sep and alpha are the last valid tokens of each kind
+<span class="lineNum">     435 </span><span class="lineNoCov">          0 :         tempResult += sep;</span>
+<span class="lineNum">     436 </span>            :         formatSingleNumber(
+<span class="lineNum">     437 </span><span class="lineNoCov">          0 :             S, nums[ndx], alpha, lang, letterValue,</span>
+<span class="lineNum">     438 </span><span class="lineNoCov">          0 :             groupingSep, groupingSize, tempResult);</span>
+<span class="lineNum">     439 </span>            :     } // for loop
+<span class="lineNum">     440 </span>            :     // get the real rightmost separator
+<span class="lineNum">     441 </span><span class="lineNoCov">          0 :     if (!readAllFormat)</span>
+<span class="lineNum">     442 </span>            :     {
+<span class="lineNum">     443 </span><span class="lineNoCov">          0 :         while(getFToken(p, sepRightmost));</span>
+<span class="lineNum">     444 </span><span class="lineNoCov">          0 :         if (isAlnumFToken(sepRightmost))</span>
+<span class="lineNum">     445 </span><span class="lineNoCov">          0 :             sepRightmost.empty();</span>
+<span class="lineNum">     446 </span>            :     }
+<span class="lineNum">     447 </span><span class="lineNoCov">          0 :     tempResult += sepRightmost;</span>
+<span class="lineNum">     448 </span><span class="lineNoCov">          0 :     result = tempResult;</span>
+<span class="lineNum">     449 </span><span class="lineNoCov">          0 :     return OK;</span>
+<span class="lineNum">     450 </span>            : }
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

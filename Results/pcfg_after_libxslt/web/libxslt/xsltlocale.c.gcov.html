@@ -1,0 +1,601 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - libxslt/xsltlocale.c</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">libxslt</a> - xsltlocale.c<span style="font-size: 80%;"> (source / <a href="xsltlocale.c.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">105</td>
+            <td class="headerCovTableEntry">118</td>
+            <td class="headerCovTableEntryMed">89.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-10-31</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">4</td>
+            <td class="headerCovTableEntry">6</td>
+            <td class="headerCovTableEntryLo">66.7 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /*</a>
+<span class="lineNum">       2 </span>            :  * xsltlocale.c: locale handling
+<span class="lineNum">       3 </span>            :  *
+<span class="lineNum">       4 </span>            :  * Reference:
+<span class="lineNum">       5 </span>            :  * RFC 3066: Tags for the Identification of Languages
+<span class="lineNum">       6 </span>            :  * http://www.ietf.org/rfc/rfc3066.txt
+<span class="lineNum">       7 </span>            :  * ISO 639-1, ISO 3166-1
+<span class="lineNum">       8 </span>            :  *
+<span class="lineNum">       9 </span>            :  * Author: Nick Wellnhofer
+<span class="lineNum">      10 </span>            :  * winapi port: Roumen Petrov
+<span class="lineNum">      11 </span>            :  */
+<span class="lineNum">      12 </span>            : 
+<span class="lineNum">      13 </span>            : #define IN_LIBXSLT
+<span class="lineNum">      14 </span>            : #include &quot;libxslt.h&quot;
+<span class="lineNum">      15 </span>            : 
+<span class="lineNum">      16 </span>            : #include &lt;string.h&gt;
+<span class="lineNum">      17 </span>            : #include &lt;libxml/xmlmemory.h&gt;
+<span class="lineNum">      18 </span>            : 
+<span class="lineNum">      19 </span>            : #include &quot;xsltlocale.h&quot;
+<span class="lineNum">      20 </span>            : #include &quot;xsltutils.h&quot;
+<span class="lineNum">      21 </span>            : 
+<span class="lineNum">      22 </span>            : #if defined(__GLIBC__) &amp;&amp; __GLIBC__ == 2 &amp;&amp; __GLIBC_MINOR__ &lt;= 2
+<span class="lineNum">      23 </span>            : #define newlocale __newlocale
+<span class="lineNum">      24 </span>            : #define freelocale __freelocale
+<span class="lineNum">      25 </span>            : #define strxfrm_l __strxfrm_l
+<span class="lineNum">      26 </span>            : #define LC_COLLATE_MASK (1 &lt;&lt; LC_COLLATE)
+<span class="lineNum">      27 </span>            : #endif
+<span class="lineNum">      28 </span>            : 
+<span class="lineNum">      29 </span>            : #define TOUPPER(c) (c &amp; ~0x20)
+<span class="lineNum">      30 </span>            : #define TOLOWER(c) (c | 0x20)
+<span class="lineNum">      31 </span>            : #define ISALPHA(c) ((unsigned)(TOUPPER(c) - 'A') &lt; 26)
+<span class="lineNum">      32 </span>            : 
+<span class="lineNum">      33 </span>            : /*without terminating null character*/
+<span class="lineNum">      34 </span>            : #define XSLTMAX_ISO639LANGLEN           8
+<span class="lineNum">      35 </span>            : #define XSLTMAX_ISO3166CNTRYLEN         8
+<span class="lineNum">      36 </span>            :                                         /* &lt;lang&gt;-&lt;cntry&gt; */
+<span class="lineNum">      37 </span>            : #define XSLTMAX_LANGTAGLEN              (XSLTMAX_ISO639LANGLEN+1+XSLTMAX_ISO3166CNTRYLEN)
+<span class="lineNum">      38 </span>            : 
+<span class="lineNum">      39 </span>            : static const xmlChar* xsltDefaultRegion(const xmlChar *localeName);
+<span class="lineNum">      40 </span>            : 
+<span class="lineNum">      41 </span>            : #ifdef XSLT_LOCALE_WINAPI
+<span class="lineNum">      42 </span>            : xmlRMutexPtr xsltLocaleMutex = NULL;
+<span class="lineNum">      43 </span>            : 
+<span class="lineNum">      44 </span>            : struct xsltRFC1766Info_s {
+<span class="lineNum">      45 </span>            :       /*note typedef unsigned char xmlChar !*/
+<span class="lineNum">      46 </span>            :     xmlChar    tag[XSLTMAX_LANGTAGLEN+1];
+<span class="lineNum">      47 </span>            :       /*note typedef LCID xsltLocale !*/
+<span class="lineNum">      48 </span>            :     xsltLocale lcid;
+<span class="lineNum">      49 </span>            : };
+<span class="lineNum">      50 </span>            : typedef struct xsltRFC1766Info_s xsltRFC1766Info;
+<span class="lineNum">      51 </span>            : 
+<span class="lineNum">      52 </span>            : static int xsltLocaleListSize = 0;
+<span class="lineNum">      53 </span>            : static xsltRFC1766Info *xsltLocaleList = NULL;
+<span class="lineNum">      54 </span>            : 
+<span class="lineNum">      55 </span>            : 
+<span class="lineNum">      56 </span>            : static xsltLocale
+<span class="lineNum">      57 </span>            : xslt_locale_WINAPI(const xmlChar *languageTag) {
+<span class="lineNum">      58 </span>            :     int k;
+<span class="lineNum">      59 </span>            :     xsltRFC1766Info *p = xsltLocaleList;
+<span class="lineNum">      60 </span>            : 
+<span class="lineNum">      61 </span>            :     for (k=0; k&lt;xsltLocaleListSize; k++, p++)
+<span class="lineNum">      62 </span>            :         if (xmlStrcmp(p-&gt;tag, languageTag) == 0) return p-&gt;lcid;
+<span class="lineNum">      63 </span>            :     return((xsltLocale)0);
+<span class="lineNum">      64 </span>            : }
+<span class="lineNum">      65 </span>            : 
+<span class="lineNum">      66 </span>            : static void xsltEnumSupportedLocales(void);
+<span class="lineNum">      67 </span>            : #endif
+<span class="lineNum">      68 </span>            : 
+<span class="lineNum">      69 </span>            : /**
+<span class="lineNum">      70 </span>            :  * xsltFreeLocales:
+<span class="lineNum">      71 </span>            :  *
+<span class="lineNum">      72 </span>            :  * Cleanup function for the locale support on shutdown
+<a name="73"><span class="lineNum">      73 </span>            :  */</a>
+<span class="lineNum">      74 </span>            : void
+<span class="lineNum">      75 </span><span class="lineCov">      40958 : xsltFreeLocales(void) {</span>
+<span class="lineNum">      76 </span>            : #ifdef XSLT_LOCALE_WINAPI
+<span class="lineNum">      77 </span>            :     xmlRMutexLock(xsltLocaleMutex);
+<span class="lineNum">      78 </span>            :     xmlFree(xsltLocaleList);
+<span class="lineNum">      79 </span>            :     xsltLocaleList = NULL;
+<span class="lineNum">      80 </span>            :     xmlRMutexUnlock(xsltLocaleMutex);
+<span class="lineNum">      81 </span>            : #endif
+<span class="lineNum">      82 </span><span class="lineCov">      40958 : }</span>
+<span class="lineNum">      83 </span>            : 
+<span class="lineNum">      84 </span>            : /**
+<span class="lineNum">      85 </span>            :  * xsltNewLocale:
+<span class="lineNum">      86 </span>            :  * @languageTag: RFC 3066 language tag
+<span class="lineNum">      87 </span>            :  *
+<span class="lineNum">      88 </span>            :  * Creates a new locale of an opaque system dependent type based on the
+<span class="lineNum">      89 </span>            :  * language tag.
+<span class="lineNum">      90 </span>            :  *
+<span class="lineNum">      91 </span>            :  * Returns the locale or NULL on error or if no matching locale was found
+<a name="92"><span class="lineNum">      92 </span>            :  */</a>
+<span class="lineNum">      93 </span>            : xsltLocale
+<span class="lineNum">      94 </span><span class="lineCov">        474 : xsltNewLocale(const xmlChar *languageTag) {</span>
+<span class="lineNum">      95 </span>            : #ifdef XSLT_LOCALE_XLOCALE
+<span class="lineNum">      96 </span>            :     xsltLocale locale;
+<span class="lineNum">      97 </span>            :     char localeName[XSLTMAX_LANGTAGLEN+6]; /* 6 chars for &quot;.utf8\0&quot; */
+<span class="lineNum">      98 </span><span class="lineCov">        474 :     const xmlChar *p = languageTag;</span>
+<span class="lineNum">      99 </span><span class="lineCov">        474 :     const char *region = NULL;</span>
+<span class="lineNum">     100 </span><span class="lineCov">        474 :     char *q = localeName;</span>
+<span class="lineNum">     101 </span>            :     int i, llen;
+<span class="lineNum">     102 </span>            : 
+<span class="lineNum">     103 </span>            :     /* Convert something like &quot;pt-br&quot; to &quot;pt_BR.utf8&quot; */
+<span class="lineNum">     104 </span>            : 
+<span class="lineNum">     105 </span><span class="lineCov">        474 :     if (languageTag == NULL)</span>
+<span class="lineNum">     106 </span>            :         return(NULL);
+<span class="lineNum">     107 </span>            : 
+<span class="lineNum">     108 </span><span class="lineCov">       1294 :     for (i=0; i&lt;XSLTMAX_ISO639LANGLEN &amp;&amp; ISALPHA(*p); ++i)</span>
+<span class="lineNum">     109 </span><span class="lineCov">       1294 :         *q++ = TOLOWER(*p++);</span>
+<span class="lineNum">     110 </span>            : 
+<span class="lineNum">     111 </span><span class="lineCov">        474 :     if (i == 0)</span>
+<span class="lineNum">     112 </span>            :         return(NULL);
+<span class="lineNum">     113 </span>            : 
+<span class="lineNum">     114 </span><span class="lineCov">        464 :     llen = i;</span>
+<span class="lineNum">     115 </span>            : 
+<span class="lineNum">     116 </span><span class="lineCov">        464 :     if (*p) {</span>
+<span class="lineNum">     117 </span><span class="lineCov">         69 :         if (*p++ != '-')</span>
+<span class="lineNum">     118 </span>            :             return(NULL);
+<span class="lineNum">     119 </span><span class="lineCov">          7 :         *q++ = '_';</span>
+<span class="lineNum">     120 </span>            : 
+<span class="lineNum">     121 </span><span class="lineCov">         35 :         for (i=0; i&lt;XSLTMAX_ISO3166CNTRYLEN &amp;&amp; ISALPHA(*p); ++i)</span>
+<span class="lineNum">     122 </span><span class="lineCov">         28 :             *q++ = TOUPPER(*p++);</span>
+<span class="lineNum">     123 </span>            : 
+<span class="lineNum">     124 </span><span class="lineCov">          7 :         if (i == 0 || *p)</span>
+<span class="lineNum">     125 </span>            :             return(NULL);
+<span class="lineNum">     126 </span>            : 
+<span class="lineNum">     127 </span>            :         memcpy(q, &quot;.utf8&quot;, 6);
+<span class="lineNum">     128 </span><span class="lineCov">          5 :         locale = newlocale(LC_COLLATE_MASK, localeName, NULL);</span>
+<span class="lineNum">     129 </span><span class="lineCov">          5 :         if (locale != NULL)</span>
+<span class="lineNum">     130 </span>            :             return(locale);
+<span class="lineNum">     131 </span>            : 
+<span class="lineNum">     132 </span>            :         /* Continue without using country code */
+<span class="lineNum">     133 </span>            : 
+<span class="lineNum">     134 </span><span class="lineCov">          5 :         q = localeName + llen;</span>
+<span class="lineNum">     135 </span>            :     }
+<span class="lineNum">     136 </span>            : 
+<span class="lineNum">     137 </span>            :     /* Try locale without territory, e.g. for Esperanto (eo) */
+<span class="lineNum">     138 </span>            : 
+<span class="lineNum">     139 </span>            :     memcpy(q, &quot;.utf8&quot;, 6);
+<span class="lineNum">     140 </span><span class="lineCov">        400 :     locale = newlocale(LC_COLLATE_MASK, localeName, NULL);</span>
+<span class="lineNum">     141 </span><span class="lineCov">        400 :     if (locale != NULL)</span>
+<span class="lineNum">     142 </span>            :         return(locale);
+<span class="lineNum">     143 </span>            : 
+<span class="lineNum">     144 </span>            :     /* Try to find most common country for language */
+<span class="lineNum">     145 </span>            : 
+<span class="lineNum">     146 </span><span class="lineCov">        400 :     if (llen != 2)</span>
+<span class="lineNum">     147 </span>            :         return(NULL);
+<span class="lineNum">     148 </span>            : 
+<span class="lineNum">     149 </span><span class="lineCov">        365 :     region = (char *)xsltDefaultRegion((xmlChar *)localeName);</span>
+<span class="lineNum">     150 </span><span class="lineCov">        365 :     if (region == NULL)</span>
+<span class="lineNum">     151 </span>            :         return(NULL);
+<span class="lineNum">     152 </span>            : 
+<span class="lineNum">     153 </span><span class="lineCov">         94 :     q = localeName + llen;</span>
+<span class="lineNum">     154 </span><span class="lineCov">         94 :     *q++ = '_';</span>
+<span class="lineNum">     155 </span><span class="lineCov">         94 :     *q++ = region[0];</span>
+<span class="lineNum">     156 </span><span class="lineCov">         94 :     *q++ = region[1];</span>
+<span class="lineNum">     157 </span>            :     memcpy(q, &quot;.utf8&quot;, 6);
+<span class="lineNum">     158 </span><span class="lineCov">         94 :     locale = newlocale(LC_COLLATE_MASK, localeName, NULL);</span>
+<span class="lineNum">     159 </span>            : 
+<span class="lineNum">     160 </span><span class="lineCov">         94 :     return(locale);</span>
+<span class="lineNum">     161 </span>            : #endif
+<span class="lineNum">     162 </span>            : 
+<span class="lineNum">     163 </span>            : #ifdef XSLT_LOCALE_WINAPI
+<span class="lineNum">     164 </span>            : {
+<span class="lineNum">     165 </span>            :     xsltLocale    locale = (xsltLocale)0;
+<span class="lineNum">     166 </span>            :     xmlChar       localeName[XSLTMAX_LANGTAGLEN+1];
+<span class="lineNum">     167 </span>            :     xmlChar       *q = localeName;
+<span class="lineNum">     168 </span>            :     const xmlChar *p = languageTag;
+<span class="lineNum">     169 </span>            :     int           i, llen;
+<span class="lineNum">     170 </span>            :     const xmlChar *region = NULL;
+<span class="lineNum">     171 </span>            : 
+<span class="lineNum">     172 </span>            :     if (languageTag == NULL) goto end;
+<span class="lineNum">     173 </span>            : 
+<span class="lineNum">     174 </span>            :     xsltEnumSupportedLocales();
+<span class="lineNum">     175 </span>            : 
+<span class="lineNum">     176 </span>            :     for (i=0; i&lt;XSLTMAX_ISO639LANGLEN &amp;&amp; ISALPHA(*p); ++i)
+<span class="lineNum">     177 </span>            :         *q++ = TOLOWER(*p++);
+<span class="lineNum">     178 </span>            :     if (i == 0) goto end;
+<span class="lineNum">     179 </span>            : 
+<span class="lineNum">     180 </span>            :     llen = i;
+<span class="lineNum">     181 </span>            :     *q++ = '-';
+<span class="lineNum">     182 </span>            :     if (*p) { /*if country tag is given*/
+<span class="lineNum">     183 </span>            :         if (*p++ != '-') goto end;
+<span class="lineNum">     184 </span>            : 
+<span class="lineNum">     185 </span>            :         for (i=0; i&lt;XSLTMAX_ISO3166CNTRYLEN &amp;&amp; ISALPHA(*p); ++i)
+<span class="lineNum">     186 </span>            :             *q++ = TOUPPER(*p++);
+<span class="lineNum">     187 </span>            :         if (i == 0 || *p) goto end;
+<span class="lineNum">     188 </span>            : 
+<span class="lineNum">     189 </span>            :         *q = '\0';
+<span class="lineNum">     190 </span>            :         locale = xslt_locale_WINAPI(localeName);
+<span class="lineNum">     191 </span>            :         if (locale != (xsltLocale)0) goto end;
+<span class="lineNum">     192 </span>            :     }
+<span class="lineNum">     193 </span>            :     /* Try to find most common country for language */
+<span class="lineNum">     194 </span>            :     region = xsltDefaultRegion(localeName);
+<span class="lineNum">     195 </span>            :     if (region == NULL) goto end;
+<span class="lineNum">     196 </span>            : 
+<span class="lineNum">     197 </span>            :     strcpy(localeName + llen + 1, region);
+<span class="lineNum">     198 </span>            :     locale = xslt_locale_WINAPI(localeName);
+<span class="lineNum">     199 </span>            : end:
+<span class="lineNum">     200 </span>            :     return(locale);
+<span class="lineNum">     201 </span>            : }
+<span class="lineNum">     202 </span>            : #endif
+<span class="lineNum">     203 </span>            : 
+<span class="lineNum">     204 </span>            : #ifdef XSLT_LOCALE_NONE
+<span class="lineNum">     205 </span>            :     return(NULL);
+<span class="lineNum">     206 </span>            : #endif
+<span class="lineNum">     207 </span>            : }
+<a name="208"><span class="lineNum">     208 </span>            : </a>
+<span class="lineNum">     209 </span>            : static const xmlChar*
+<span class="lineNum">     210 </span><span class="lineCov">        365 : xsltDefaultRegion(const xmlChar *localeName) {</span>
+<span class="lineNum">     211 </span>            :     xmlChar c;
+<span class="lineNum">     212 </span>            :     /* region should be xmlChar, but gcc warns on all string assignments */
+<span class="lineNum">     213 </span><span class="lineCov">        365 :     const char *region = NULL;</span>
+<span class="lineNum">     214 </span>            : 
+<span class="lineNum">     215 </span><span class="lineCov">        365 :     c = localeName[1];</span>
+<span class="lineNum">     216 </span>            :     /* This is based on the locales from glibc 2.3.3 */
+<span class="lineNum">     217 </span>            : 
+<span class="lineNum">     218 </span><span class="lineCov">        365 :     switch (localeName[0]) {</span>
+<span class="lineNum">     219 </span>            :         case 'a':
+<span class="lineNum">     220 </span><span class="lineCov">          6 :             if (c == 'a' || c == 'm') region = &quot;ET&quot;;</span>
+<span class="lineNum">     221 </span><span class="lineCov">          6 :             else if (c == 'f') region = &quot;ZA&quot;;</span>
+<span class="lineNum">     222 </span><span class="lineCov">          6 :             else if (c == 'n') region = &quot;ES&quot;;</span>
+<span class="lineNum">     223 </span><span class="lineCov">          3 :             else if (c == 'r') region = &quot;AE&quot;;</span>
+<span class="lineNum">     224 </span><span class="lineCov">          3 :             else if (c == 'z') region = &quot;AZ&quot;;</span>
+<span class="lineNum">     225 </span>            :             break;
+<span class="lineNum">     226 </span>            :         case 'b':
+<span class="lineNum">     227 </span><span class="lineCov">          6 :             if (c == 'e') region = &quot;BY&quot;;</span>
+<span class="lineNum">     228 </span><span class="lineCov">          6 :             else if (c == 'g') region = &quot;BG&quot;;</span>
+<span class="lineNum">     229 </span><span class="lineCov">          6 :             else if (c == 'n') region = &quot;BD&quot;;</span>
+<span class="lineNum">     230 </span><span class="lineCov">          4 :             else if (c == 'r') region = &quot;FR&quot;;</span>
+<span class="lineNum">     231 </span><span class="lineCov">          4 :             else if (c == 's') region = &quot;BA&quot;;</span>
+<span class="lineNum">     232 </span>            :             break;
+<span class="lineNum">     233 </span>            :         case 'c':
+<span class="lineNum">     234 </span><span class="lineCov">          3 :             if (c == 'a') region = &quot;ES&quot;;</span>
+<span class="lineNum">     235 </span><span class="lineCov">          3 :             else if (c == 's') region = &quot;CZ&quot;;</span>
+<span class="lineNum">     236 </span><span class="lineCov">          3 :             else if (c == 'y') region = &quot;GB&quot;;</span>
+<span class="lineNum">     237 </span>            :             break;
+<span class="lineNum">     238 </span>            :         case 'd':
+<span class="lineNum">     239 </span><span class="lineCov">         17 :             if (c == 'a') region = &quot;DK&quot;;</span>
+<span class="lineNum">     240 </span><span class="lineCov">         17 :             else if (c == 'e') region = &quot;DE&quot;;</span>
+<span class="lineNum">     241 </span>            :             break;
+<span class="lineNum">     242 </span>            :         case 'e':
+<span class="lineNum">     243 </span><span class="lineCov">         65 :             if (c == 'l') region = &quot;GR&quot;;</span>
+<span class="lineNum">     244 </span><span class="lineCov">         61 :             else if (c == 'n' || c == 'o') region = &quot;US&quot;;</span>
+<span class="lineNum">     245 </span><span class="lineCov">         32 :             else if (c == 's' || c == 'u') region = &quot;ES&quot;;</span>
+<span class="lineNum">     246 </span><span class="lineCov">         29 :             else if (c == 't') region = &quot;EE&quot;;</span>
+<span class="lineNum">     247 </span>            :             break;
+<span class="lineNum">     248 </span>            :         case 'f':
+<span class="lineNum">     249 </span><span class="lineCov">         16 :             if (c == 'a') region = &quot;IR&quot;;</span>
+<span class="lineNum">     250 </span><span class="lineCov">         16 :             else if (c == 'i') region = &quot;FI&quot;;</span>
+<span class="lineNum">     251 </span><span class="lineCov">         16 :             else if (c == 'o') region = &quot;FO&quot;;</span>
+<span class="lineNum">     252 </span><span class="lineCov">         16 :             else if (c == 'r') region = &quot;FR&quot;;</span>
+<span class="lineNum">     253 </span>            :             break;
+<span class="lineNum">     254 </span>            :         case 'g':
+<span class="lineNum">     255 </span><span class="lineCov">         10 :             if (c == 'a') region = &quot;IE&quot;;</span>
+<span class="lineNum">     256 </span><span class="lineCov">         10 :             else if (c == 'l') region = &quot;ES&quot;;</span>
+<span class="lineNum">     257 </span><span class="lineCov">         10 :             else if (c == 'v') region = &quot;GB&quot;;</span>
+<span class="lineNum">     258 </span>            :             break;
+<span class="lineNum">     259 </span>            :         case 'h':
+<span class="lineNum">     260 </span><span class="lineCov">         18 :             if (c == 'e') region = &quot;IL&quot;;</span>
+<span class="lineNum">     261 </span><span class="lineCov">         15 :             else if (c == 'i') region = &quot;IN&quot;;</span>
+<span class="lineNum">     262 </span><span class="lineCov">         15 :             else if (c == 'r') region = &quot;HT&quot;;</span>
+<span class="lineNum">     263 </span><span class="lineCov">         15 :             else if (c == 'u') region = &quot;HU&quot;;</span>
+<span class="lineNum">     264 </span>            :             break;
+<span class="lineNum">     265 </span>            :         case 'i':
+<span class="lineNum">     266 </span><span class="lineCov">          3 :             if (c == 'd') region = &quot;ID&quot;;</span>
+<span class="lineNum">     267 </span><span class="lineCov">          3 :             else if (c == 's') region = &quot;IS&quot;;</span>
+<span class="lineNum">     268 </span><span class="lineCov">          3 :             else if (c == 't') region = &quot;IT&quot;;</span>
+<span class="lineNum">     269 </span><span class="lineCov">          3 :             else if (c == 'w') region = &quot;IL&quot;;</span>
+<span class="lineNum">     270 </span>            :             break;
+<span class="lineNum">     271 </span>            :         case 'j':
+<span class="lineNum">     272 </span><span class="lineCov">         10 :             if (c == 'a') region = &quot;JP&quot;;</span>
+<span class="lineNum">     273 </span>            :             break;
+<span class="lineNum">     274 </span>            :         case 'k':
+<span class="lineNum">     275 </span><span class="lineCov">          3 :             if (c == 'l') region = &quot;GL&quot;;</span>
+<span class="lineNum">     276 </span><span class="lineCov">          3 :             else if (c == 'o') region = &quot;KR&quot;;</span>
+<span class="lineNum">     277 </span><span class="lineCov">          3 :             else if (c == 'w') region = &quot;GB&quot;;</span>
+<span class="lineNum">     278 </span>            :             break;
+<span class="lineNum">     279 </span>            :         case 'l':
+<span class="lineNum">     280 </span><span class="lineCov">          3 :             if (c == 't') region = &quot;LT&quot;;</span>
+<span class="lineNum">     281 </span><span class="lineCov">          3 :             else if (c == 'v') region = &quot;LV&quot;;</span>
+<span class="lineNum">     282 </span>            :             break;
+<span class="lineNum">     283 </span>            :         case 'm':
+<span class="lineNum">     284 </span><span class="lineCov">          9 :             if (c == 'k') region = &quot;MK&quot;;</span>
+<span class="lineNum">     285 </span><span class="lineCov">          9 :             else if (c == 'l' || c == 'r') region = &quot;IN&quot;;</span>
+<span class="lineNum">     286 </span><span class="lineCov">          6 :             else if (c == 'n') region = &quot;MN&quot;;</span>
+<span class="lineNum">     287 </span><span class="lineCov">          3 :             else if (c == 's') region = &quot;MY&quot;;</span>
+<span class="lineNum">     288 </span><span class="lineCov">          3 :             else if (c == 't') region = &quot;MT&quot;;</span>
+<span class="lineNum">     289 </span>            :             break;
+<span class="lineNum">     290 </span>            :         case 'n':
+<span class="lineNum">     291 </span><span class="lineCov">         21 :             if (c == 'b' || c == 'n' || c == 'o') region = &quot;NO&quot;;</span>
+<span class="lineNum">     292 </span><span class="lineCov">         21 :             else if (c == 'e') region = &quot;NP&quot;;</span>
+<span class="lineNum">     293 </span><span class="lineCov">         21 :             else if (c == 'l') region = &quot;NL&quot;;</span>
+<span class="lineNum">     294 </span>            :             break;
+<span class="lineNum">     295 </span>            :         case 'o':
+<span class="lineNum">     296 </span><span class="lineCov">          3 :             if (c == 'm') region = &quot;ET&quot;;</span>
+<span class="lineNum">     297 </span>            :             break;
+<span class="lineNum">     298 </span>            :         case 'p':
+<span class="lineNum">     299 </span><span class="lineCov">         15 :             if (c == 'a') region = &quot;IN&quot;;</span>
+<span class="lineNum">     300 </span><span class="lineCov">         15 :             else if (c == 'l') region = &quot;PL&quot;;</span>
+<span class="lineNum">     301 </span><span class="lineCov">         15 :             else if (c == 't') region = &quot;PT&quot;;</span>
+<span class="lineNum">     302 </span>            :             break;
+<span class="lineNum">     303 </span>            :         case 'r':
+<span class="lineNum">     304 </span><span class="lineCov">         25 :             if (c == 'o') region = &quot;RO&quot;;</span>
+<span class="lineNum">     305 </span><span class="lineCov">         22 :             else if (c == 'u') region = &quot;RU&quot;;</span>
+<span class="lineNum">     306 </span>            :             break;
+<span class="lineNum">     307 </span>            :         case 's':
+<span class="lineNum">     308 </span>            :             switch (c) {
+<span class="lineNum">     309 </span>            :                 case 'e': region = &quot;NO&quot;; break;
+<span class="lineNum">     310 </span>            :                 case 'h': region = &quot;YU&quot;; break;
+<span class="lineNum">     311 </span>            :                 case 'k': region = &quot;SK&quot;; break;
+<span class="lineNum">     312 </span>            :                 case 'l': region = &quot;SI&quot;; break;
+<span class="lineNum">     313 </span>            :                 case 'o': region = &quot;ET&quot;; break;
+<span class="lineNum">     314 </span>            :                 case 'q': region = &quot;AL&quot;; break;
+<span class="lineNum">     315 </span>            :                 case 't': region = &quot;ZA&quot;; break;
+<span class="lineNum">     316 </span>            :                 case 'v': region = &quot;SE&quot;; break;
+<span class="lineNum">     317 </span>            :             }
+<span class="lineNum">     318 </span>            :             break;
+<span class="lineNum">     319 </span>            :         case 't':
+<span class="lineNum">     320 </span><span class="lineCov">          6 :             if (c == 'a' || c == 'e') region = &quot;IN&quot;;</span>
+<span class="lineNum">     321 </span><span class="lineCov">          4 :             else if (c == 'h') region = &quot;TH&quot;;</span>
+<span class="lineNum">     322 </span><span class="lineCov">          4 :             else if (c == 'i') region = &quot;ER&quot;;</span>
+<span class="lineNum">     323 </span><span class="lineCov">          4 :             else if (c == 'r') region = &quot;TR&quot;;</span>
+<span class="lineNum">     324 </span><span class="lineCov">          4 :             else if (c == 't') region = &quot;RU&quot;;</span>
+<span class="lineNum">     325 </span>            :             break;
+<span class="lineNum">     326 </span>            :         case 'u':
+<span class="lineNum">     327 </span><span class="lineCov">          3 :             if (c == 'k') region = &quot;UA&quot;;</span>
+<span class="lineNum">     328 </span><span class="lineCov">          3 :             else if (c == 'r') region = &quot;PK&quot;;</span>
+<span class="lineNum">     329 </span>            :             break;
+<span class="lineNum">     330 </span>            :         case 'v':
+<span class="lineNum">     331 </span><span class="lineCov">         12 :             if (c == 'i') region = &quot;VN&quot;;</span>
+<span class="lineNum">     332 </span>            :             break;
+<span class="lineNum">     333 </span>            :         case 'w':
+<span class="lineNum">     334 </span><span class="lineCov">          3 :             if (c == 'a') region = &quot;BE&quot;;</span>
+<span class="lineNum">     335 </span>            :             break;
+<span class="lineNum">     336 </span>            :         case 'x':
+<span class="lineNum">     337 </span><span class="lineCov">          7 :             if (c == 'h') region = &quot;ZA&quot;;</span>
+<span class="lineNum">     338 </span>            :             break;
+<span class="lineNum">     339 </span>            :         case 'z':
+<span class="lineNum">     340 </span><span class="lineCov">         12 :             if (c == 'h') region = &quot;CN&quot;;</span>
+<span class="lineNum">     341 </span><span class="lineCov">         12 :             else if (c == 'u') region = &quot;ZA&quot;;</span>
+<span class="lineNum">     342 </span>            :             break;
+<span class="lineNum">     343 </span>            :     }
+<span class="lineNum">     344 </span><span class="lineCov">        365 :     return((xmlChar *)region);</span>
+<span class="lineNum">     345 </span>            : }
+<span class="lineNum">     346 </span>            : 
+<span class="lineNum">     347 </span>            : /**
+<span class="lineNum">     348 </span>            :  * xsltFreeLocale:
+<span class="lineNum">     349 </span>            :  * @locale: the locale to free
+<span class="lineNum">     350 </span>            :  *
+<span class="lineNum">     351 </span>            :  * Frees a locale created with xsltNewLocale
+<a name="352"><span class="lineNum">     352 </span>            :  */</a>
+<span class="lineNum">     353 </span>            : void
+<span class="lineNum">     354 </span><span class="lineCov">         29 : xsltFreeLocale(xsltLocale locale) {</span>
+<span class="lineNum">     355 </span>            : #ifdef XSLT_LOCALE_XLOCALE
+<span class="lineNum">     356 </span><span class="lineCov">         29 :     freelocale(locale);</span>
+<span class="lineNum">     357 </span>            : #endif
+<span class="lineNum">     358 </span><span class="lineCov">         29 : }</span>
+<span class="lineNum">     359 </span>            : 
+<span class="lineNum">     360 </span>            : /**
+<span class="lineNum">     361 </span>            :  * xsltStrxfrm:
+<span class="lineNum">     362 </span>            :  * @locale: locale created with xsltNewLocale
+<span class="lineNum">     363 </span>            :  * @string: UTF-8 string to transform
+<span class="lineNum">     364 </span>            :  *
+<span class="lineNum">     365 </span>            :  * Transforms a string according to locale. The transformed string must then be
+<span class="lineNum">     366 </span>            :  * compared with xsltLocaleStrcmp and freed with xmlFree.
+<span class="lineNum">     367 </span>            :  *
+<span class="lineNum">     368 </span>            :  * Returns the transformed string or NULL on error
+<a name="369"><span class="lineNum">     369 </span>            :  */</a>
+<span class="lineNum">     370 </span>            : xsltLocaleChar *
+<span class="lineNum">     371 </span><span class="lineNoCov">          0 : xsltStrxfrm(xsltLocale locale, const xmlChar *string)</span>
+<span class="lineNum">     372 </span>            : {
+<span class="lineNum">     373 </span>            : #ifdef XSLT_LOCALE_NONE
+<span class="lineNum">     374 </span>            :     return(NULL);
+<span class="lineNum">     375 </span>            : #else
+<span class="lineNum">     376 </span>            :     size_t xstrlen, r;
+<span class="lineNum">     377 </span>            :     xsltLocaleChar *xstr;
+<span class="lineNum">     378 </span>            : 
+<span class="lineNum">     379 </span>            : #ifdef XSLT_LOCALE_XLOCALE
+<span class="lineNum">     380 </span><span class="lineNoCov">          0 :     xstrlen = strxfrm_l(NULL, (const char *)string, 0, locale) + 1;</span>
+<span class="lineNum">     381 </span><span class="lineNoCov">          0 :     xstr = (xsltLocaleChar *) xmlMalloc(xstrlen);</span>
+<span class="lineNum">     382 </span><span class="lineNoCov">          0 :     if (xstr == NULL) {</span>
+<span class="lineNum">     383 </span><span class="lineNoCov">          0 :         xsltTransformError(NULL, NULL, NULL,</span>
+<span class="lineNum">     384 </span>            :             &quot;xsltStrxfrm : out of memory error\n&quot;);
+<span class="lineNum">     385 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">     386 </span>            :     }
+<span class="lineNum">     387 </span>            : 
+<span class="lineNum">     388 </span><span class="lineNoCov">          0 :     r = strxfrm_l((char *)xstr, (const char *)string, xstrlen, locale);</span>
+<span class="lineNum">     389 </span>            : #endif
+<span class="lineNum">     390 </span>            : 
+<span class="lineNum">     391 </span>            : #ifdef XSLT_LOCALE_WINAPI
+<span class="lineNum">     392 </span>            :     xstrlen = MultiByteToWideChar(CP_UTF8, 0, string, -1, NULL, 0);
+<span class="lineNum">     393 </span>            :     if (xstrlen == 0) {
+<span class="lineNum">     394 </span>            :         xsltTransformError(NULL, NULL, NULL, &quot;xsltStrxfrm : MultiByteToWideChar check failed\n&quot;);
+<span class="lineNum">     395 </span>            :         return(NULL);
+<span class="lineNum">     396 </span>            :     }
+<span class="lineNum">     397 </span>            :     xstr = (xsltLocaleChar*) xmlMalloc(xstrlen * sizeof(xsltLocaleChar));
+<span class="lineNum">     398 </span>            :     if (xstr == NULL) {
+<span class="lineNum">     399 </span>            :         xsltTransformError(NULL, NULL, NULL, &quot;xsltStrxfrm : out of memory\n&quot;);
+<span class="lineNum">     400 </span>            :         return(NULL);
+<span class="lineNum">     401 </span>            :     }
+<span class="lineNum">     402 </span>            :     r = MultiByteToWideChar(CP_UTF8, 0, string, -1, xstr, xstrlen);
+<span class="lineNum">     403 </span>            :     if (r == 0) {
+<span class="lineNum">     404 </span>            :         xsltTransformError(NULL, NULL, NULL, &quot;xsltStrxfrm : MultiByteToWideChar failed\n&quot;);
+<span class="lineNum">     405 </span>            :         xmlFree(xstr);
+<span class="lineNum">     406 </span>            :         return(NULL);
+<span class="lineNum">     407 </span>            :     }
+<span class="lineNum">     408 </span>            :     return(xstr);
+<span class="lineNum">     409 </span>            : #endif /* XSLT_LOCALE_WINAPI */
+<span class="lineNum">     410 </span>            : 
+<span class="lineNum">     411 </span><span class="lineNoCov">          0 :     if (r &gt;= xstrlen) {</span>
+<span class="lineNum">     412 </span><span class="lineNoCov">          0 :         xsltTransformError(NULL, NULL, NULL, &quot;xsltStrxfrm : strxfrm failed\n&quot;);</span>
+<span class="lineNum">     413 </span><span class="lineNoCov">          0 :         xmlFree(xstr);</span>
+<span class="lineNum">     414 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">     415 </span>            :     }
+<span class="lineNum">     416 </span>            : 
+<span class="lineNum">     417 </span>            :     return(xstr);
+<span class="lineNum">     418 </span>            : #endif /* XSLT_LOCALE_NONE */
+<span class="lineNum">     419 </span>            : }
+<span class="lineNum">     420 </span>            : 
+<span class="lineNum">     421 </span>            : /**
+<span class="lineNum">     422 </span>            :  * xsltLocaleStrcmp:
+<span class="lineNum">     423 </span>            :  * @locale: a locale identifier
+<span class="lineNum">     424 </span>            :  * @str1: a string transformed with xsltStrxfrm
+<span class="lineNum">     425 </span>            :  * @str2: a string transformed with xsltStrxfrm
+<span class="lineNum">     426 </span>            :  *
+<span class="lineNum">     427 </span>            :  * Compares two strings transformed with xsltStrxfrm
+<span class="lineNum">     428 </span>            :  *
+<span class="lineNum">     429 </span>            :  * Returns a value &lt; 0 if str1 sorts before str2,
+<span class="lineNum">     430 </span>            :  *         a value &gt; 0 if str1 sorts after str2,
+<span class="lineNum">     431 </span>            :  *         0 if str1 and str2 are equal wrt sorting
+<a name="432"><span class="lineNum">     432 </span>            :  */</a>
+<span class="lineNum">     433 </span>            : int
+<span class="lineNum">     434 </span><span class="lineNoCov">          0 : xsltLocaleStrcmp(xsltLocale locale, const xsltLocaleChar *str1, const xsltLocaleChar *str2) {</span>
+<span class="lineNum">     435 </span>            :     (void)locale;
+<span class="lineNum">     436 </span>            : #ifdef XSLT_LOCALE_WINAPI
+<span class="lineNum">     437 </span>            : {
+<span class="lineNum">     438 </span>            :     int ret;
+<span class="lineNum">     439 </span>            :     if (str1 == str2) return(0);
+<span class="lineNum">     440 </span>            :     if (str1 == NULL) return(-1);
+<span class="lineNum">     441 </span>            :     if (str2 == NULL) return(1);
+<span class="lineNum">     442 </span>            :     ret = CompareStringW(locale, 0, str1, -1, str2, -1);
+<span class="lineNum">     443 </span>            :     if (ret == 0) {
+<span class="lineNum">     444 </span>            :         xsltTransformError(NULL, NULL, NULL, &quot;xsltLocaleStrcmp : CompareStringW fail\n&quot;);
+<span class="lineNum">     445 </span>            :         return(0);
+<span class="lineNum">     446 </span>            :     }
+<span class="lineNum">     447 </span>            :     return(ret - 2);
+<span class="lineNum">     448 </span>            : }
+<span class="lineNum">     449 </span>            : #else
+<span class="lineNum">     450 </span><span class="lineNoCov">          0 :     return(xmlStrcmp(str1, str2));</span>
+<span class="lineNum">     451 </span>            : #endif
+<span class="lineNum">     452 </span>            : }
+<span class="lineNum">     453 </span>            : 
+<span class="lineNum">     454 </span>            : #ifdef XSLT_LOCALE_WINAPI
+<span class="lineNum">     455 </span>            : /**
+<span class="lineNum">     456 </span>            :  * xsltCountSupportedLocales:
+<span class="lineNum">     457 </span>            :  * @lcid: not used
+<span class="lineNum">     458 </span>            :  *
+<span class="lineNum">     459 </span>            :  * callback used to count locales
+<span class="lineNum">     460 </span>            :  *
+<span class="lineNum">     461 </span>            :  * Returns TRUE
+<span class="lineNum">     462 </span>            :  */
+<span class="lineNum">     463 </span>            : BOOL CALLBACK
+<span class="lineNum">     464 </span>            : xsltCountSupportedLocales(LPSTR lcid) {
+<span class="lineNum">     465 </span>            :     (void) lcid;
+<span class="lineNum">     466 </span>            :     ++xsltLocaleListSize;
+<span class="lineNum">     467 </span>            :     return(TRUE);
+<span class="lineNum">     468 </span>            : }
+<span class="lineNum">     469 </span>            : 
+<span class="lineNum">     470 </span>            : /**
+<span class="lineNum">     471 </span>            :  * xsltIterateSupportedLocales:
+<span class="lineNum">     472 </span>            :  * @lcid: not used
+<span class="lineNum">     473 </span>            :  *
+<span class="lineNum">     474 </span>            :  * callback used to track locales
+<span class="lineNum">     475 </span>            :  *
+<span class="lineNum">     476 </span>            :  * Returns TRUE if not at the end of the array
+<span class="lineNum">     477 </span>            :  */
+<span class="lineNum">     478 </span>            : BOOL CALLBACK
+<span class="lineNum">     479 </span>            : xsltIterateSupportedLocales(LPSTR lcid) {
+<span class="lineNum">     480 </span>            :     static int count = 0;
+<span class="lineNum">     481 </span>            :     xmlChar    iso639lang [XSLTMAX_ISO639LANGLEN  +1];
+<span class="lineNum">     482 </span>            :     xmlChar    iso3136ctry[XSLTMAX_ISO3166CNTRYLEN+1];
+<span class="lineNum">     483 </span>            :     int        k, l;
+<span class="lineNum">     484 </span>            :     xsltRFC1766Info *p = xsltLocaleList + count;
+<span class="lineNum">     485 </span>            : 
+<span class="lineNum">     486 </span>            :     k = sscanf(lcid, &quot;%lx&quot;, (long*)&amp;p-&gt;lcid);
+<span class="lineNum">     487 </span>            :     if (k &lt; 1) goto end;
+<span class="lineNum">     488 </span>            :     /*don't count terminating null character*/
+<span class="lineNum">     489 </span>            :     k = GetLocaleInfoA(p-&gt;lcid, LOCALE_SISO639LANGNAME , iso639lang , sizeof(iso639lang ));
+<span class="lineNum">     490 </span>            :     if (--k &lt; 1) goto end;
+<span class="lineNum">     491 </span>            :     l = GetLocaleInfoA(p-&gt;lcid, LOCALE_SISO3166CTRYNAME, iso3136ctry, sizeof(iso3136ctry));
+<span class="lineNum">     492 </span>            :     if (--l &lt; 1) goto end;
+<span class="lineNum">     493 </span>            : 
+<span class="lineNum">     494 </span>            :     {  /*fill results*/
+<span class="lineNum">     495 </span>            :         xmlChar    *q = p-&gt;tag;
+<span class="lineNum">     496 </span>            :         memcpy(q, iso639lang, k);
+<span class="lineNum">     497 </span>            :         q += k;
+<span class="lineNum">     498 </span>            :         *q++ = '-';
+<span class="lineNum">     499 </span>            :         memcpy(q, iso3136ctry, l);
+<span class="lineNum">     500 </span>            :         q += l;
+<span class="lineNum">     501 </span>            :         *q = '\0';
+<span class="lineNum">     502 </span>            :     }
+<span class="lineNum">     503 </span>            :     ++count;
+<span class="lineNum">     504 </span>            : end:
+<span class="lineNum">     505 </span>            :     return((count &lt; xsltLocaleListSize) ? TRUE : FALSE);
+<span class="lineNum">     506 </span>            : }
+<span class="lineNum">     507 </span>            : 
+<span class="lineNum">     508 </span>            : 
+<span class="lineNum">     509 </span>            : static void
+<span class="lineNum">     510 </span>            : xsltEnumSupportedLocales(void) {
+<span class="lineNum">     511 </span>            :     xmlRMutexLock(xsltLocaleMutex);
+<span class="lineNum">     512 </span>            :     if (xsltLocaleListSize &lt;= 0) {
+<span class="lineNum">     513 </span>            :         size_t len;
+<span class="lineNum">     514 </span>            : 
+<span class="lineNum">     515 </span>            :         EnumSystemLocalesA(xsltCountSupportedLocales, LCID_SUPPORTED);
+<span class="lineNum">     516 </span>            : 
+<span class="lineNum">     517 </span>            :         len = xsltLocaleListSize * sizeof(xsltRFC1766Info);
+<span class="lineNum">     518 </span>            :         xsltLocaleList = xmlMalloc(len);
+<span class="lineNum">     519 </span>            :         memset(xsltLocaleList, 0, len);
+<span class="lineNum">     520 </span>            :         EnumSystemLocalesA(xsltIterateSupportedLocales, LCID_SUPPORTED);
+<span class="lineNum">     521 </span>            :     }
+<span class="lineNum">     522 </span>            :     xmlRMutexUnlock(xsltLocaleMutex);
+<span class="lineNum">     523 </span>            : }
+<span class="lineNum">     524 </span>            : 
+<span class="lineNum">     525 </span>            : #endif /*def XSLT_LOCALE_WINAPI*/
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

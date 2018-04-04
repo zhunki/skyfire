@@ -1,0 +1,536 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - gcov/xmlmodule.c</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">gcov</a> - xmlmodule.c<span style="font-size: 80%;"> (source / <a href="xmlmodule.c.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">51</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-11-07</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">6</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /*</a>
+<span class="lineNum">       2 </span>            :  * xmlmodule.c : basic API for dynamic module loading added 2.6.17
+<span class="lineNum">       3 </span>            :  *
+<span class="lineNum">       4 </span>            :  * See Copyright for the status of this software.
+<span class="lineNum">       5 </span>            :  *
+<span class="lineNum">       6 </span>            :  * joelwreed@comcast.net
+<span class="lineNum">       7 </span>            :  *
+<span class="lineNum">       8 </span>            :  * http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
+<span class="lineNum">       9 </span>            :  */
+<span class="lineNum">      10 </span>            : 
+<span class="lineNum">      11 </span>            : #define IN_LIBXML
+<span class="lineNum">      12 </span>            : #include &quot;libxml.h&quot;
+<span class="lineNum">      13 </span>            : 
+<span class="lineNum">      14 </span>            : #include &lt;string.h&gt;
+<span class="lineNum">      15 </span>            : #include &lt;libxml/xmlmemory.h&gt;
+<span class="lineNum">      16 </span>            : #include &lt;libxml/xmlerror.h&gt;
+<span class="lineNum">      17 </span>            : #include &lt;libxml/xmlmodule.h&gt;
+<span class="lineNum">      18 </span>            : #include &lt;libxml/globals.h&gt;
+<span class="lineNum">      19 </span>            : 
+<span class="lineNum">      20 </span>            : #ifdef LIBXML_MODULES_ENABLED
+<span class="lineNum">      21 </span>            : 
+<span class="lineNum">      22 </span>            : struct _xmlModule {
+<span class="lineNum">      23 </span>            :     unsigned char *name;
+<span class="lineNum">      24 </span>            :     void *handle;
+<span class="lineNum">      25 </span>            : };
+<span class="lineNum">      26 </span>            : 
+<span class="lineNum">      27 </span>            : static void *xmlModulePlatformOpen(const char *name);
+<span class="lineNum">      28 </span>            : static int xmlModulePlatformClose(void *handle);
+<span class="lineNum">      29 </span>            : static int xmlModulePlatformSymbol(void *handle, const char *name, void **result);
+<span class="lineNum">      30 </span>            : 
+<span class="lineNum">      31 </span>            : /************************************************************************
+<span class="lineNum">      32 </span>            :  *                                                                      *
+<span class="lineNum">      33 </span>            :  *              module memory error handler                             *
+<span class="lineNum">      34 </span>            :  *                                                                      *
+<span class="lineNum">      35 </span>            :  ************************************************************************/
+<span class="lineNum">      36 </span>            : 
+<span class="lineNum">      37 </span>            : /**
+<span class="lineNum">      38 </span>            :  * xmlModuleErrMemory:
+<span class="lineNum">      39 </span>            :  * @extra:  extra information
+<span class="lineNum">      40 </span>            :  *
+<span class="lineNum">      41 </span>            :  * Handle an out of memory condition
+<a name="42"><span class="lineNum">      42 </span>            :  */</a>
+<span class="lineNum">      43 </span>            : static void
+<span class="lineNum">      44 </span><span class="lineNoCov">          0 : xmlModuleErrMemory(xmlModulePtr module, const char *extra)</span>
+<span class="lineNum">      45 </span>            : {
+<span class="lineNum">      46 </span><span class="lineNoCov">          0 :     const char *name = NULL;</span>
+<span class="lineNum">      47 </span>            : 
+<span class="lineNum">      48 </span><span class="lineNoCov">          0 :     if (module != NULL) {</span>
+<span class="lineNum">      49 </span><span class="lineNoCov">          0 :         name = (const char *) module-&gt;name;</span>
+<span class="lineNum">      50 </span>            :     }
+<span class="lineNum">      51 </span>            : 
+<span class="lineNum">      52 </span><span class="lineNoCov">          0 :     __xmlRaiseError(NULL, NULL, NULL, NULL, NULL, XML_FROM_MODULE,</span>
+<span class="lineNum">      53 </span>            :                     XML_ERR_NO_MEMORY, XML_ERR_FATAL, NULL, 0, extra,
+<span class="lineNum">      54 </span>            :                     name, NULL, 0, 0,
+<span class="lineNum">      55 </span>            :                     &quot;Memory allocation failed : %s\n&quot;, extra);
+<span class="lineNum">      56 </span><span class="lineNoCov">          0 : }</span>
+<span class="lineNum">      57 </span>            : 
+<span class="lineNum">      58 </span>            : /**
+<span class="lineNum">      59 </span>            :  * xmlModuleOpen:
+<span class="lineNum">      60 </span>            :  * @name: the module name
+<span class="lineNum">      61 </span>            :  * @options: a set of xmlModuleOption
+<span class="lineNum">      62 </span>            :  *
+<span class="lineNum">      63 </span>            :  * Opens a module/shared library given its name or path
+<span class="lineNum">      64 </span>            :  * NOTE: that due to portability issues, behaviour can only be
+<span class="lineNum">      65 </span>            :  * guaranteed with @name using ASCII. We canot guarantee that
+<span class="lineNum">      66 </span>            :  * an UTF-8 string would work, which is why name is a const char *
+<span class="lineNum">      67 </span>            :  * and not a const xmlChar * .
+<span class="lineNum">      68 </span>            :  * TODO: options are not yet implemented.
+<span class="lineNum">      69 </span>            :  *
+<span class="lineNum">      70 </span>            :  * Returns a handle for the module or NULL in case of error
+<a name="71"><span class="lineNum">      71 </span>            :  */</a>
+<span class="lineNum">      72 </span>            : xmlModulePtr
+<span class="lineNum">      73 </span><span class="lineNoCov">          0 : xmlModuleOpen(const char *name, int options ATTRIBUTE_UNUSED)</span>
+<span class="lineNum">      74 </span>            : {
+<span class="lineNum">      75 </span>            :     xmlModulePtr module;
+<span class="lineNum">      76 </span>            : 
+<span class="lineNum">      77 </span><span class="lineNoCov">          0 :     module = (xmlModulePtr) xmlMalloc(sizeof(xmlModule));</span>
+<span class="lineNum">      78 </span><span class="lineNoCov">          0 :     if (module == NULL) {</span>
+<span class="lineNum">      79 </span><span class="lineNoCov">          0 :         xmlModuleErrMemory(NULL, &quot;creating module&quot;);</span>
+<span class="lineNum">      80 </span><span class="lineNoCov">          0 :         return (NULL);</span>
+<span class="lineNum">      81 </span>            :     }
+<span class="lineNum">      82 </span>            : 
+<span class="lineNum">      83 </span>            :     memset(module, 0, sizeof(xmlModule));
+<span class="lineNum">      84 </span>            : 
+<span class="lineNum">      85 </span><span class="lineNoCov">          0 :     module-&gt;handle = xmlModulePlatformOpen(name);</span>
+<span class="lineNum">      86 </span>            : 
+<span class="lineNum">      87 </span><span class="lineNoCov">          0 :     if (module-&gt;handle == NULL) {</span>
+<span class="lineNum">      88 </span><span class="lineNoCov">          0 :         xmlFree(module);</span>
+<span class="lineNum">      89 </span><span class="lineNoCov">          0 :         __xmlRaiseError(NULL, NULL, NULL, NULL, NULL, XML_FROM_MODULE,</span>
+<span class="lineNum">      90 </span>            :                         XML_MODULE_OPEN, XML_ERR_FATAL, NULL, 0, 0,
+<span class="lineNum">      91 </span>            :                         name, NULL, 0, 0, &quot;failed to open %s\n&quot;, name);
+<span class="lineNum">      92 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">      93 </span>            :     }
+<span class="lineNum">      94 </span>            : 
+<span class="lineNum">      95 </span><span class="lineNoCov">          0 :     module-&gt;name = xmlStrdup((const xmlChar *) name);</span>
+<span class="lineNum">      96 </span><span class="lineNoCov">          0 :     return (module);</span>
+<span class="lineNum">      97 </span>            : }
+<span class="lineNum">      98 </span>            : 
+<span class="lineNum">      99 </span>            : /**
+<span class="lineNum">     100 </span>            :  * xmlModuleSymbol:
+<span class="lineNum">     101 </span>            :  * @module: the module
+<span class="lineNum">     102 </span>            :  * @name: the name of the symbol
+<span class="lineNum">     103 </span>            :  * @symbol: the resulting symbol address
+<span class="lineNum">     104 </span>            :  *
+<span class="lineNum">     105 </span>            :  * Lookup for a symbol address in the given module
+<span class="lineNum">     106 </span>            :  * NOTE: that due to portability issues, behaviour can only be
+<span class="lineNum">     107 </span>            :  * guaranteed with @name using ASCII. We canot guarantee that
+<span class="lineNum">     108 </span>            :  * an UTF-8 string would work, which is why name is a const char *
+<span class="lineNum">     109 </span>            :  * and not a const xmlChar * .
+<span class="lineNum">     110 </span>            :  *
+<span class="lineNum">     111 </span>            :  * Returns 0 if the symbol was found, or -1 in case of error
+<a name="112"><span class="lineNum">     112 </span>            :  */</a>
+<span class="lineNum">     113 </span>            : int
+<span class="lineNum">     114 </span><span class="lineNoCov">          0 : xmlModuleSymbol(xmlModulePtr module, const char *name, void **symbol)</span>
+<span class="lineNum">     115 </span>            : {
+<span class="lineNum">     116 </span><span class="lineNoCov">          0 :     int rc = -1;</span>
+<span class="lineNum">     117 </span>            : 
+<span class="lineNum">     118 </span><span class="lineNoCov">          0 :     if ((NULL == module) || (symbol == NULL) || (name == NULL)) {</span>
+<span class="lineNum">     119 </span><span class="lineNoCov">          0 :         __xmlRaiseError(NULL, NULL, NULL, NULL, NULL, XML_FROM_MODULE,</span>
+<span class="lineNum">     120 </span>            :                         XML_MODULE_OPEN, XML_ERR_FATAL, NULL, 0, 0,
+<span class="lineNum">     121 </span>            :                         NULL, NULL, 0, 0, &quot;null parameter\n&quot;);
+<span class="lineNum">     122 </span><span class="lineNoCov">          0 :         return rc;</span>
+<span class="lineNum">     123 </span>            :     }
+<span class="lineNum">     124 </span>            : 
+<span class="lineNum">     125 </span><span class="lineNoCov">          0 :     rc = xmlModulePlatformSymbol(module-&gt;handle, name, symbol);</span>
+<span class="lineNum">     126 </span>            : 
+<span class="lineNum">     127 </span><span class="lineNoCov">          0 :     if (rc == -1) {</span>
+<span class="lineNum">     128 </span><span class="lineNoCov">          0 :         __xmlRaiseError(NULL, NULL, NULL, NULL, NULL, XML_FROM_MODULE,</span>
+<span class="lineNum">     129 </span>            :                         XML_MODULE_OPEN, XML_ERR_FATAL, NULL, 0, 0,
+<span class="lineNum">     130 </span>            :                         name, NULL, 0, 0,
+<span class="lineNum">     131 </span>            :                         &quot;failed to find symbol: %s\n&quot;,
+<span class="lineNum">     132 </span>            :                         (name == NULL ? &quot;NULL&quot; : name));
+<span class="lineNum">     133 </span><span class="lineNoCov">          0 :         return rc;</span>
+<span class="lineNum">     134 </span>            :     }
+<span class="lineNum">     135 </span>            : 
+<span class="lineNum">     136 </span>            :     return rc;
+<span class="lineNum">     137 </span>            : }
+<span class="lineNum">     138 </span>            : 
+<span class="lineNum">     139 </span>            : /**
+<span class="lineNum">     140 </span>            :  * xmlModuleClose:
+<span class="lineNum">     141 </span>            :  * @module: the module handle
+<span class="lineNum">     142 </span>            :  *
+<span class="lineNum">     143 </span>            :  * The close operations unload the associated module and free the
+<span class="lineNum">     144 </span>            :  * data associated to the module.
+<span class="lineNum">     145 </span>            :  *
+<span class="lineNum">     146 </span>            :  * Returns 0 in case of success, -1 in case of argument error and -2
+<span class="lineNum">     147 </span>            :  *         if the module could not be closed/unloaded.
+<a name="148"><span class="lineNum">     148 </span>            :  */</a>
+<span class="lineNum">     149 </span>            : int
+<span class="lineNum">     150 </span><span class="lineNoCov">          0 : xmlModuleClose(xmlModulePtr module)</span>
+<span class="lineNum">     151 </span>            : {
+<span class="lineNum">     152 </span>            :     int rc;
+<span class="lineNum">     153 </span>            : 
+<span class="lineNum">     154 </span><span class="lineNoCov">          0 :     if (NULL == module) {</span>
+<span class="lineNum">     155 </span><span class="lineNoCov">          0 :         __xmlRaiseError(NULL, NULL, NULL, NULL, NULL, XML_FROM_MODULE,</span>
+<span class="lineNum">     156 </span>            :                         XML_MODULE_CLOSE, XML_ERR_FATAL, NULL, 0, 0,
+<span class="lineNum">     157 </span>            :                         NULL, NULL, 0, 0, &quot;null module pointer\n&quot;);
+<span class="lineNum">     158 </span><span class="lineNoCov">          0 :         return -1;</span>
+<span class="lineNum">     159 </span>            :     }
+<span class="lineNum">     160 </span>            : 
+<span class="lineNum">     161 </span><span class="lineNoCov">          0 :     rc = xmlModulePlatformClose(module-&gt;handle);</span>
+<span class="lineNum">     162 </span>            : 
+<span class="lineNum">     163 </span><span class="lineNoCov">          0 :     if (rc != 0) {</span>
+<span class="lineNum">     164 </span><span class="lineNoCov">          0 :         __xmlRaiseError(NULL, NULL, NULL, NULL, NULL, XML_FROM_MODULE,</span>
+<span class="lineNum">     165 </span>            :                         XML_MODULE_CLOSE, XML_ERR_FATAL, NULL, 0, 0,
+<span class="lineNum">     166 </span><span class="lineNoCov">          0 :                         (const char *) module-&gt;name, NULL, 0, 0,</span>
+<span class="lineNum">     167 </span>            :                         &quot;failed to close: %s\n&quot;, module-&gt;name);
+<span class="lineNum">     168 </span><span class="lineNoCov">          0 :         return -2;</span>
+<span class="lineNum">     169 </span>            :     }
+<span class="lineNum">     170 </span>            : 
+<span class="lineNum">     171 </span><span class="lineNoCov">          0 :     rc = xmlModuleFree(module);</span>
+<span class="lineNum">     172 </span><span class="lineNoCov">          0 :     return (rc);</span>
+<span class="lineNum">     173 </span>            : }
+<span class="lineNum">     174 </span>            : 
+<span class="lineNum">     175 </span>            : /**
+<span class="lineNum">     176 </span>            :  * xmlModuleFree:
+<span class="lineNum">     177 </span>            :  * @module: the module handle
+<span class="lineNum">     178 </span>            :  *
+<span class="lineNum">     179 </span>            :  * The free operations free the data associated to the module
+<span class="lineNum">     180 </span>            :  * but does not unload the associated shared library which may still
+<span class="lineNum">     181 </span>            :  * be in use.
+<span class="lineNum">     182 </span>            :  *
+<span class="lineNum">     183 </span>            :  * Returns 0 in case of success, -1 in case of argument error
+<a name="184"><span class="lineNum">     184 </span>            :  */</a>
+<span class="lineNum">     185 </span>            : int
+<span class="lineNum">     186 </span><span class="lineNoCov">          0 : xmlModuleFree(xmlModulePtr module)</span>
+<span class="lineNum">     187 </span>            : {
+<span class="lineNum">     188 </span><span class="lineNoCov">          0 :     if (NULL == module) {</span>
+<span class="lineNum">     189 </span><span class="lineNoCov">          0 :         __xmlRaiseError(NULL, NULL, NULL, NULL, NULL, XML_FROM_MODULE,</span>
+<span class="lineNum">     190 </span>            :                         XML_MODULE_CLOSE, XML_ERR_FATAL, NULL, 0, NULL,
+<span class="lineNum">     191 </span>            :                         NULL, NULL, 0, 0, &quot;null module pointer\n&quot;);
+<span class="lineNum">     192 </span><span class="lineNoCov">          0 :         return -1;</span>
+<span class="lineNum">     193 </span>            :     }
+<span class="lineNum">     194 </span>            : 
+<span class="lineNum">     195 </span><span class="lineNoCov">          0 :     xmlFree(module-&gt;name);</span>
+<span class="lineNum">     196 </span><span class="lineNoCov">          0 :     xmlFree(module);</span>
+<span class="lineNum">     197 </span>            : 
+<span class="lineNum">     198 </span><span class="lineNoCov">          0 :     return (0);</span>
+<span class="lineNum">     199 </span>            : }
+<span class="lineNum">     200 </span>            : 
+<span class="lineNum">     201 </span>            : #if defined(HAVE_DLOPEN) &amp;&amp; !defined(_WIN32)
+<span class="lineNum">     202 </span>            : #ifdef HAVE_DLFCN_H
+<span class="lineNum">     203 </span>            : #include &lt;dlfcn.h&gt;
+<span class="lineNum">     204 </span>            : #endif
+<span class="lineNum">     205 </span>            : 
+<span class="lineNum">     206 </span>            : #ifndef RTLD_GLOBAL            /* For Tru64 UNIX 4.0 */
+<span class="lineNum">     207 </span>            : #define RTLD_GLOBAL 0
+<span class="lineNum">     208 </span>            : #endif
+<span class="lineNum">     209 </span>            : 
+<span class="lineNum">     210 </span>            : /**
+<span class="lineNum">     211 </span>            :  * xmlModulePlatformOpen:
+<span class="lineNum">     212 </span>            :  * @name: path to the module
+<span class="lineNum">     213 </span>            :  *
+<span class="lineNum">     214 </span>            :  * returns a handle on success, and zero on error.
+<span class="lineNum">     215 </span>            :  */
+<span class="lineNum">     216 </span>            : 
+<span class="lineNum">     217 </span>            : static void *
+<span class="lineNum">     218 </span>            : xmlModulePlatformOpen(const char *name)
+<span class="lineNum">     219 </span>            : {
+<span class="lineNum">     220 </span><span class="lineNoCov">          0 :     return dlopen(name, RTLD_GLOBAL | RTLD_NOW);</span>
+<span class="lineNum">     221 </span>            : }
+<span class="lineNum">     222 </span>            : 
+<span class="lineNum">     223 </span>            : /*
+<span class="lineNum">     224 </span>            :  * xmlModulePlatformClose:
+<span class="lineNum">     225 </span>            :  * @handle: handle to the module
+<span class="lineNum">     226 </span>            :  *
+<span class="lineNum">     227 </span>            :  * returns 0 on success, and non-zero on error.
+<span class="lineNum">     228 </span>            :  */
+<span class="lineNum">     229 </span>            : 
+<span class="lineNum">     230 </span>            : static int
+<span class="lineNum">     231 </span>            : xmlModulePlatformClose(void *handle)
+<span class="lineNum">     232 </span>            : {
+<span class="lineNum">     233 </span><span class="lineNoCov">          0 :     return dlclose(handle);</span>
+<span class="lineNum">     234 </span>            : }
+<span class="lineNum">     235 </span>            : 
+<span class="lineNum">     236 </span>            : /*
+<span class="lineNum">     237 </span>            :  * xmlModulePlatformSymbol:
+<span class="lineNum">     238 </span>            :  * http://www.opengroup.org/onlinepubs/009695399/functions/dlsym.html
+<span class="lineNum">     239 </span>            :  * returns 0 on success and the loaded symbol in result, and -1 on error.
+<span class="lineNum">     240 </span>            :  */
+<a name="241"><span class="lineNum">     241 </span>            : </a>
+<span class="lineNum">     242 </span>            : static int
+<span class="lineNum">     243 </span><span class="lineNoCov">          0 : xmlModulePlatformSymbol(void *handle, const char *name, void **symbol)</span>
+<span class="lineNum">     244 </span>            : {
+<span class="lineNum">     245 </span><span class="lineNoCov">          0 :     *symbol = dlsym(handle, name);</span>
+<span class="lineNum">     246 </span><span class="lineNoCov">          0 :     if (dlerror() != NULL) {</span>
+<span class="lineNum">     247 </span>            :         return -1;
+<span class="lineNum">     248 </span>            :     }
+<span class="lineNum">     249 </span><span class="lineNoCov">          0 :     return 0;</span>
+<span class="lineNum">     250 </span>            : }
+<span class="lineNum">     251 </span>            : 
+<span class="lineNum">     252 </span>            : #else /* ! HAVE_DLOPEN */
+<span class="lineNum">     253 </span>            : 
+<span class="lineNum">     254 </span>            : #ifdef HAVE_SHLLOAD             /* HAVE_SHLLOAD */
+<span class="lineNum">     255 </span>            : #ifdef HAVE_DL_H
+<span class="lineNum">     256 </span>            : #include &lt;dl.h&gt;
+<span class="lineNum">     257 </span>            : #endif
+<span class="lineNum">     258 </span>            : /*
+<span class="lineNum">     259 </span>            :  * xmlModulePlatformOpen:
+<span class="lineNum">     260 </span>            :  * returns a handle on success, and zero on error.
+<span class="lineNum">     261 </span>            :  */
+<span class="lineNum">     262 </span>            : 
+<span class="lineNum">     263 </span>            : static void *
+<span class="lineNum">     264 </span>            : xmlModulePlatformOpen(const char *name)
+<span class="lineNum">     265 </span>            : {
+<span class="lineNum">     266 </span>            :     return shl_load(name, BIND_IMMEDIATE, 0L);
+<span class="lineNum">     267 </span>            : }
+<span class="lineNum">     268 </span>            : 
+<span class="lineNum">     269 </span>            : /*
+<span class="lineNum">     270 </span>            :  * xmlModulePlatformClose:
+<span class="lineNum">     271 </span>            :  * returns 0 on success, and non-zero on error.
+<span class="lineNum">     272 </span>            :  */
+<span class="lineNum">     273 </span>            : 
+<span class="lineNum">     274 </span>            : static int
+<span class="lineNum">     275 </span>            : xmlModulePlatformClose(void *handle)
+<span class="lineNum">     276 </span>            : {
+<span class="lineNum">     277 </span>            :     return shl_unload(handle);
+<span class="lineNum">     278 </span>            : }
+<span class="lineNum">     279 </span>            : 
+<span class="lineNum">     280 </span>            : /*
+<span class="lineNum">     281 </span>            :  * xmlModulePlatformSymbol:
+<span class="lineNum">     282 </span>            :  * http://docs.hp.com/en/B2355-90683/shl_load.3X.html
+<span class="lineNum">     283 </span>            :  * returns 0 on success and the loaded symbol in result, and -1 on error.
+<span class="lineNum">     284 </span>            :  */
+<span class="lineNum">     285 </span>            : 
+<span class="lineNum">     286 </span>            : static int
+<span class="lineNum">     287 </span>            : xmlModulePlatformSymbol(void *handle, const char *name, void **symbol)
+<span class="lineNum">     288 </span>            : {
+<span class="lineNum">     289 </span>            :     int rc;
+<span class="lineNum">     290 </span>            : 
+<span class="lineNum">     291 </span>            :     errno = 0;
+<span class="lineNum">     292 </span>            :     rc = shl_findsym(&amp;handle, name, TYPE_UNDEFINED, symbol);
+<span class="lineNum">     293 </span>            :     return rc;
+<span class="lineNum">     294 </span>            : }
+<span class="lineNum">     295 </span>            : 
+<span class="lineNum">     296 </span>            : #endif /* HAVE_SHLLOAD */
+<span class="lineNum">     297 </span>            : #endif /* ! HAVE_DLOPEN */
+<span class="lineNum">     298 </span>            : 
+<span class="lineNum">     299 </span>            : #ifdef _WIN32
+<span class="lineNum">     300 </span>            : 
+<span class="lineNum">     301 </span>            : #include &lt;windows.h&gt;
+<span class="lineNum">     302 </span>            : 
+<span class="lineNum">     303 </span>            : /*
+<span class="lineNum">     304 </span>            :  * xmlModulePlatformOpen:
+<span class="lineNum">     305 </span>            :  * returns a handle on success, and zero on error.
+<span class="lineNum">     306 </span>            :  */
+<span class="lineNum">     307 </span>            : 
+<span class="lineNum">     308 </span>            : static void *
+<span class="lineNum">     309 </span>            : xmlModulePlatformOpen(const char *name)
+<span class="lineNum">     310 </span>            : {
+<span class="lineNum">     311 </span>            :     return LoadLibraryA(name);
+<span class="lineNum">     312 </span>            : }
+<span class="lineNum">     313 </span>            : 
+<span class="lineNum">     314 </span>            : /*
+<span class="lineNum">     315 </span>            :  * xmlModulePlatformClose:
+<span class="lineNum">     316 </span>            :  * returns 0 on success, and non-zero on error.
+<span class="lineNum">     317 </span>            :  */
+<span class="lineNum">     318 </span>            : 
+<span class="lineNum">     319 </span>            : static int
+<span class="lineNum">     320 </span>            : xmlModulePlatformClose(void *handle)
+<span class="lineNum">     321 </span>            : {
+<span class="lineNum">     322 </span>            :     int rc;
+<span class="lineNum">     323 </span>            : 
+<span class="lineNum">     324 </span>            :     rc = FreeLibrary(handle);
+<span class="lineNum">     325 </span>            :     return (0 == rc);
+<span class="lineNum">     326 </span>            : }
+<span class="lineNum">     327 </span>            : 
+<span class="lineNum">     328 </span>            : /*
+<span class="lineNum">     329 </span>            :  * xmlModulePlatformSymbol:
+<span class="lineNum">     330 </span>            :  * http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/getprocaddress.asp
+<span class="lineNum">     331 </span>            :  * returns 0 on success and the loaded symbol in result, and -1 on error.
+<span class="lineNum">     332 </span>            :  */
+<span class="lineNum">     333 </span>            : 
+<span class="lineNum">     334 </span>            : static int
+<span class="lineNum">     335 </span>            : xmlModulePlatformSymbol(void *handle, const char *name, void **symbol)
+<span class="lineNum">     336 </span>            : {
+<span class="lineNum">     337 </span>            : #ifdef _WIN32_WCE
+<span class="lineNum">     338 </span>            :     /*
+<span class="lineNum">     339 </span>            :      * GetProcAddressA seems only available on WinCE
+<span class="lineNum">     340 </span>            :      */
+<span class="lineNum">     341 </span>            :     *symbol = GetProcAddressA(handle, name);
+<span class="lineNum">     342 </span>            : #else
+<span class="lineNum">     343 </span>            :     *symbol = GetProcAddress(handle, name);
+<span class="lineNum">     344 </span>            : #endif
+<span class="lineNum">     345 </span>            :     return (NULL == *symbol) ? -1 : 0;
+<span class="lineNum">     346 </span>            : }
+<span class="lineNum">     347 </span>            : 
+<span class="lineNum">     348 </span>            : #endif /* _WIN32 */
+<span class="lineNum">     349 </span>            : 
+<span class="lineNum">     350 </span>            : #ifdef HAVE_BEOS
+<span class="lineNum">     351 </span>            : 
+<span class="lineNum">     352 </span>            : #include &lt;kernel/image.h&gt;
+<span class="lineNum">     353 </span>            : 
+<span class="lineNum">     354 </span>            : /*
+<span class="lineNum">     355 </span>            :  * xmlModulePlatformOpen:
+<span class="lineNum">     356 </span>            :  * beos api info: http://www.beunited.org/bebook/The%20Kernel%20Kit/Images.html
+<span class="lineNum">     357 </span>            :  * returns a handle on success, and zero on error.
+<span class="lineNum">     358 </span>            :  */
+<span class="lineNum">     359 </span>            : 
+<span class="lineNum">     360 </span>            : static void *
+<span class="lineNum">     361 </span>            : xmlModulePlatformOpen(const char *name)
+<span class="lineNum">     362 </span>            : {
+<span class="lineNum">     363 </span>            :     return (void *) load_add_on(name);
+<span class="lineNum">     364 </span>            : }
+<span class="lineNum">     365 </span>            : 
+<span class="lineNum">     366 </span>            : /*
+<span class="lineNum">     367 </span>            :  * xmlModulePlatformClose:
+<span class="lineNum">     368 </span>            :  * beos api info: http://www.beunited.org/bebook/The%20Kernel%20Kit/Images.html
+<span class="lineNum">     369 </span>            :  * returns 0 on success, and non-zero on error.
+<span class="lineNum">     370 </span>            :  */
+<span class="lineNum">     371 </span>            : 
+<span class="lineNum">     372 </span>            : static int
+<span class="lineNum">     373 </span>            : xmlModulePlatformClose(void *handle)
+<span class="lineNum">     374 </span>            : {
+<span class="lineNum">     375 </span>            :     status_t rc;
+<span class="lineNum">     376 </span>            : 
+<span class="lineNum">     377 </span>            :     rc = unload_add_on((image_id) handle);
+<span class="lineNum">     378 </span>            : 
+<span class="lineNum">     379 </span>            :     if (rc == B_OK)
+<span class="lineNum">     380 </span>            :         return 0;
+<span class="lineNum">     381 </span>            :     else
+<span class="lineNum">     382 </span>            :         return -1;
+<span class="lineNum">     383 </span>            : }
+<span class="lineNum">     384 </span>            : 
+<span class="lineNum">     385 </span>            : /*
+<span class="lineNum">     386 </span>            :  * xmlModulePlatformSymbol:
+<span class="lineNum">     387 </span>            :  * beos api info: http://www.beunited.org/bebook/The%20Kernel%20Kit/Images.html
+<span class="lineNum">     388 </span>            :  * returns 0 on success and the loaded symbol in result, and -1 on error.
+<span class="lineNum">     389 </span>            :  */
+<span class="lineNum">     390 </span>            : 
+<span class="lineNum">     391 </span>            : static int
+<span class="lineNum">     392 </span>            : xmlModulePlatformSymbol(void *handle, const char *name, void **symbol)
+<span class="lineNum">     393 </span>            : {
+<span class="lineNum">     394 </span>            :     status_t rc;
+<span class="lineNum">     395 </span>            : 
+<span class="lineNum">     396 </span>            :     rc = get_image_symbol((image_id) handle, name, B_SYMBOL_TYPE_ANY, symbol);
+<span class="lineNum">     397 </span>            : 
+<span class="lineNum">     398 </span>            :     return (rc == B_OK) ? 0 : -1;
+<span class="lineNum">     399 </span>            : }
+<span class="lineNum">     400 </span>            : 
+<span class="lineNum">     401 </span>            : #endif /* HAVE_BEOS */
+<span class="lineNum">     402 </span>            : 
+<span class="lineNum">     403 </span>            : #ifdef HAVE_OS2
+<span class="lineNum">     404 </span>            : 
+<span class="lineNum">     405 </span>            : #include &lt;os2.h&gt;
+<span class="lineNum">     406 </span>            : 
+<span class="lineNum">     407 </span>            : /*
+<span class="lineNum">     408 </span>            :  * xmlModulePlatformOpen:
+<span class="lineNum">     409 </span>            :  * os2 api info: http://www.edm2.com/os2api/Dos/DosLoadModule.html
+<span class="lineNum">     410 </span>            :  * returns a handle on success, and zero on error.
+<span class="lineNum">     411 </span>            :  */
+<span class="lineNum">     412 </span>            : 
+<span class="lineNum">     413 </span>            : static void *
+<span class="lineNum">     414 </span>            : xmlModulePlatformOpen(const char *name)
+<span class="lineNum">     415 </span>            : {
+<span class="lineNum">     416 </span>            :     char errbuf[256];
+<span class="lineNum">     417 </span>            :     void *handle;
+<span class="lineNum">     418 </span>            :     int rc;
+<span class="lineNum">     419 </span>            : 
+<span class="lineNum">     420 </span>            :     rc = DosLoadModule(errbuf, sizeof(errbuf) - 1, name, &amp;handle);
+<span class="lineNum">     421 </span>            : 
+<span class="lineNum">     422 </span>            :     if (rc)
+<span class="lineNum">     423 </span>            :         return 0;
+<span class="lineNum">     424 </span>            :     else
+<span class="lineNum">     425 </span>            :         return (handle);
+<span class="lineNum">     426 </span>            : }
+<span class="lineNum">     427 </span>            : 
+<span class="lineNum">     428 </span>            : /*
+<span class="lineNum">     429 </span>            :  * xmlModulePlatformClose:
+<span class="lineNum">     430 </span>            :  * os2 api info: http://www.edm2.com/os2api/Dos/DosFreeModule.html
+<span class="lineNum">     431 </span>            :  * returns 0 on success, and non-zero on error.
+<span class="lineNum">     432 </span>            :  */
+<span class="lineNum">     433 </span>            : 
+<span class="lineNum">     434 </span>            : static int
+<span class="lineNum">     435 </span>            : xmlModulePlatformClose(void *handle)
+<span class="lineNum">     436 </span>            : {
+<span class="lineNum">     437 </span>            :     return DosFreeModule(handle);
+<span class="lineNum">     438 </span>            : }
+<span class="lineNum">     439 </span>            : 
+<span class="lineNum">     440 </span>            : /*
+<span class="lineNum">     441 </span>            :  * xmlModulePlatformSymbol:
+<span class="lineNum">     442 </span>            :  * os2 api info: http://www.edm2.com/os2api/Dos/DosQueryProcAddr.html
+<span class="lineNum">     443 </span>            :  * returns 0 on success and the loaded symbol in result, and -1 on error.
+<span class="lineNum">     444 </span>            :  */
+<span class="lineNum">     445 </span>            : 
+<span class="lineNum">     446 </span>            : static int
+<span class="lineNum">     447 </span>            : xmlModulePlatformSymbol(void *handle, const char *name, void **symbol)
+<span class="lineNum">     448 </span>            : {
+<span class="lineNum">     449 </span>            :     int rc;
+<span class="lineNum">     450 </span>            : 
+<span class="lineNum">     451 </span>            :     rc = DosQueryProcAddr(handle, 0, name, symbol);
+<span class="lineNum">     452 </span>            : 
+<span class="lineNum">     453 </span>            :     return (rc == NO_ERROR) ? 0 : -1;
+<span class="lineNum">     454 </span>            : }
+<span class="lineNum">     455 </span>            : 
+<span class="lineNum">     456 </span>            : #endif /* HAVE_OS2 */
+<span class="lineNum">     457 </span>            : 
+<span class="lineNum">     458 </span>            : #define bottom_xmlmodule
+<span class="lineNum">     459 </span>            : #include &quot;elfgcchack.h&quot;
+<span class="lineNum">     460 </span>            : #endif /* LIBXML_MODULES_ENABLED */
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

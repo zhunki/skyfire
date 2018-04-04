@@ -1,0 +1,196 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - gcov/doc/examples/reader3.c</title>
+  <link rel="stylesheet" type="text/css" href="../../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../../index.html">top level</a> - <a href="index.html">gcov/doc/examples</a> - reader3.c<span style="font-size: 80%;"> (source / <a href="reader3.c.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">31</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-11-01</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /**</a>
+<span class="lineNum">       2 </span>            :  * section: xmlReader
+<span class="lineNum">       3 </span>            :  * synopsis: Show how to extract subdocuments with xmlReader
+<span class="lineNum">       4 </span>            :  * purpose: Demonstrate the use of xmlTextReaderPreservePattern() 
+<span class="lineNum">       5 </span>            :  *          to parse an XML file with the xmlReader while collecting
+<span class="lineNum">       6 </span>            :  *          only some subparts of the document.
+<span class="lineNum">       7 </span>            :  *          (Note that the XMLReader functions require libxml2 version later
+<span class="lineNum">       8 </span>            :  *          than 2.6.)
+<span class="lineNum">       9 </span>            :  * usage: reader3
+<span class="lineNum">      10 </span>            :  * test: reader3 &gt; reader3.tmp &amp;&amp; diff reader3.tmp $(srcdir)/reader3.res
+<span class="lineNum">      11 </span>            :  * author: Daniel Veillard
+<span class="lineNum">      12 </span>            :  * copy: see Copyright for the status of this software.
+<span class="lineNum">      13 </span>            :  */
+<span class="lineNum">      14 </span>            : 
+<span class="lineNum">      15 </span>            : #include &lt;stdio.h&gt;
+<span class="lineNum">      16 </span>            : #include &lt;libxml/xmlreader.h&gt;
+<span class="lineNum">      17 </span>            : 
+<span class="lineNum">      18 </span>            : #if defined(LIBXML_READER_ENABLED) &amp;&amp; defined(LIBXML_PATTERN_ENABLED) &amp;&amp; defined(LIBXML_OUTPUT_ENABLED)
+<span class="lineNum">      19 </span>            : 
+<span class="lineNum">      20 </span>            : 
+<span class="lineNum">      21 </span>            : /**
+<span class="lineNum">      22 </span>            :  * streamFile:
+<span class="lineNum">      23 </span>            :  * @filename: the file name to parse
+<span class="lineNum">      24 </span>            :  *
+<span class="lineNum">      25 </span>            :  * Parse and print information about an XML file.
+<span class="lineNum">      26 </span>            :  *
+<span class="lineNum">      27 </span>            :  * Returns the resulting doc with just the elements preserved.
+<a name="28"><span class="lineNum">      28 </span>            :  */</a>
+<span class="lineNum">      29 </span>            : static xmlDocPtr
+<span class="lineNum">      30 </span><span class="lineNoCov">          0 : extractFile(const char *filename, const xmlChar *pattern) {</span>
+<span class="lineNum">      31 </span>            :     xmlDocPtr doc;
+<span class="lineNum">      32 </span>            :     xmlTextReaderPtr reader;
+<span class="lineNum">      33 </span>            :     int ret;
+<span class="lineNum">      34 </span>            : 
+<span class="lineNum">      35 </span>            :     /*
+<span class="lineNum">      36 </span>            :      * build an xmlReader for that file
+<span class="lineNum">      37 </span>            :      */
+<span class="lineNum">      38 </span><span class="lineNoCov">          0 :     reader = xmlReaderForFile(filename, NULL, 0);</span>
+<span class="lineNum">      39 </span><span class="lineNoCov">          0 :     if (reader != NULL) {</span>
+<span class="lineNum">      40 </span>            :         /*
+<span class="lineNum">      41 </span>            :          * add the pattern to preserve
+<span class="lineNum">      42 </span>            :          */
+<span class="lineNum">      43 </span><span class="lineNoCov">          0 :         if (xmlTextReaderPreservePattern(reader, pattern, NULL) &lt; 0) {</span>
+<span class="lineNum">      44 </span><span class="lineNoCov">          0 :             fprintf(stderr, &quot;%s : failed add preserve pattern %s\n&quot;,</span>
+<span class="lineNum">      45 </span>            :                     filename, (const char *) pattern);
+<span class="lineNum">      46 </span>            :         }
+<span class="lineNum">      47 </span>            :         /*
+<span class="lineNum">      48 </span>            :          * Parse and traverse the tree, collecting the nodes in the process
+<span class="lineNum">      49 </span>            :          */
+<span class="lineNum">      50 </span><span class="lineNoCov">          0 :         ret = xmlTextReaderRead(reader);</span>
+<span class="lineNum">      51 </span><span class="lineNoCov">          0 :         while (ret == 1) {</span>
+<span class="lineNum">      52 </span><span class="lineNoCov">          0 :             ret = xmlTextReaderRead(reader);</span>
+<span class="lineNum">      53 </span>            :         }
+<span class="lineNum">      54 </span><span class="lineNoCov">          0 :         if (ret != 0) {</span>
+<span class="lineNum">      55 </span><span class="lineNoCov">          0 :             fprintf(stderr, &quot;%s : failed to parse\n&quot;, filename);</span>
+<span class="lineNum">      56 </span><span class="lineNoCov">          0 :             xmlFreeTextReader(reader);</span>
+<span class="lineNum">      57 </span><span class="lineNoCov">          0 :             return(NULL);</span>
+<span class="lineNum">      58 </span>            :         }
+<span class="lineNum">      59 </span>            :         /*
+<span class="lineNum">      60 </span>            :          * get the resulting nodes
+<span class="lineNum">      61 </span>            :          */
+<span class="lineNum">      62 </span><span class="lineNoCov">          0 :         doc = xmlTextReaderCurrentDoc(reader);</span>
+<span class="lineNum">      63 </span>            :         /*
+<span class="lineNum">      64 </span>            :          * Free up the reader
+<span class="lineNum">      65 </span>            :          */
+<span class="lineNum">      66 </span><span class="lineNoCov">          0 :         xmlFreeTextReader(reader);</span>
+<span class="lineNum">      67 </span>            :     } else {
+<span class="lineNum">      68 </span><span class="lineNoCov">          0 :         fprintf(stderr, &quot;Unable to open %s\n&quot;, filename);</span>
+<span class="lineNum">      69 </span><span class="lineNoCov">          0 :         return(NULL);</span>
+<span class="lineNum">      70 </span>            :     }
+<span class="lineNum">      71 </span><span class="lineNoCov">          0 :     return(doc);</span>
+<a name="72"><span class="lineNum">      72 </span>            : }</a>
+<span class="lineNum">      73 </span>            : 
+<span class="lineNum">      74 </span><span class="lineNoCov">          0 : int main(int argc, char **argv) {</span>
+<span class="lineNum">      75 </span><span class="lineNoCov">          0 :     const char *filename = &quot;test3.xml&quot;;</span>
+<span class="lineNum">      76 </span><span class="lineNoCov">          0 :     const char *pattern = &quot;preserved&quot;;</span>
+<span class="lineNum">      77 </span>            :     xmlDocPtr doc;
+<span class="lineNum">      78 </span>            : 
+<span class="lineNum">      79 </span><span class="lineNoCov">          0 :     if (argc == 3) {</span>
+<span class="lineNum">      80 </span><span class="lineNoCov">          0 :         filename = argv[1];</span>
+<span class="lineNum">      81 </span><span class="lineNoCov">          0 :         pattern = argv[2];</span>
+<span class="lineNum">      82 </span>            :     }
+<span class="lineNum">      83 </span>            : 
+<span class="lineNum">      84 </span>            :     /*
+<span class="lineNum">      85 </span>            :      * this initialize the library and check potential ABI mismatches
+<span class="lineNum">      86 </span>            :      * between the version it was compiled for and the actual shared
+<span class="lineNum">      87 </span>            :      * library used.
+<span class="lineNum">      88 </span>            :      */
+<span class="lineNum">      89 </span><span class="lineNoCov">          0 :     LIBXML_TEST_VERSION</span>
+<span class="lineNum">      90 </span>            : 
+<span class="lineNum">      91 </span><span class="lineNoCov">          0 :     doc = extractFile(filename, (const xmlChar *) pattern);</span>
+<span class="lineNum">      92 </span><span class="lineNoCov">          0 :     if (doc != NULL) {</span>
+<span class="lineNum">      93 </span>            :         /*
+<span class="lineNum">      94 </span>            :          * ouptut the result.
+<span class="lineNum">      95 </span>            :          */
+<span class="lineNum">      96 </span><span class="lineNoCov">          0 :         xmlDocDump(stdout, doc);</span>
+<span class="lineNum">      97 </span>            :         /*
+<span class="lineNum">      98 </span>            :          * don't forget to free up the doc
+<span class="lineNum">      99 </span>            :          */
+<span class="lineNum">     100 </span><span class="lineNoCov">          0 :         xmlFreeDoc(doc);</span>
+<span class="lineNum">     101 </span>            :     }
+<span class="lineNum">     102 </span>            : 
+<span class="lineNum">     103 </span>            : 
+<span class="lineNum">     104 </span>            :     /*
+<span class="lineNum">     105 </span>            :      * Cleanup function for the XML library.
+<span class="lineNum">     106 </span>            :      */
+<span class="lineNum">     107 </span><span class="lineNoCov">          0 :     xmlCleanupParser();</span>
+<span class="lineNum">     108 </span>            :     /*
+<span class="lineNum">     109 </span>            :      * this is to debug memory for regression tests
+<span class="lineNum">     110 </span>            :      */
+<span class="lineNum">     111 </span><span class="lineNoCov">          0 :     xmlMemoryDump();</span>
+<span class="lineNum">     112 </span><span class="lineNoCov">          0 :     return(0);</span>
+<span class="lineNum">     113 </span>            : }
+<span class="lineNum">     114 </span>            : 
+<span class="lineNum">     115 </span>            : #else
+<span class="lineNum">     116 </span>            : int main(void) {
+<span class="lineNum">     117 </span>            :     fprintf(stderr, &quot;Reader, Pattern or output support not compiled in\n&quot;);
+<span class="lineNum">     118 </span>            :     exit(1);
+<span class="lineNum">     119 </span>            : }
+<span class="lineNum">     120 </span>            : #endif
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>
