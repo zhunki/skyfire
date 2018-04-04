@@ -13,19 +13,18 @@ double click and install
 create new database pcsg
 create new table pcsg
 
-CREATE TABLE pcsg (
+>create table pcsg (
+id int auto_increment,
 parent varchar(100) not null,
 context varchar(500) not null,
 rule varchar(1000) not null,
-prob float not null
+prob float not null,
+primary key(id)
 );
 
 download mysql-connector-java-5.1.46.tar.gz from http://dev.mysql.com/downloads/connector/j/ and unzip it
 add mysql-connector-java-5.1.46-bin.jar to build path
 
+3.change Visitor
 
-
-
-change Visitor
-
-3. 
+ 

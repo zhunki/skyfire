@@ -22,8 +22,10 @@ public class PCSGLearner {
 	// parent of a production rule
 	static Map<String, Integer> parentCount = new TreeMap<String, Integer>();
 	// production rule with the form:
-	// parent->TerminalNodeImpl@@@@@part3#####TerminalNodeImpl
+	// <c1,c2,c3,c4>parent->TerminalNodeImpl@@@@@part3#####TerminalNodeImpl
 	static Map<String, Integer> ruleCount = new TreeMap<String, Integer>();
+	public static int maxChildCount = 20;
+	public static int maxChildLength = 200;
 	//
 	public static boolean parsingError = false;
 
@@ -34,7 +36,7 @@ public class PCSGLearner {
 
 	public static void main(String[] args) {
 		// 1. traverse a folder with samples,.e.g.xml samples
-		String sampleFolderPath = "E:\\xsl1";
+		String sampleFolderPath = "E:\\xsl";
 		File dir = new File(sampleFolderPath);
 		File[] files = dir.listFiles();
 		if (files != null) {
@@ -76,9 +78,11 @@ public class PCSGLearner {
 		System.out.println("=====================================");
 		System.out.println("PCSG:");
 		System.out.println("=====================================");
-		for (final String k : ruleCount.keySet()) {
-			System.out.println(k + ": " + (float) ruleCount.get(k) / parentCount.get(k.substring(0, k.indexOf("->"))));
-		}
+
+		// for (final String k : ruleCount.keySet()) {
+		// System.out.println(k + ": "+ (float) ruleCount.get(k) /
+		// parentCount.get(k.substring(k.indexOf(">") + 1, k.indexOf("->"))));
+		// }
 		instorePCSG();
 	}
 
@@ -101,23 +105,36 @@ public class PCSGLearner {
 	public static void instorePCSG() {
 		Connection conn = null;
 		Statement stmt = null;
+		String sql = "";
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			System.out.println("linking to MySQL....");
 			conn = DriverManager.getConnection(DB_URL, USER, PASS);
 			stmt = conn.createStatement();
-			String sql = "insert into pcsg(parent, context, rule, prob) values \n";
+			sql = "insert into pcsg(parent, context, rule, prob) values \n";
+			int i = 0;
 			for (String k : ruleCount.keySet()) {
-				sql += "('" + k.substring(0, k.indexOf("->")) + "','context','" + k.replaceAll("'", "\\\\'") + "',"
-						+ (float) ruleCount.get(k) / parentCount.get(k.substring(0, k.indexOf("->"))) + "),\n";
-
+				i++;
+				sql += "('" + k.substring(k.indexOf(">") + 1, k.indexOf("->")) + "','" + k.substring(1, k.indexOf(">"))
+						+ "','" + k.substring(k.indexOf("->")).replaceAll("\\\\", "\\\\\\\\").replaceAll("'", "\\\\'") + "',"
+						+ (float) ruleCount.get(k) / parentCount.get(k.substring(k.indexOf(">") + 1, k.indexOf("->")))
+						+ "),\n";
+				if (i % 500 == 0) {
+					sql += "('','','',1.0);";
+					//System.out.println(sql);
+					stmt.executeUpdate(sql);
+					stmt.close();
+					stmt = conn.createStatement();
+					sql = "insert into pcsg(parent, context, rule, prob) values \n";
+				}
 			}
-			sql += "('','',',1.0);";
-			System.out.println(sql);
+			sql += "('','','',1.0);";
+			// System.out.println(sql);
 			stmt.executeUpdate(sql);
 			stmt.close();
 			conn.close();
 		} catch (SQLException se) {
+			System.out.println(sql);
 			se.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
