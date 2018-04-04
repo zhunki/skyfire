@@ -34,7 +34,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 				}
 			}
 			if (ctx.getParent().getChild(0) != null) {
-				sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
+				// sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
 			}
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
@@ -46,7 +46,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
 							: ctx.getChild(i).getText().trim();
 				} else {
-					rule += "@@#@@" + ctx.getChild(i).getClass().getSimpleName() + "@@#@@";
+					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
 				}
 			}
 		} else {
@@ -78,7 +78,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 				}
 			}
 			if (ctx.getParent().getChild(0) != null) {
-				sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
+				// sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
 			}
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
@@ -90,7 +90,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
 							: ctx.getChild(i).getText().trim();
 				} else {
-					rule += "@@#@@" + ctx.getChild(i).getClass().getSimpleName() + "@@#@@";
+					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
 				}
 			}
 		} else {
@@ -122,7 +122,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 				}
 			}
 			if (ctx.getParent().getChild(0) != null) {
-				sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
+				// sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
 			}
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
@@ -134,7 +134,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
 							: ctx.getChild(i).getText().trim();
 				} else {
-					rule += "@@#@@" + ctx.getChild(i).getClass().getSimpleName() + "@@#@@";
+					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
 				}
 			}
 		} else {
@@ -166,7 +166,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 				}
 			}
 			if (ctx.getParent().getChild(0) != null) {
-				sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
+				// sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
 			}
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
@@ -178,7 +178,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
 							: ctx.getChild(i).getText().trim();
 				} else {
-					rule += "@@#@@" + ctx.getChild(i).getClass().getSimpleName() + "@@#@@";
+					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
 				}
 			}
 		} else {
@@ -210,7 +210,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 				}
 			}
 			if (ctx.getParent().getChild(0) != null) {
-				sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
+				// sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
 			}
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
@@ -222,7 +222,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
 							: ctx.getChild(i).getText().trim();
 				} else {
-					rule += "@@#@@" + ctx.getChild(i).getClass().getSimpleName() + "@@#@@";
+					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
 				}
 			}
 		} else {
@@ -254,7 +254,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 				}
 			}
 			if (ctx.getParent().getChild(0) != null) {
-				sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
+				// sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
 			}
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
@@ -266,7 +266,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
 							: ctx.getChild(i).getText().trim();
 				} else {
-					rule += "@@#@@" + ctx.getChild(i).getClass().getSimpleName() + "@@#@@";
+					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
 				}
 			}
 		} else {
@@ -298,7 +298,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 				}
 			}
 			if (ctx.getParent().getChild(0) != null) {
-				sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
+				// sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
 			}
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
@@ -310,7 +310,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
 							: ctx.getChild(i).getText().trim();
 				} else {
-					rule += "@@#@@" + ctx.getChild(i).getClass().getSimpleName() + "@@#@@";
+					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
 				}
 			}
 		} else {
@@ -342,7 +342,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 				}
 			}
 			if (ctx.getParent().getChild(0) != null) {
-				sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
+				// sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
 			}
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
@@ -352,7 +352,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 				if (ctx.getChild(i).getClass().getSimpleName().equals("TerminalNodeImpl")) {
 					rule += "";
 				} else {
-					rule += "@@#@@" + ctx.getChild(i).getClass().getSimpleName() + "@@#@@";
+					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
 				}
 			}
 		} else {

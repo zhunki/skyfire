@@ -116,7 +116,7 @@ public class PCSGLearner {
 			for (String k : ruleCount.keySet()) {
 				i++;
 				sql += "('" + k.substring(k.indexOf(">") + 1, k.indexOf("->")) + "','" + k.substring(1, k.indexOf(">"))
-						+ "','" + k.substring(k.indexOf("->")).replaceAll("\\\\", "\\\\\\\\").replaceAll("'", "\\\\'") + "',"
+						+ "','" + k.substring(k.indexOf("->")+2).replaceAll("\\\\", "\\\\\\\\").replaceAll("'", "\\\\'") + "',"
 						+ (float) ruleCount.get(k) / parentCount.get(k.substring(k.indexOf(">") + 1, k.indexOf("->")))
 						+ "),\n";
 				if (i % 500 == 0) {
