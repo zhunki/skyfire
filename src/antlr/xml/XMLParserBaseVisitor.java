@@ -130,9 +130,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 		if (ctx.getChildCount() > 0 && ctx.getChildCount() < PCSGLearner.maxChildCount) {
 			for (int i = 0; i < ctx.children.size(); i++) {
 				if (ctx.getChild(i).getClass().getSimpleName().equals("TerminalNodeImpl")) {
-					rule += ctx.getChild(i).getText().length() > PCSGLearner.maxChildLength
-							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
-							: ctx.getChild(i).getText().trim();
+					rule += "";
 				} else {
 					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
 				}
@@ -306,9 +304,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 		if (ctx.getChildCount() > 0 && ctx.getChildCount() < PCSGLearner.maxChildCount) {
 			for (int i = 0; i < ctx.children.size(); i++) {
 				if (ctx.getChild(i).getClass().getSimpleName().equals("TerminalNodeImpl")) {
-					rule += ctx.getChild(i).getText().length() > PCSGLearner.maxChildLength
-							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
-							: ctx.getChild(i).getText().trim();
+					rule += " ";
 				} else {
 					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
 				}
@@ -350,7 +346,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 		if (ctx.getChildCount() > 0 && ctx.getChildCount() < PCSGLearner.maxChildCount) {
 			for (int i = 0; i < ctx.children.size(); i++) {
 				if (ctx.getChild(i).getClass().getSimpleName().equals("TerminalNodeImpl")) {
-					rule += "";
+					rule += " ";
 				} else {
 					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
 				}
