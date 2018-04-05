@@ -1,0 +1,1 @@
+ <?xml encoding="ASCII" ?>                 <factory>           <xsl:output/>     <doc:template select="@person-group-type" >     &#x2663;  &zeta;     <svg:rect level="collection"  select="tokenize($sansApos,'''')"  name="conta1"  match="note/name"  frame='none'  name="xml2rfc-ext-maxwidth" />     </doc:template>     </factory>    

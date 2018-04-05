@@ -1,0 +1,1 @@
+                   <test4>        <g/>     <xsl:output test="d:indexentry"  select="@mode" />        </test4>    

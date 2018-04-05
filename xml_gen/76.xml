@@ -1,0 +1,1 @@
+          <html xmlns:fo="http://www.w3.org/1999/XSL/Format" >     <mdo:setup>  &#x1FD9;  <mi name="check-artwork-width" >     &#177;  &isin;  <vertical-space data-resourcefragment-pid="{$resourcefragment-pid}" />  &#x1F41;  &#x0226A;     </mi>  &pt25;  </mdo:setup>           <xsl:decimal-format match="tertiaryie"  text="&#30446;&#24405;" />     </html>    

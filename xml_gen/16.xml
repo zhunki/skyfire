@@ -1,0 +1,1 @@
+    <bb:root exclude-result-prefixes="doc xt" >              <AAA select="$entry/@namest" />     </bb:root>    

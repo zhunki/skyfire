@@ -12,7 +12,7 @@ import java.util.Random;
 import java.util.TreeMap;
 
 public class Generator {
-	static int numOfSamplesToGenerate = 10;
+	static int numOfSamplesToGenerate = 100;
 	static int maxDerivation = 8;
 	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
 	static final String DB_URL = "jdbc:mysql://localhost:3306/pcsg";

@@ -1,0 +1,1 @@
+          <element>  <xsl:template select="/*/*"  select="$printDate"  select="@sex" />  </element> 

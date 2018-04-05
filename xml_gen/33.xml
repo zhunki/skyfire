@@ -1,0 +1,1 @@
+ <?xml encoding="UTF-8"  encoding='UTF-8'  encoding="utf-8" ?>        <dynmap>     <city select="$parent"  select="substring-after(text(), 'fsfunc')" />     <foo/>  </dynmap>       

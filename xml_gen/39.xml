@@ -1,0 +1,5 @@
+ <?xml encoding="windows-1251"  version='1.0'  encoding="utf8" ?>     <customers>  <xsl:param name="h{$depth}"  match="m:tendsto"  select="$glossary"  select="position() != last() and (
+      following-sibling::t:f or
+      following-sibling::t:meas or
+      following-sibling::t:num 
+    )" />     <html ID='18M' >        &#x1F69;  <ol>     <answer test="count(//reference[@anchor=current()/@anchor])!=1" >                </answer>     &#x1FDE;  &Chi;     <softwareName>          </softwareName>     </ol>  &#x1F8F;     </html>     <value>     <ulink string="&amp;ovbar;" />  <target>  &#101;     &#x1FE8;     &Pi;     &#x262F;  </target>  <dob>  <modsrdf:noteGroupType>            </modsrdf:noteGroupType>     <error select="@DEF | @USE | @containerField "  name="morecols"  test=".='Education policy'" />        <ie5:if name="fnc:capitalize" >                    </ie5:if>     </dob>     </value>     <ANCESTOR2>  &#x10D;     &#x1F92;  </ANCESTOR2>  </customers>    

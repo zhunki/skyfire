@@ -1,0 +1,1 @@
+             <tree exclude-result-prefixes="n" >        <item>  &#x0025;     &#x00DF;     &#9500;     &#x610F;  &#x1F3B;  </item>        <xsl:output test="./td[6] != ''"  paragraph="1"  name="7542 U" />     </tree>          

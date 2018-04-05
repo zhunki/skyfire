@@ -1,0 +1,1 @@
+ <?xml encoding="iso-8859-1"  encoding='utf-8'  encoding="UTF-8" ?>           <dummy xmlns:n1="urn:hl7-org:v3" >        <test:root>  <xsl:namespace test="$NT='N2'"  href="r.xsl" />     <essenceTrackType>  &#x1FEA;  <vra-p:wasDestroyed>            </vra-p:wasDestroyed>  </essenceTrackType>  </test:root>     </dummy>          

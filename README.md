@@ -83,16 +83,6 @@ int numOfSamplesToGenerate = 10; 		// the number of seeds to generate
 int maxDerivation = 8;           		// the max iteration depth of derivation
 
 String outputPath = "E:\\xml_gen\\";	//the path to save generated seeds
-
-6. Some samples generated
-
-<?xml encoding="windows-1252" ?>        <sales>  <month/>  <xsl:decimal-format test="contains($value, 'learner') or contains($value, 'leerling/student')"  name="reset"  pos="{position()}" />  <Product select="./hs:Descriptor" />  </sales>
-
-<?xml encoding="windows-1251"  standalone="no" ?>     <result/> 
- 
-<?xml standalone="yes"  encoding="windows-1251"  encoding="utf8" ?>                    <foobar exclude-result-prefixes="xsl exsl aac tei sru exist xd" /> 
-
-<book xmlns:sl="http://developer.apple.com/namespaces/sl" >           <div select="translate(substring(concat(@item,/rfc/back/displayreference[@target=current()/@anchor]/@to,@anchor),1,1),$lcase,$ucase)" />     </book> 
  
  
  
