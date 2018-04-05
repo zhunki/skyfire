@@ -78,11 +78,11 @@ The non-terminal child of ContentContext contains comment and we omit them to re
 5. run Generator class to generate samples
 
 Several parameters affect the seed and complexity of generation and users can change them as their needs.
-int numOfSamplesToGenerate = 10; 		// the number of seeds to generate
 
-int maxDerivation = 8;           		// the max iteration depth of derivation
-
-String outputPath = "E:\\xml_gen\\";	//the path to save generated seeds
+	static int maxDerivation = 50;			// the max number of derivation
+	static int maxDerivationDepth = 8;		// the max iteration depth of derivation
+	int numOfSamplesToGenerate = 10; 		// the number of seeds to generate
+	String outputPath = "E:\\xml_gen\\";	//the path to save generated seeds
  
  
  

@@ -7,13 +7,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
 public class Generator {
 	static int numOfSamplesToGenerate = 100;
-	static int maxDerivation = 8;
+	static int maxDerivation = 50;
+	static int numofDerivation = 0;
+	static int maxDerivationDepth = 8;
 	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
 	static final String DB_URL = "jdbc:mysql://localhost:3306/pcsg";
 	static final String USER = "test";
@@ -22,7 +26,9 @@ public class Generator {
 	static String outputPath = "E:\\xml_gen\\";
 
 	static Map<String, Double> rulesProb = new TreeMap<String, Double>();
-	static ArrayList<String> rules = null;
+	static List<Map.Entry<String, Double>> rules = null;
+
+	static ValueComparator vc = new ValueComparator();
 
 	public static void main(String[] args) {
 		Connection conn = null;
@@ -39,6 +45,7 @@ public class Generator {
 				String parent = "null", grandparent = "null", greatparent = "null", sibling = "null";
 				String alpha = "DocumentContext";
 				System.out.println("===========================" + i + "===========================");
+				numofDerivation = 1;
 				String sample = derivation(alpha, greatparent, grandparent, parent, sibling, stmt, 0);
 				System.out.println(sample);
 				writer = new PrintWriter(outputPath + i + ".xml", "UTF-8");
@@ -72,7 +79,8 @@ public class Generator {
 	// output: sample without non-terminal symbols
 	static String derivation(String alpha, String greatparent, String grandparent, String parent, String sibling,
 			Statement stmt, int num) {
-		if (num > maxDerivation) {
+		numofDerivation++;
+		if (num > maxDerivationDepth || numofDerivation > maxDerivation) {
 			return "";
 		}
 		String context = greatparent + "," + grandparent + "," + parent + "," + sibling;
@@ -83,8 +91,8 @@ public class Generator {
 		// 2. get the list of production rules whose left-side is alpha and context
 		// matches the current context
 		rulesProb.clear();
-		rules = new ArrayList<>(rulesProb.keySet());
-		rules.clear();
+		// rules = new ArrayList<>(rulesProb.keySet());
+		// rules.clear();
 		String sql = "select * from pcsg where parent='" + alpha + "' and context='" + context + "';\n";
 		ResultSet rs;
 		try {
@@ -99,14 +107,35 @@ public class Generator {
 				// System.out.print(rs.getString(5) + "\t");
 				// System.out.println("==================");
 			}
-			rules = new ArrayList<>(rulesProb.keySet());
+			rules = new ArrayList<>();
+			rules.addAll(rulesProb.entrySet());
+			Collections.sort(rules, vc);
 			if (rules.size() == 0) {
 				System.out.println("Error: no rules to use. ");
 				System.out.println("alpha:" + alpha);
 				System.out.println("context:" + context);
 			}
 			rs.close();
-			temp = rules.get(rand.nextInt(rules.size()));
+			// if random() < 0.9 then
+			// heuristically choose a less-frequently applied and less complexity rule r
+			// from low-probability rules in Rl
+			// else heuristically choose a less-frequently applied and less complexity rule
+			// r from high-probability rules in Rl
+			int ruleIndex = 0;
+			// System.out.println("rules.size():" + rules.size());
+			if (rules.size() == 1) {
+				ruleIndex = 0;
+			} else {
+				if (rand.nextInt(100) < 10) {
+					ruleIndex = rand.nextInt(rules.size() / 2);
+				} else {
+					ruleIndex = rules.size() / 2 + rand.nextInt(rules.size() / 2);
+				}
+			}
+
+			// System.out.println("ruleIndex:" + ruleIndex);
+			temp = rules.get(ruleIndex).getKey();
+
 			int leftMark = temp.indexOf("@@@@@");
 			int rightMark = 0;
 			if (leftMark != -1) {
