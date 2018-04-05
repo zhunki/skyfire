@@ -45,7 +45,7 @@ change the original visitor function to extract context and rule information
 				}
 			}
 			if (ctx.getParent().getChild(0) != null) {
-				sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
+				// sibling = ctx.getParent().getChild(0).getClass().getSimpleName();
 			}
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
@@ -57,7 +57,7 @@ change the original visitor function to extract context and rule information
 							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
 							: ctx.getChild(i).getText().trim();
 				} else {
-					rule += "@@#@@" + ctx.getChild(i).getClass().getSimpleName() + "@@#@@";
+					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
 				}
 			}
 		} else {
@@ -67,7 +67,7 @@ change the original visitor function to extract context and rule information
 		PCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
 		PCSGLearner.updateRuleCount(rule);
 		return visitChildren(ctx);
-	}
+}
 	
 4. first run PCSGLearner class to learn from samples
 
