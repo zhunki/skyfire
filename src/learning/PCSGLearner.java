@@ -24,7 +24,7 @@ public class PCSGLearner {
 	// production rule with the form:
 	// <c1,c2,c3,c4>parent->TerminalNodeImpl@@@@@part3#####TerminalNodeImpl
 	static Map<String, Integer> ruleCount = new TreeMap<String, Integer>();
-	public static int maxChildCount = 20;
+	public static int maxChildCount = 10;
 	public static int maxChildLength = 200;
 	//
 	public static boolean parsingError = false;
@@ -36,7 +36,7 @@ public class PCSGLearner {
 
 	public static void main(String[] args) {
 		// 1. traverse a folder with samples,.e.g.xml samples
-		String sampleFolderPath = "E:\\xsl";
+		String sampleFolderPath = "E:\\xsl_seeds";
 		File dir = new File(sampleFolderPath);
 		File[] files = dir.listFiles();
 		if (files != null) {

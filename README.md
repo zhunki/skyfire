@@ -71,5 +71,15 @@ change the original visitor function to extract context and rule information
 	
 4. first run PCSGLearner class to learn from samples
 
+some optimizations for XML:
+ChardataContext and MiscContext nodes normally contain a string whose value is useless to grammar. Therefore, we omit those nodes to get a much smaller PCSG.
+The non-terminal child of ContentContext contains comment and we omit them to reduce size of PCSG.
+
 5. run Generator class to generate samples
+
+Several parameters affect the seed and complexity of generation and users can change them as their needs.
+int numOfSamplesToGenerate = 10; 		// the number of seeds to generate
+int maxDerivation = 8;           		// the max iteration depth of derivation
+String outputPath = "E:\\xml_gen\\";	//the path to save generated seeds
+
  
