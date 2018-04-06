@@ -18,7 +18,7 @@ import antlr.xml.XMLLexer;
 import antlr.xml.XMLParser;
 import antlr.xml.XMLParserBaseVisitor;
 
-public class PCSGLearner {
+public class XMLPCSGLearner {
 	// parent of a production rule
 	static Map<String, Integer> parentCount = new TreeMap<String, Integer>();
 	// production rule with the form:
@@ -111,7 +111,7 @@ public class PCSGLearner {
 			System.out.println("linking to MySQL....");
 			conn = DriverManager.getConnection(DB_URL, USER, PASS);
 			stmt = conn.createStatement();
-			sql = "insert into pcsg(parent, context, rule, prob) values \n";
+			sql = "insert into xmlpcsg(parent, context, rule, prob) values \n";
 			int i = 0;
 			for (String k : ruleCount.keySet()) {
 				i++;
@@ -125,7 +125,7 @@ public class PCSGLearner {
 					stmt.executeUpdate(sql);
 					stmt.close();
 					stmt = conn.createStatement();
-					sql = "insert into pcsg(parent, context, rule, prob) values \n";
+					sql = "insert into xmlpcsg(parent, context, rule, prob) values \n";
 				}
 			}
 			sql += "('','','',1.0);";

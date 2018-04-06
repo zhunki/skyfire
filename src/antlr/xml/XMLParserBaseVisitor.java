@@ -2,7 +2,7 @@ package antlr.xml;
 
 // Generated from E:\xml\XMLParser.g4 by ANTLR 4.7
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
-import learning.PCSGLearner;
+import learning.XMLPCSGLearner;
 
 /**
  * This class provides an empty implementation of {@link XMLParserVisitor},
@@ -39,11 +39,11 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
 		rule += ctx.getClass().getSimpleName() + "->";
-		if (ctx.getChildCount() > 0 && ctx.getChildCount() < PCSGLearner.maxChildCount) {
+		if (ctx.getChildCount() > 0 && ctx.getChildCount() < XMLPCSGLearner.maxChildCount) {
 			for (int i = 0; i < ctx.children.size(); i++) {
 				if (ctx.getChild(i).getClass().getSimpleName().equals("TerminalNodeImpl")) {
-					rule += ctx.getChild(i).getText().length() > PCSGLearner.maxChildLength
-							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
+					rule += ctx.getChild(i).getText().length() > XMLPCSGLearner.maxChildLength
+							? ctx.getChild(i).getText().substring(0, XMLPCSGLearner.maxChildLength).trim()
 							: ctx.getChild(i).getText().trim();
 				} else {
 					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
@@ -53,8 +53,8 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 			return visitChildren(ctx);
 		}
 		// System.out.println(rule);
-		PCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
-		PCSGLearner.updateRuleCount(rule);
+		XMLPCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
+		XMLPCSGLearner.updateRuleCount(rule);
 		return visitChildren(ctx);
 	}
 
@@ -83,11 +83,11 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
 		rule += ctx.getClass().getSimpleName() + "->";
-		if (ctx.getChildCount() > 0 && ctx.getChildCount() < PCSGLearner.maxChildCount) {
+		if (ctx.getChildCount() > 0 && ctx.getChildCount() < XMLPCSGLearner.maxChildCount) {
 			for (int i = 0; i < ctx.children.size(); i++) {
 				if (ctx.getChild(i).getClass().getSimpleName().equals("TerminalNodeImpl")) {
-					rule += ctx.getChild(i).getText().length() > PCSGLearner.maxChildLength
-							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
+					rule += ctx.getChild(i).getText().length() > XMLPCSGLearner.maxChildLength
+							? ctx.getChild(i).getText().substring(0, XMLPCSGLearner.maxChildLength).trim()
 							: ctx.getChild(i).getText().trim();
 				} else {
 					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
@@ -97,8 +97,8 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 			return visitChildren(ctx);
 		}
 		// System.out.println(rule);
-		PCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
-		PCSGLearner.updateRuleCount(rule);
+		XMLPCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
+		XMLPCSGLearner.updateRuleCount(rule);
 		return visitChildren(ctx);
 	}
 
@@ -127,7 +127,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
 		rule += ctx.getClass().getSimpleName() + "->";
-		if (ctx.getChildCount() > 0 && ctx.getChildCount() < PCSGLearner.maxChildCount) {
+		if (ctx.getChildCount() > 0 && ctx.getChildCount() < XMLPCSGLearner.maxChildCount) {
 			for (int i = 0; i < ctx.children.size(); i++) {
 				if (ctx.getChild(i).getClass().getSimpleName().equals("TerminalNodeImpl")) {
 					rule += "";
@@ -139,8 +139,8 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 			return visitChildren(ctx);
 		}
 		// System.out.println(rule);
-		PCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
-		PCSGLearner.updateRuleCount(rule);
+		XMLPCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
+		XMLPCSGLearner.updateRuleCount(rule);
 		return visitChildren(ctx);
 	}
 
@@ -169,11 +169,11 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
 		rule += ctx.getClass().getSimpleName() + "->";
-		if (ctx.getChildCount() > 0 && ctx.getChildCount() < PCSGLearner.maxChildCount) {
+		if (ctx.getChildCount() > 0 && ctx.getChildCount() < XMLPCSGLearner.maxChildCount) {
 			for (int i = 0; i < ctx.children.size(); i++) {
 				if (ctx.getChild(i).getClass().getSimpleName().equals("TerminalNodeImpl")) {
-					rule += ctx.getChild(i).getText().length() > PCSGLearner.maxChildLength
-							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
+					rule += ctx.getChild(i).getText().length() > XMLPCSGLearner.maxChildLength
+							? ctx.getChild(i).getText().substring(0, XMLPCSGLearner.maxChildLength).trim()
 							: ctx.getChild(i).getText().trim();
 				} else {
 					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
@@ -183,8 +183,8 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 			return visitChildren(ctx);
 		}
 		// System.out.println(rule);
-		PCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
-		PCSGLearner.updateRuleCount(rule);
+		XMLPCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
+		XMLPCSGLearner.updateRuleCount(rule);
 		return visitChildren(ctx);
 	}
 
@@ -213,11 +213,11 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
 		rule += ctx.getClass().getSimpleName() + "->";
-		if (ctx.getChildCount() > 0 && ctx.getChildCount() < PCSGLearner.maxChildCount) {
+		if (ctx.getChildCount() > 0 && ctx.getChildCount() < XMLPCSGLearner.maxChildCount) {
 			for (int i = 0; i < ctx.children.size(); i++) {
 				if (ctx.getChild(i).getClass().getSimpleName().equals("TerminalNodeImpl")) {
-					rule += ctx.getChild(i).getText().length() > PCSGLearner.maxChildLength
-							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
+					rule += ctx.getChild(i).getText().length() > XMLPCSGLearner.maxChildLength
+							? ctx.getChild(i).getText().substring(0, XMLPCSGLearner.maxChildLength).trim()
 							: ctx.getChild(i).getText().trim();
 				} else {
 					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
@@ -227,8 +227,8 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 			return visitChildren(ctx);
 		}
 		// System.out.println(rule);
-		PCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
-		PCSGLearner.updateRuleCount(rule);
+		XMLPCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
+		XMLPCSGLearner.updateRuleCount(rule);
 		return visitChildren(ctx);
 	}
 
@@ -257,11 +257,11 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
 		rule += ctx.getClass().getSimpleName() + "->";
-		if (ctx.getChildCount() > 0 && ctx.getChildCount() < PCSGLearner.maxChildCount) {
+		if (ctx.getChildCount() > 0 && ctx.getChildCount() < XMLPCSGLearner.maxChildCount) {
 			for (int i = 0; i < ctx.children.size(); i++) {
 				if (ctx.getChild(i).getClass().getSimpleName().equals("TerminalNodeImpl")) {
-					rule += ctx.getChild(i).getText().length() > PCSGLearner.maxChildLength
-							? ctx.getChild(i).getText().substring(0, PCSGLearner.maxChildLength).trim()
+					rule += ctx.getChild(i).getText().length() > XMLPCSGLearner.maxChildLength
+							? ctx.getChild(i).getText().substring(0, XMLPCSGLearner.maxChildLength).trim()
 							: ctx.getChild(i).getText().trim();
 				} else {
 					rule += "@@@@@" + ctx.getChild(i).getClass().getSimpleName() + "#####";
@@ -271,8 +271,8 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 			return visitChildren(ctx);
 		}
 		// System.out.println(rule);
-		PCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
-		PCSGLearner.updateRuleCount(rule);
+		XMLPCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
+		XMLPCSGLearner.updateRuleCount(rule);
 		return visitChildren(ctx);
 	}
 
@@ -301,7 +301,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
 		rule += ctx.getClass().getSimpleName() + "->";
-		if (ctx.getChildCount() > 0 && ctx.getChildCount() < PCSGLearner.maxChildCount) {
+		if (ctx.getChildCount() > 0 && ctx.getChildCount() < XMLPCSGLearner.maxChildCount) {
 			for (int i = 0; i < ctx.children.size(); i++) {
 				if (ctx.getChild(i).getClass().getSimpleName().equals("TerminalNodeImpl")) {
 					rule += " ";
@@ -313,8 +313,8 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 			return visitChildren(ctx);
 		}
 		// System.out.println(rule);
-		PCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
-		PCSGLearner.updateRuleCount(rule);
+		XMLPCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
+		XMLPCSGLearner.updateRuleCount(rule);
 		return visitChildren(ctx);
 	}
 
@@ -343,7 +343,7 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 		}
 		String rule = "<" + greatparent + "," + grandparent + "," + parent + "," + sibling + ">";
 		rule += ctx.getClass().getSimpleName() + "->";
-		if (ctx.getChildCount() > 0 && ctx.getChildCount() < PCSGLearner.maxChildCount) {
+		if (ctx.getChildCount() > 0 && ctx.getChildCount() < XMLPCSGLearner.maxChildCount) {
 			for (int i = 0; i < ctx.children.size(); i++) {
 				if (ctx.getChild(i).getClass().getSimpleName().equals("TerminalNodeImpl")) {
 					rule += " ";
@@ -355,8 +355,8 @@ public class XMLParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 			return visitChildren(ctx);
 		}
 		// System.out.println(rule);
-		PCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
-		PCSGLearner.updateRuleCount(rule);
+		XMLPCSGLearner.updateParentCount(ctx.getClass().getSimpleName());
+		XMLPCSGLearner.updateRuleCount(rule);
 		return visitChildren(ctx);
 	}
 }

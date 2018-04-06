@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
-public class Generator {
+public class JSGenerator {
 	static int numOfSamplesToGenerate = 100;
 	static int maxDerivation = 50;
 	static int numofDerivation = 0;
@@ -23,7 +23,7 @@ public class Generator {
 	static final String USER = "test";
 	static final String PASS = "1234";
 	static Random rand = new Random();
-	static String outputPath = "E:\\xml_gen\\";
+	static String outputPath = "E:\\js_gen\\";
 
 	static Map<String, Double> rulesProb = new TreeMap<String, Double>();
 	static List<Map.Entry<String, Double>> rules = null;
@@ -43,13 +43,13 @@ public class Generator {
 			System.out.println("generating...");
 			for (int i = 0; i < numOfSamplesToGenerate; i++) {
 				String parent = "null", grandparent = "null", greatparent = "null", sibling = "null";
-				String alpha = "DocumentContext";
+				String alpha = "ProgramContext";
 				System.out.println("===========================" + i + "===========================");
 				numofDerivation = 1;
 				String sample = derivation(alpha, greatparent, grandparent, parent, sibling, stmt, 0);
-				System.out.println(sample);
+				System.out.println(sample.replaceAll(" +", " "));
 				writer = new PrintWriter(outputPath + i + ".xml", "UTF-8");
-				writer.println(sample);
+				writer.println(sample.replaceAll(" +", " "));
 				writer.close();
 			}
 			stmt.close();
@@ -93,7 +93,7 @@ public class Generator {
 		rulesProb.clear();
 		// rules = new ArrayList<>(rulesProb.keySet());
 		// rules.clear();
-		String sql = "select * from pcsg where parent='" + alpha + "' and context='" + context + "';\n";
+		String sql = "select * from jspcsg where parent='" + alpha + "' and context='" + context + "';\n";
 		ResultSet rs;
 		try {
 			rs = stmt.executeQuery(sql);
