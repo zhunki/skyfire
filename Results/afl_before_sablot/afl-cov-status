@@ -1,3 +1,0 @@
-afl_cov_pid     : 11938
-afl_cov_version : 0.6
-command_line    : /home/b/afl-cov --overwrite -d /tmp/afl-ramdisk/output/ --coverage-cmd /tmp/afl-ramdisk/gcov/src/command/sabcmd file://AFL_FILE /tmp/afl-ramdisk/cdcatalog.xml --code-dir /tmp/afl-ramdisk/gcov/

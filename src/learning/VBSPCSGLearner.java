@@ -17,15 +17,18 @@ import antlr.javascript.CountErrorListener;
 import antlr.javascript.JavaScriptLexer;
 import antlr.javascript.JavaScriptParser;
 import antlr.javascript.JavaScriptParserBaseVisitor;
+import antlr.vbs.VisualBasic6BaseVisitor;
+import antlr.vbs.VisualBasic6Lexer;
+import antlr.vbs.VisualBasic6Parser;
 
 
-public class JSPCSGLearner {
+public class VBSPCSGLearner {
 	// parent of a production rule
 	static Map<String, Integer> parentCount = new TreeMap<String, Integer>();
 	// production rule with the form:
 	// <c1,c2,c3,c4>parent->TerminalNodeImpl@@@@@part3#####TerminalNodeImpl
 	static Map<String, Integer> ruleCount = new TreeMap<String, Integer>();
-	public static int maxChildCount = 50;
+	public static int maxChildCount = 100;
 	public static int maxChildLength = 200;
 	//
 	public static boolean parsingError = false;
@@ -37,7 +40,7 @@ public class JSPCSGLearner {
 
 	public static void main(String[] args) {
 		// 1. traverse a folder with samples,.e.g.xml samples
-		String sampleFolderPath = "E:\\-1";
+		String sampleFolderPath = "C:\\Users\\xiang\\Desktop\\vbs\\";
 		File dir = new File(sampleFolderPath);
 		File[] files = dir.listFiles();
 		if (files != null) {
@@ -47,15 +50,15 @@ public class JSPCSGLearner {
 				try {
 					// 2. parse each sample
 					parsingError = false;
-					JavaScriptLexer lexer = new JavaScriptLexer(new ANTLRFileStream(samplePath));
+					VisualBasic6Lexer lexer = new VisualBasic6Lexer(new ANTLRFileStream(samplePath));
 					CountErrorListener errorListener = new CountErrorListener();
 					lexer.removeErrorListeners();
 					lexer.addErrorListener(errorListener);
 					CommonTokenStream tokens = new CommonTokenStream(lexer);
-					JavaScriptParser parser = new JavaScriptParser(tokens);
+					VisualBasic6Parser parser = new VisualBasic6Parser(tokens);
 					parser.removeErrorListeners();
 					parser.addErrorListener(errorListener);
-					ParseTree tree = parser.program();
+					ParseTree tree = parser.startRule();
 					if (parsingError) {
 						System.out.println("--------------");
 						continue;
@@ -63,7 +66,7 @@ public class JSPCSGLearner {
 
 					// System.out.println("---" + tree.toStringTree());
 					// 3. traverse the sample and count parent
-					JavaScriptParserBaseVisitor visitor = new JavaScriptParserBaseVisitor();
+					VisualBasic6BaseVisitor visitor = new VisualBasic6BaseVisitor();
 					visitor.visit(tree);
 
 				} catch (IOException e) {
@@ -112,7 +115,7 @@ public class JSPCSGLearner {
 			System.out.println("linking to MySQL....");
 			conn = DriverManager.getConnection(DB_URL, USER, PASS);
 			stmt = conn.createStatement();
-			sql = "insert into jspcsg(parent, context, rule, prob) values \n";
+			sql = "insert into vbspcsg(parent, context, rule, prob) values \n";
 			int i = 0;
 			for (String k : ruleCount.keySet()) {
 				i++;
@@ -126,7 +129,7 @@ public class JSPCSGLearner {
 					stmt.executeUpdate(sql);
 					stmt.close();
 					stmt = conn.createStatement();
-					sql = "insert into jspcsg(parent, context, rule, prob) values \n";
+					sql = "insert into vbspcsg(parent, context, rule, prob) values \n";
 				}
 			}
 			sql += "('','','',1.0);";
